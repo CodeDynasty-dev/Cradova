@@ -1,5 +1,5 @@
 import type { Func, VJS_params_TYPE } from "./types.js";
-import { __raw_ref, CradovaEvent, Signal } from "./classes.js";
+import {  CradovaEvent, Signal } from "./classes.js";
 
 export const makeElement = <E extends HTMLElement>(
   element: E & HTMLElement,
@@ -281,6 +281,40 @@ export function useEffect(effect: () => void, self: Func) {
 /**
  * Cradova
  * ---
+ * make reference to dom elements
+ */
+
+ class __raw_ref {
+  tree: Record<string, any> = {};
+  /**
+   * Bind a DOM element to a reference name.
+   * @param name - The name to reference the DOM element by.
+   */
+  bindAs(name: string) {
+    return [this, name] as unknown as __raw_ref;
+  }
+  /**
+   * Retrieve a referenced DOM element.
+   * @param name - The name of the referenced DOM element.
+   */
+  elem<ElementType extends HTMLElement = HTMLElement>(name: string) {
+    return this.tree[name] as ElementType | undefined;
+  }
+  /**
+   * Append a DOM element to the reference, overwriting any existing reference.
+   * @param name - The name to reference the DOM element by.
+   * @param element - The DOM element to reference.
+   * @internal
+   */
+  _append(name: string, Element: HTMLElement) {
+    this.tree[name] = Element;
+  }
+}
+
+
+/**
+ * Cradova
+ * ---
 Returns a mutable reference object of dom elements.
  * @returns reference
  */
@@ -292,14 +326,7 @@ export const getSignal = (name: string, func: Func) => {
   return func.pipes!.get(name);
 };
 
-export const sendSignal = (name: string, data: any, func: Func) => {
-  const signal = func.signals!.get(name);
-  if (signal) {
-    signal.publish(name, data as any);
-  } else {
-    console.error(" ✘  Cradova err :  Invalid signal name " + name);
-  }
-};
+ 
 
 const isArrowFunc = (fn: Function) => !fn.hasOwnProperty("prototype");
 const DEFAULT_STATE = {
@@ -307,12 +334,12 @@ const DEFAULT_STATE = {
   published: false,
   preRendered: null,
   reference: null,
-  _state_index: 0,
-  _state: [],
+  _state_index: 0, 
 };
 const toFunc = (func: any) => {
   if (typeof func._state_index === "number") return funcManager.render(func);
   Object.assign(func, DEFAULT_STATE);
+  func._state = [];
   func.signals = new Map();
   func.pipes = new Map();
   return funcManager.render(func);
@@ -321,6 +348,7 @@ const toFunc = (func: any) => {
 export const funcManager = {
   render(func: Func) {
     Object.assign(func, DEFAULT_STATE);
+    func._state = [];
     const html = func.apply(func);
     //? parking
     if (html instanceof HTMLElement) {

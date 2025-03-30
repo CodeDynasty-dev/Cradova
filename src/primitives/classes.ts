@@ -239,12 +239,24 @@ export class Signal<Type extends Record<string, any>> {
 // TODO: make this class internal using lower abstractions for pages, let users provide regular Funcs type instead.
 export class Page {
   /**
-   * used internally
+   * @internal
    */
   private _name: string;
+  /**
+   * @internal
+   */
   public _html: (this: Page) => HTMLElement;
+  /**
+   * @internal
+   */
   public _template?: HTMLElement;
+  /**
+   * @internal
+   */
   private _snapshot: boolean;
+  /**
+   * @internal
+   */
   private _snapshot_html?: string;
   /**
    * @internal
@@ -671,35 +683,4 @@ export class Router {
   }
 }
 
-/**
- * Cradova
- * ---
- * make reference to dom elements
- */
 
-export class __raw_ref {
-  tree: Record<string, any> = {};
-  /**
-   * Bind a DOM element to a reference name.
-   * @param name - The name to reference the DOM element by.
-   */
-  bindAs(name: string) {
-    return [this, name] as unknown as __raw_ref;
-  }
-  /**
-   * Retrieve a referenced DOM element.
-   * @param name - The name of the referenced DOM element.
-   */
-  elem<ElementType extends HTMLElement = HTMLElement>(name: string) {
-    return this.tree[name] as ElementType | undefined;
-  }
-  /**
-   * Append a DOM element to the reference, overwriting any existing reference.
-   * @param name - The name to reference the DOM element by.
-   * @param element - The DOM element to reference.
-   * @internal
-   */
-  _append(name: string, Element: HTMLElement) {
-    this.tree[name] = Element;
-  }
-}

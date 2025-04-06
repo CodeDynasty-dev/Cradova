@@ -327,13 +327,13 @@ export class Page {
     // ? call any onmount event added in the cradova event loop
     // @ts-ignore
 
-window.    CradovaEvent.dispatchEvent("after_comp_is_mounted");
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      // @ts-ignore
-      behavior: "instant",
-    });
+window.CradovaEvent.dispatchEvent("after_comp_is_mounted");
+    // window.scrollTo({
+    //   top: 0,
+    //   left: 0,
+    //   // @ts-ignore
+    //   behavior: "instant",
+    // });
     if (this._snapshot) this._takeSnapShot();
   }
 }

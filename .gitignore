@@ -9,5 +9,4 @@ dist
 **/.eslintignore
 coverage
 **/.github/README.md
-package-lock.json
-dev/index.ts
+package-lock.json 

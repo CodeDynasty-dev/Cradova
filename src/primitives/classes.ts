@@ -155,7 +155,7 @@ export class Signal<Type extends Record<string, any>> {
         });
         return;
       }
-      if (!isArrowFunc(comp) && comp.signals) {
+      if (!isArrowFunc(comp) && !comp.signals) {
         comp = toFuncNoRender(comp)
       } else {
         console.error(

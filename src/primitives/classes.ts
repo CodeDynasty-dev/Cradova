@@ -43,8 +43,8 @@ export class cradovaEvent {
   }
 }
 
-export const CradovaEvent = new cradovaEvent();
-
+//  @ts-ignore
+window.CradovaEvent = new cradovaEvent();
 /**
  *  Cradova Signal
  * ----
@@ -317,14 +317,17 @@ export class Page {
     if (this._name) document.title = this._name;
     //? packaging the page dom
     // ? call all return functions of useEffects
-    CradovaEvent.dispatchEvent("after_page_is_killed");
+    // @ts-ignore
+    window.CradovaEvent.dispatchEvent("after_page_is_killed");
     this._template = div({ id: "page" }, this._html);
     RouterBox.doc!.innerHTML = "";
     // ? create save the snapshot html
     if (this._snapshot) this._snapshot_html = this._template.outerHTML;
     RouterBox.doc!.appendChild(this._template);
     // ? call any onmount event added in the cradova event loop
-    CradovaEvent.dispatchEvent("after_comp_is_mounted");
+    // @ts-ignore
+
+window.    CradovaEvent.dispatchEvent("after_comp_is_mounted");
     window.scrollTo({
       top: 0,
       left: 0,

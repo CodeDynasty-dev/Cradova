@@ -1,5 +1,5 @@
 import type { Func, VJS_params_TYPE } from "./types.js";
-import {  CradovaEvent, Signal } from "./classes.js";
+import { Signal } from "./classes.js";
 
 export const makeElement = <E extends HTMLElement>(
   element: E & HTMLElement,
@@ -56,7 +56,8 @@ export const makeElement = <E extends HTMLElement>(
 
       //? setting onmount event;
       if (prop === "onmount") {
-        CradovaEvent.after_comp_is_mounted.push(() => {
+    // @ts-ignore
+window.        CradovaEvent.after_comp_is_mounted.push(() => {
           typeof props["onmount"] === "function" &&
             props["onmount"].apply(element);
         });
@@ -275,7 +276,9 @@ export function useEffect(effect: () => void, self: Func) {
     return;
   }
   if (self.rendered) return;
-  CradovaEvent.after_comp_is_mounted.push(effect);
+    // @ts-ignore
+
+window.  CradovaEvent.after_comp_is_mounted.push(effect);
 }
 
 /**
@@ -386,7 +389,9 @@ export const funcManager = {
         node!.remove();
         func.published = true;
         func.reference = html;
-        CradovaEvent.dispatchEvent("after_comp_is_mounted");
+    // @ts-ignore
+
+window.        CradovaEvent.dispatchEvent("after_comp_is_mounted");
       } else {
         console.error(" ✘  Cradova err :  Invalid html, got  - " + html);
       }

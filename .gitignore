@@ -10,3 +10,4 @@ dist
 coverage
 **/.github/README.md
 package-lock.json
+dev/index.ts

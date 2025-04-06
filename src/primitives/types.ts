@@ -1,21 +1,24 @@
 import * as CSS from "csstype";
 import { __raw_ref, Page, Signal } from "./classes.js";
 
-type Attributes<E extends HTMLElement> = {
-  ref?: __raw_ref;
-  value?: any;
-  subscription?: Signal<any>;
-  style?: CSS.Properties;
-  recall?: (P: any) => void;
-  [key: `data-${string}`]: string | undefined;
-  [key: `aria-${string}`]: string | undefined;
-  [key: `on${string}`]: (this: E, event: Event) => void;
-} & {
-  /**
-   * Cradova calls this function when this element is rendered on the DOM.
-   */
-  onmount?: (this: E) => void;
-} & Partial<
+type Attributes<E extends HTMLElement> =
+  & {
+    ref?: __raw_ref;
+    value?: any;
+    subscription?: Signal<any>;
+    style?: CSS.Properties;
+    recall?: (P: any) => void;
+    [key: `data-${string}`]: string | undefined;
+    [key: `aria-${string}`]: string | undefined;
+    [key: `on${string}`]: (this: E, event: Event) => void;
+  }
+  & {
+    /**
+     * Cradova calls this function when this element is rendered on the DOM.
+     */
+    onmount?: (this: E) => void;
+  }
+  & Partial<
     Omit<
       E,
       | "style"

@@ -4,6 +4,7 @@ import {
   a,
   button,
   div,
+  Func,
   h1,
   input,
   main,
@@ -14,7 +15,6 @@ import {
   useEffect,
   useRef,
   useState,
-  Func,
 } from "../dist/index.js";
 
 // creating a store
@@ -48,13 +48,13 @@ function TodoList() {
       button("Add todo", {
         onclick() {
           addTodo(
-            referenceSet.elem<HTMLInputElement>("todoInput")?.value || ""
+            referenceSet.elem<HTMLInputElement>("todoInput")?.value || "",
           );
           referenceSet.elem<HTMLInputElement>("todoInput")!.value = "";
         },
-      })
+      }),
     ),
-    todoList
+    todoList,
   );
 }
 
@@ -68,7 +68,7 @@ const todoList: Func = function () {
           removeTodo(item);
         },
       })
-    )
+    ),
   );
 };
 
@@ -119,7 +119,7 @@ function typingExample() {
       placeholder: "typing simulation",
     }),
     p(" no thing typed yet!", { ref: ref.bindAs("text") }),
-    a({ href: "/p" }, "log lol in the console")
+    a({ href: "/p" }, "log lol in the console"),
   );
 }
 
@@ -146,7 +146,7 @@ Router.BrowserRoutes({
           type: "button",
         }),
         TodoList,
-        App
+        App,
       );
     },
   }),
@@ -161,7 +161,7 @@ Router.BrowserRoutes({
           },
         }),
         TodoList,
-        App
+        App,
       );
     },
   }),

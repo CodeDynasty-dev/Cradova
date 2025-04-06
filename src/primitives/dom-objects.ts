@@ -39,7 +39,7 @@ export const tr = cra<HTMLTableColElement>("tr");
 
 export const svg = (
   svg: string,
-  properties?: VJS_params_TYPE<HTMLSpanElement>
+  properties?: VJS_params_TYPE<HTMLSpanElement>,
 ): HTMLSpanElement => {
   const span = document.createElement("span");
   span.innerHTML = svg;

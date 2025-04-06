@@ -3,7 +3,7 @@ import { Signal } from "./classes.js";
 
 export const makeElement = <E extends HTMLElement>(
   element: E & HTMLElement,
-  ElementChildrenAndPropertyList: VJS_params_TYPE<E>
+  ElementChildrenAndPropertyList: VJS_params_TYPE<E>,
 ) => {
   const props: Record<string, any> = {};
   let text: string | undefined = undefined;
@@ -56,8 +56,8 @@ export const makeElement = <E extends HTMLElement>(
 
       //? setting onmount event;
       if (prop === "onmount") {
-    // @ts-ignore
-window.        CradovaEvent.after_comp_is_mounted.push(() => {
+        // @ts-ignore
+        window.CradovaEvent.after_comp_is_mounted.push(() => {
           typeof props["onmount"] === "function" &&
             props["onmount"].apply(element);
         });
@@ -76,7 +76,7 @@ window.        CradovaEvent.after_comp_is_mounted.push(() => {
         if (prop == "ref" && (value! as unknown[])![0] instanceof __raw_ref) {
           ((value! as unknown[])![0] as __raw_ref)._append(
             (value! as unknown[])![1] as string,
-            element
+            element,
           );
           continue;
         }
@@ -181,14 +181,14 @@ export function loop<Type>(
   component: (
     value: Type,
     index?: number,
-    array?: LoopData<Type>
+    array?: LoopData<Type>,
   ) =>
     | HTMLElement
     | HTMLElement[]
     | DocumentFragment
     | DocumentFragment[]
     | undefined
-    | undefined[]
+    | undefined[],
 ) {
   return Array.isArray(datalist)
     ? (datalist.map(component) as unknown as HTMLElement[])
@@ -234,7 +234,7 @@ export const frag = function (children: VJS_params_TYPE<HTMLElement>) {
  */
 export function useState<S = unknown>(
   newState: S,
-  self: any
+  self: any,
 ): [S, (newState: S | ((preS: S) => S)) => void] {
   if (typeof self !== "function") {
     console.error("Invalid setState 'this' value");
@@ -276,9 +276,9 @@ export function useEffect(effect: () => void, self: Func) {
     return;
   }
   if (self.rendered) return;
-    // @ts-ignore
+  // @ts-ignore
 
-window.  CradovaEvent.after_comp_is_mounted.push(effect);
+  window.CradovaEvent.after_comp_is_mounted.push(effect);
 }
 
 /**
@@ -287,7 +287,7 @@ window.  CradovaEvent.after_comp_is_mounted.push(effect);
  * make reference to dom elements
  */
 
- class __raw_ref {
+class __raw_ref {
   tree: Record<string, any> = {};
   /**
    * Bind a DOM element to a reference name.
@@ -314,7 +314,6 @@ window.  CradovaEvent.after_comp_is_mounted.push(effect);
   }
 }
 
-
 /**
  * Cradova
  * ---
@@ -329,17 +328,15 @@ export const getSignal = (name: string, func: Func) => {
   return func.pipes!.get(name);
 };
 
- 
-
 export const isArrowFunc = (fn: Function) => !fn.hasOwnProperty("prototype");
 const DEFAULT_STATE = {
   rendered: false,
   published: false,
   preRendered: null,
   reference: null,
-  _state_index: 0, 
+  _state_index: 0,
 };
- const toFunc = (func: any) => {
+const toFunc = (func: any) => {
   if (typeof func._state_index === "number") return funcManager.render(func);
   Object.assign(func, DEFAULT_STATE);
   func._state = [];
@@ -352,7 +349,7 @@ export const toFuncNoRender = (func: any) => {
   Object.assign(func, DEFAULT_STATE);
   func._state = [];
   func.signals = new Map();
-  func.pipes = new Map(); 
+  func.pipes = new Map();
   return func;
 };
 
@@ -397,9 +394,9 @@ export const funcManager = {
         node!.remove();
         func.published = true;
         func.reference = html;
-    // @ts-ignore
+        // @ts-ignore
 
-window.        CradovaEvent.dispatchEvent("after_comp_is_mounted");
+        window.CradovaEvent.dispatchEvent("after_comp_is_mounted");
       } else {
         console.error(" ✘  Cradova err :  Invalid html, got  - " + html);
       }

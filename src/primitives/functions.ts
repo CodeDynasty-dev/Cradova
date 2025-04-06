@@ -331,7 +331,7 @@ export const getSignal = (name: string, func: Func) => {
 
  
 
-const isArrowFunc = (fn: Function) => !fn.hasOwnProperty("prototype");
+export const isArrowFunc = (fn: Function) => !fn.hasOwnProperty("prototype");
 const DEFAULT_STATE = {
   rendered: false,
   published: false,
@@ -339,13 +339,21 @@ const DEFAULT_STATE = {
   reference: null,
   _state_index: 0, 
 };
-const toFunc = (func: any) => {
+ const toFunc = (func: any) => {
   if (typeof func._state_index === "number") return funcManager.render(func);
   Object.assign(func, DEFAULT_STATE);
   func._state = [];
   func.signals = new Map();
   func.pipes = new Map();
   return funcManager.render(func);
+};
+export const toFuncNoRender = (func: any) => {
+  if (typeof func._state_index === "number") return func;
+  Object.assign(func, DEFAULT_STATE);
+  func._state = [];
+  func.signals = new Map();
+  func.pipes = new Map(); 
+  return func;
 };
 
 export const funcManager = {

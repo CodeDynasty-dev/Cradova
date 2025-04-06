@@ -19,3 +19,4 @@ document.addEventListener("DOMContentLoaded", () => {
 window.addEventListener("beforeunload", function (e) {
     sessionStorage.setItem("cra_scroll_pos", String(window.scrollY));
 });
+

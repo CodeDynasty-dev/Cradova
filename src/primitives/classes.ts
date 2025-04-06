@@ -1,5 +1,5 @@
 import { div } from "./dom-objects.js";
-import { funcManager } from "./functions.js";
+import { funcManager, isArrowFunc, toFuncNoRender } from "./functions.js";
 import type { browserPageType, CradovaPageType, Func } from "./types.js";
 
 /**
@@ -153,6 +153,16 @@ export class Signal<Type extends Record<string, any>> {
         eventName.forEach((en) => {
           this.subscribe(en, comp);
         });
+        return;
+      }
+      if (!isArrowFunc(comp) && comp.signals) {
+        comp = toFuncNoRender(comp)
+      } else {
+        console.error(
+          ` ✘  Cradova err:  ${String(
+            comp
+          )} is not a valid component or function`
+        );
         return;
       }
       if (comp.signals.get(eventName as string)) return;

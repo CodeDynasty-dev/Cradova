@@ -1,23 +1,23 @@
 import * as CSS from "csstype";
 import { __raw_ref, Page, Signal } from "./classes.js";
 
-type Attributes<E extends HTMLElement> =
-  & {
-    ref?: __raw_ref;
-    value?: any;
-    style?: CSS.Properties;
-    recall?: (P: any) => void;
-    [key: `data-${string}`]: string | undefined;
-    [key: `aria-${string}`]: string | undefined;
-    [key: `on${string}`]: (this: E, event: Event) => void;
-  }
-  & {
-    /**
-     * Cradova calls this function when this element is rendered on the DOM.
-     */
-    onmount?: (this: E) => void;
-  }
-  & Partial<
+type Attributes<E extends HTMLElement> = {
+  ref?: {
+    bind: (name: string) => any;
+    current: Record<string, unknown>;
+  };
+  value?: any;
+  style?: CSS.Properties;
+  recall?: (P: any) => void;
+  [key: `data-${string}`]: string | undefined;
+  [key: `aria-${string}`]: string | undefined;
+  [key: `on${string}`]: (this: E, event: Event) => void;
+} & {
+  /**
+   * Cradova calls this function when this element is rendered on the DOM.
+   */
+  onmount?: (this: E) => void;
+} & Partial<
     Omit<
       E,
       | "style"
@@ -26,9 +26,9 @@ type Attributes<E extends HTMLElement> =
       | `on${string}`
       | "ref"
       | "recall"
+      | "onmount"
     >
   >;
-
 export type VJS_params_TYPE<E extends HTMLElement> = (
   | undefined
   // children types
@@ -44,7 +44,9 @@ export type VJS_params_TYPE<E extends HTMLElement> = (
   // css types
   | { style: CSS.Properties }
 )[];
-
+/**
+ * @internal
+ */
 export interface RouterRouteObject {
   _html:
     | ((this: Page, data?: unknown) => HTMLElement | DocumentFragment)
@@ -158,16 +160,16 @@ export interface Func extends Function {
   useReducer: <S, A>(
     reducer: (state: S, action: A) => S,
     initialArg: S,
-    initializer?: (arg: S) => S,
+    initializer?: (arg: S) => S
   ) => [S, (action: A) => void];
   useState: <S>(
-    initialValue: S,
+    initialValue: S
   ) => [S, (newState: S | ((prevState: S) => S)) => void];
   useEffect: (effect: () => (() => void) | void, deps?: unknown[]) => void;
   useMemo: <T>(factory: () => T, deps?: unknown[]) => T;
   useCallback: <T extends (...args: any[]) => any>(
     callback: T,
-    deps?: unknown[],
+    deps?: unknown[]
   ) => T;
   useRef: <T = unknown>() => {
     current: Record<string, T>;

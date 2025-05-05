@@ -8,4 +8,4 @@
 
 ##### Cradova community
 
-[Telegram](https://t.me/uiedbook)
+[Telegram](https://t.me/codedynasty-dev)

@@ -1,7 +1,7 @@
 <br/>
 <p align="center">
-  <a href="https://github.com/uiedbook/cradova">
-    <img src="https://raw.githubusercontent.com/Uiedbook/cradova/main/icon.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/codedynasty-dev/cradova">
+    <img src="https://raw.githubusercontent.com/CodeDynasty-dev/cradova/main/icon.png" alt="Logo" width="80" height="80">
   </a>
 
 <h1 align="center">Cradova</h1>
@@ -10,26 +10,26 @@
 Build Powerful ⚡ Web Apps with Ease
     <br/>
     <br/>
-    <a href="https://github.com/uiedbook/cradova#examples"><strong>Explore the 🎙️ docs »</strong></a>
+    <a href="https://github.com/codedynasty-dev/cradova#examples"><strong>Explore the 🎙️ docs »</strong></a>
     <br/>
     <br/>
-    <a href="https://t.me/uiedbookHQ">Join Community</a>
+    <a href="https://t.me/codedynasty-devHQ">Join Community</a>
     .
-    <a href="https://github.com/uiedbook/cradova/issues">Report Bug</a>
+    <a href="https://github.com/codedynasty-dev/cradova/issues">Report Bug</a>
     .
-    <a href="https://github.com/uiedbook/cradova/issues">Request Feature</a>
+    <a href="https://github.com/codedynasty-dev/cradova/issues">Request Feature</a>
   </p>
 </p>
 
-![Contributors](https://img.shields.io/github/contributors/uiedbook/cradova?color=dark-green)
-![Issues](https://img.shields.io/github/issues/uiedbook/cradova)
-![License](https://img.shields.io/github/license/uiedbook/cradova)
+![Contributors](https://img.shields.io/github/contributors/codedynasty-dev/cradova?color=dark-green)
+![Issues](https://img.shields.io/github/issues/codedynasty-dev/cradova)
+![License](https://img.shields.io/github/license/codedynasty-dev/cradova)
 [![npm Version](https://img.shields.io/npm/v/cradova.svg)](https://www.npmjs.com/package/cradova)
 [![License](https://img.shields.io/npm/l/cradova.svg)](https://github.com/cradova/cradova.js/blob/next/LICENSE)
 [![npm Downloads](https://img.shields.io/npm/dm/cradova.svg)](https://www.npmjs.com/package/cradova)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/cradova/cradova.js/blob/next/contributing.md)
-![Forks](https://img.shields.io/github/forks/uiedbook/cradova?style=social)
-![Stargazers](https://img.shields.io/github/stars/uiedbook/cradova?style=social)
+![Forks](https://img.shields.io/github/forks/codedynasty-dev/cradova?style=social)
+![Stargazers](https://img.shields.io/github/stars/codedynasty-dev/cradova?style=social)
 
 # Cradova is 3
 
@@ -158,7 +158,7 @@ Cradova is a web development framework for building Single Page Applications and
 PWAs.
 
 Cradova follows the
-[VJS specification](https://github.com/uiedbook/cradova/blob/main/VJS_spec/specification.md)
+[VJS specification](https://github.com/codedynasty-dev/cradova/blob/main/VJS_spec/specification.md)
 
 ## What's the benefit?
 
@@ -171,7 +171,7 @@ management is done in a way that is simple, easy and fast.
 
 Undoubtedly, this provides a significant advantage.
 
-[current version changes](https://github.com/uiedbook/cradova/blob/main/CHANGELOG.md#v400)
+[current version changes](https://github.com/codedynasty-dev/cradova/blob/main/CHANGELOG.md#v400)
 
 ## Installation
 
@@ -455,13 +455,13 @@ to the advancement of Cradova.
 ## Getting Help
 
 To get further insights and help on Cradova, visit the
-[Discord](https://discord.gg/b7fvMg38) and [Telegram](https://t.me/uiedbookHQ)
+[Discord](https://discord.gg/b7fvMg38) and [Telegram](https://t.me/codedynasty-devHQ)
 Community Chats.
 
 ## Contributing
 
 We are currently working to
-[set](https://github.com/uiedbook/cradova/blob/main/contributing.md) up the
+[set](https://github.com/codedynasty-dev/cradova/blob/main/contributing.md) up the
 following:
 
 - building Cradova CLI (in progress)
@@ -481,8 +481,6 @@ following:
 ## MIT Licensed
 
 Open sourced And Free.
-
-Join Us on [telegram](https://t.me/UiedbookHQ).
 
 ### Contribution and License Agreement
 

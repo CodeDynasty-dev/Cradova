@@ -5,7 +5,6 @@ type Attributes<E extends HTMLElement> =
   & {
     ref?: __raw_ref;
     value?: any;
-    subscription?: Signal<any>;
     style?: CSS.Properties;
     recall?: (P: any) => void;
     [key: `data-${string}`]: string | undefined;
@@ -39,6 +38,7 @@ export type VJS_params_TYPE<E extends HTMLElement> = (
   | DocumentFragment
   | DocumentFragment[]
   | (() => HTMLElement)
+  | Signal<any>
   // property types
   | Partial<Attributes<E>>
   // css types
@@ -109,13 +109,82 @@ export type browserPageType<importType = Page> =
   | Promise<importType>
   | (() => Promise<importType>);
 
-export type Func = {
-  (): HTMLElement;
-  rendered?: boolean;
-  published?: boolean;
-  reference?: HTMLElement | null;
-  signals?: Map<string, Signal<any>>;
-  pipes?: Map<string, any>;
+export interface Func extends Function {
+  /**
+   * @internal
+   */
   _state?: unknown[];
+  /**
+   * @internal
+   */
   _state_index?: number;
+  /**
+   * @internal
+   */
+  _effect_tracker?: EffectTracker[];
+  /**
+   * @internal
+   */
+  _effect_index?: number;
+  /**
+   * @internal
+   */
+  _memo_tracker?: MemoTracker[];
+  /**
+   * @internal
+   */
+  _memo_index?: number;
+  /**
+   * @internal
+   */
+  reference?: HTMLElement | null;
+  /**
+   * @internal
+   */
+  rendered?: boolean;
+  /**
+   * @internal
+   */
+  published?: boolean;
+  /**
+   * @internal
+   */
+  _reducer_tracker?: ReducerTracker[];
+  /**
+   * @internal
+   */
+  _reducer_index?: number;
+  // ? hooks
+  useReducer: <S, A>(
+    reducer: (state: S, action: A) => S,
+    initialArg: S,
+    initializer?: (arg: S) => S,
+  ) => [S, (action: A) => void];
+  useState: <S>(
+    initialValue: S,
+  ) => [S, (newState: S | ((prevState: S) => S)) => void];
+  useEffect: (effect: () => (() => void) | void, deps?: unknown[]) => void;
+  useMemo: <T>(factory: () => T, deps?: unknown[]) => T;
+  useCallback: <T extends (...args: any[]) => any>(
+    callback: T,
+    deps?: unknown[],
+  ) => T;
+  useRef: <T = unknown>() => {
+    current: Record<string, T>;
+    bind: (name: string) => any;
+  };
+}
+
+type EffectTracker = {
+  deps?: unknown[];
+  cleanup?: (() => void) | void;
+};
+
+type MemoTracker = {
+  deps?: unknown[];
+  value: unknown;
+};
+
+type ReducerTracker = {
+  state: unknown;
 };

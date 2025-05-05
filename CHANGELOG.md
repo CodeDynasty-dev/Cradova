@@ -235,3 +235,7 @@ we went along with it.
 # v3.7.0
 
 - Implemented signal.subscriber for binding signal event to specific elements in th a function, a way to self handle reactivity and avoid complex diffing algorithms,
+
+# v3.8.0
+
+- Implemented more hooks and a syntax upgrades.

@@ -61,7 +61,7 @@ export class Signal<Type extends Record<string, any>> {
   private subs: Record<keyof Type, Func[]> = {} as any;
   private listening_subs: Record<
     keyof Type,
-    Map<HTMLElement, (data: Partial<Type>) => void>
+    ((data: Partial<Type>) => void)[]
   > = {} as any;
   pipe: Type;
   constructor(initial: Type, props?: { persistName?: string | undefined }) {
@@ -94,13 +94,12 @@ export class Signal<Type extends Record<string, any>> {
     const subs = this.subs![eventName as string] || [];
     for (let i = 0; i < subs.length; i++) {
       const c = subs[i];
-      c.pipes!.set(eventName as string, this.pipe[eventName]);
       funcManager.recall(c);
     }
     const subs2 = this.listening_subs![eventName as string];
     if (subs2) {
-      for (const [el, fn] of subs2.entries()) {
-        fn.apply(el, [{ [eventName]: data } as any]);
+      for (const fn of subs2) {
+        fn({ [eventName]: data } as any);
       }
     }
     if (this.pn) {
@@ -114,27 +113,26 @@ export class Signal<Type extends Record<string, any>> {
    */
   batchPublish(events: Partial<Type>) {
     const s = new Set<Func>();
-    const s2 = new Map<HTMLElement, (data: Partial<Type>) => void>();
+    const s2 = new Set<(data: Partial<Type>) => void>();
     for (const [eventName, data] of Object.entries(events)) {
       // @ts-ignore
       this.pipe[eventName] = data;
       const subs = this.subs![eventName as string] || [];
       for (let i = 0; i < subs.length; i++) {
         const c = subs[i];
-        c.pipes!.set(eventName as string, this.pipe[eventName]);
         s.add(c);
       }
       const subs2 = this.listening_subs![eventName as string];
       if (subs2) {
-        for (const [el, fn] of subs2.entries()) {
-          s2.set(el, fn);
+        for (const fn of subs2) {
+          s2.add(fn);
         }
       }
     }
     for (const c of s.values()) {
       funcManager.recall(c);
     }
-    for (const [el, fn] of s2.entries()) fn.apply(el, [events]);
+    for (const fn of s2.values()) fn(events);
     if (this.pn) {
       localStorage.setItem(this.pn, JSON.stringify(this.pipe));
     }
@@ -213,9 +211,9 @@ export class Signal<Type extends Record<string, any>> {
       return;
     }
     if (!this.listening_subs[eventName]) {
-      this.listening_subs[eventName] = new Map();
+      this.listening_subs[eventName] = [];
     }
-    this.listening_subs[eventName].set(el, fn);
+    this.listening_subs[eventName].push(fn);
   }
   /**
    *  Cradova Signal
@@ -225,12 +223,20 @@ export class Signal<Type extends Record<string, any>> {
    * @param name(s) of event.
    * @param Func to bind to.
    */
-  subscriber<T extends keyof Type>(
-    eventName: T | T[],
-    fn: (this: HTMLElement, data: Partial<Type>) => void,
-  ) {
-    // event = [signal, subscriptions , function]
-    return [this, eventName, fn] as unknown as Signal<any>;
+  get pass(): Record<keyof Type, Signal<any>> {
+    const keys = Object.keys(this.pipe) as (keyof Type)[];
+    const obj: Record<keyof Type, Signal<any>> = {} as any;
+    for (const key of keys) {
+      obj[key] = this._embed(key);
+    }
+    return obj;
+  }
+  /**
+   * @internal
+   */
+  _embed<T extends keyof Type>(eventName: T): Signal<any> {
+    // event = [subscriptions , signal]
+    return [eventName, this] as unknown as Signal<any>;
   }
 
   /**
@@ -428,10 +434,10 @@ class RouterBoxClass {
         //  @ts-ignore
         if (route?.default) route = route.default;
         if (!route) {
-          // ! bad operation let's drop it and revert
-          if (this.lastNavigatedRoute) {
-            history.pushState({}, url, this.lastNavigatedRoute);
-          }
+          // ! bad operation let's drop it| ok, but and revert?????
+          // if (this.lastNavigatedRoute) {
+          //   history.pushState({}, url, this.lastNavigatedRoute);
+          // }
           return;
         }
         if (params) {
@@ -467,19 +473,6 @@ class RouterBoxClass {
     if (this.routes[url]) {
       return [this.routes[url], { path: url }];
     }
-    // ! {2} this is commented out because it's has been handled by the navigating method
-    //? check for search in the route
-    // if (url.includes("/?")) {
-    //   const sraw = [...new URLSearchParams(url).entries()];
-    //   const search: Record<string, string> = {};
-    //   for (const idx in sraw) {
-    //     search[
-    //       sraw[idx][0].includes("?") ? sraw[idx][0].split("?")[1] : sraw[idx][0]
-    //     ] = sraw[idx][1];
-    //   }
-    //   const path = url.slice(0, url.indexOf("/?") + 2)
-    //   return [this.routes[path], { path, search }];
-    // }
     //  ? {2} that's why we handle it differently.
     if (url.includes("?")) {
       let search;
@@ -684,7 +677,9 @@ export class Router {
       );
     }
   }
-
+  /**
+   * @internal
+   */
   static _mount() {
     // creating mount point
     let doc = document.querySelector("[data-wrapper=app]") as HTMLElement;
@@ -700,5 +695,24 @@ export class Router {
       _e.preventDefault();
       RouterBox.router();
     });
+  }
+}
+
+/**
+ * Cradova
+ * ---
+ * make reference to dom elements
+ */
+/**
+ * @internal
+ */
+export class __raw_ref<T = unknown> {
+  current: Record<string, T> = {};
+  /**
+   * Bind a DOM element to a reference name.
+   * @param name - The name to reference the DOM element by.
+   */
+  bind(name: string) {
+    return [this, name] as unknown as __raw_ref;
   }
 }

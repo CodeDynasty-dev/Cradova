@@ -13,11 +13,13 @@ and limitations under the License.
 export * from "./primitives/classes.js";
 export * from "./primitives/functions.js";
 export * from "./primitives/dom-objects.js";
-export type { Func } from "./primitives/types.js";
+import type { Func } from "./primitives/types.js";
+export type { Func };
 
 declare global {
   interface Function {
     cloneFunc(): () => HTMLElement;
+    InvokeWith(args: any[]): Func;
   }
 }
 
@@ -26,4 +28,8 @@ Function.prototype.cloneFunc = function () {
   return function funcClone(this: any) {
     return pre.call(this);
   };
+};
+
+Function.prototype.InvokeWith = function (args: any[]) {
+  return this.apply(this, args);
 };

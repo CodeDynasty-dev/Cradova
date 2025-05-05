@@ -1,5 +1,5 @@
 import type { Func, VJS_params_TYPE } from "./types.js";
-import { Signal } from "./classes.js";
+import { __raw_ref, Signal } from "./classes.js";
 
 export const makeElement = <E extends HTMLElement>(
   element: E & HTMLElement,
@@ -24,6 +24,23 @@ export const makeElement = <E extends HTMLElement>(
 
       // children array
       if (Array.isArray(child)) {
+        if (child[1] instanceof Signal) {
+          // ? push effect to the listening queue of the signal
+          child[1].listen([child[0] as unknown as string], element, (x) => {
+            element.innerHTML = "";
+            element.appendChild(
+              unroll_child_list([
+                x[child[0] as unknown as string] as HTMLElement,
+              ]),
+            );
+          });
+          element.appendChild(
+            unroll_child_list([
+              child[1].pipe[child[0] as unknown as string] as HTMLElement,
+            ]),
+          );
+          continue;
+        }
         element.appendChild(unroll_child_list(child as HTMLElement[]));
         continue;
       }
@@ -66,7 +83,6 @@ export const makeElement = <E extends HTMLElement>(
 
       // data-(s) &  aria-(s)
       if (prop.includes("data-") || prop.includes("aria-")) {
-        9;
         element.setAttribute(prop, value as string);
         continue;
       }
@@ -74,19 +90,18 @@ export const makeElement = <E extends HTMLElement>(
       if (Array.isArray(value)) {
         // reference
         if (prop == "ref" && (value! as unknown[])![0] instanceof __raw_ref) {
-          ((value! as unknown[])![0] as __raw_ref)._append(
-            (value! as unknown[])![1] as string,
-            element,
-          );
+          (value![0] as __raw_ref).current[value[1]] = element;
           continue;
         }
-        // event = [signal, subscriptions , function]
-        if (
-          prop == "subscription" &&
-          (value! as unknown[])![0] instanceof Signal
-        ) {
-          const a = value as [Signal<any>, string[], () => void];
-          a[0].listen(a[1], element, a[2]);
+        // event = [subscription, signal]
+        if (value![1] instanceof Signal) {
+          value[1].listen(value[0], element, (x) => {
+            element.setAttribute(prop, x[value[0] as unknown as string] as any);
+          });
+          element.setAttribute(
+            prop,
+            value[1].pipe(value[0] as unknown as string) as any,
+          );
           continue;
         }
       }
@@ -114,7 +129,9 @@ function unroll_child_list(l: VJS_params_TYPE<HTMLElement>) {
       if (typeof ch === "function") {
         ch = isArrowFunc(ch) ? ch() : toFunc(ch);
         if (typeof ch === "function") {
-          ch = isArrowFunc(ch) ? (ch as any)() : toFunc(ch);
+          ch = isArrowFunc(ch)
+            ? (ch as () => HTMLElement | DocumentFragment)()
+            : toFunc(ch);
         }
       }
       if (ch instanceof HTMLElement || ch instanceof DocumentFragment) {
@@ -137,10 +154,11 @@ function unroll_child_list(l: VJS_params_TYPE<HTMLElement>) {
 export function $if<E extends HTMLElement>(
   condition: any,
   ...elements: VJS_params_TYPE<E>
-): any {
+): VJS_params_TYPE<E> | undefined {
   if (condition) {
     return elements;
   }
+  return undefined;
 }
 
 export function $ifelse(condition: any, ifTrue: any, ifFalse?: any) {
@@ -222,187 +240,439 @@ export const frag = function (children: VJS_params_TYPE<HTMLElement>) {
   return par;
 };
 
-// hooks
+//? comparing dependency arrays
+function depsAreEqual(prevDeps?: unknown[], nextDeps?: unknown[]): boolean {
+  if (!prevDeps || !nextDeps || prevDeps.length !== nextDeps.length) {
+    return false;
+  }
+  for (let i = 0; i < prevDeps.length; i++) {
+    if (!Object.is(prevDeps[i], nextDeps[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// --- Hooks ---
 
 /**
  * Cradova
  * ---
- *  Allows functional components to manage state by providing a state value and a function to update it.
+ * Allows functional components to manage state.
  * @param initialValue
- * @param Func
  * @returns [state, setState]
  */
-export function useState<S = unknown>(
-  newState: S,
-  self: any,
-): [S, (newState: S | ((preS: S) => S)) => void] {
-  if (typeof self !== "function") {
-    console.error("Invalid setState 'this' value");
-    return null as any;
+function useState<S>(
+  this: Func,
+  initialValue: S,
+): [S, (newState: S | ((prevState: S) => S)) => void] {
+  const self = this;
+  if (typeof self !== "function" || !self._state) {
+    throw new Error(
+      "Cradova Hook Error: useState called outside of a Cradova component context.",
+    );
   }
 
-  const Func = self as Func;
-  Func._state_index! += 1;
-  const idx = Func._state_index!;
-  if (idx >= Func._state!.length) {
-    Func._state![idx] = newState;
+  const idx = ++self._state_index!;
+
+  if (self._state.length <= idx) {
+    self._state[idx] = initialValue;
   }
 
-  /**
-   * cradova
-   * ---
-   * set new state and re-renders Func
-   * @param newState
-   */
-  function setState(newState: S | ((preS: S) => S)) {
+  const setState = (newState: S | ((prevState: S) => S)) => {
+    const currentState = self._state![idx] as S;
+    let nextState: S;
     if (typeof newState === "function") {
-      newState = (newState as (preS: S) => S)(Func._state![idx] as any);
+      nextState = (newState as (prevState: S) => S)(currentState);
+    } else {
+      nextState = newState;
     }
-    Func._state![idx] = newState;
-    funcManager.recall(Func);
-  }
-  return [Func._state![idx] as S, setState];
+
+    if (!Object.is(currentState, nextState)) {
+      self._state![idx] = nextState;
+      funcManager.recall(self);
+    }
+  };
+
+  return [self._state[idx] as S, setState];
 }
+
 /**
  * Cradova
  * ---
-Allows side effects to be performed in functional components, such as fetching data or subscribing to events.
- * @param effect
- * @returns
+ * Allows side effects with optional cleanup. Runs after component mount/update.
+ * @param effect - Function to run. Can optionally return a cleanup function.
+ * @param deps - Dependencies array. Effect runs if deps change. Runs on every render if omitted. Runs only on mount/unmount if empty array [].
  */
-export function useEffect(effect: () => void, self: Func) {
+function useEffect(
+  this: Func,
+  effect: () => (() => void) | void,
+  deps?: unknown[],
+): void {
+  const self = this;
+  if (typeof self !== "function" || !self._effect_tracker) {
+    throw new Error(
+      "Cradova Hook Error: useEffect called outside of a Cradova component context.",
+    );
+  }
+
+  const idx = ++self._effect_index!;
+  const tracker = self._effect_tracker;
+
+  // Get previous dependencies for comparison
+  const prevDeps = tracker[idx]?.deps;
+  let needsRun = false;
+
+  // Determine if effect needs to run
+  if (deps === undefined) {
+    // No dependency array: run always
+    needsRun = true;
+  } else if (!tracker[idx] || !depsAreEqual(prevDeps, deps)) {
+    // First run or dependencies changed
+    needsRun = true;
+  }
+
+  if (!tracker[idx]) {
+    tracker[idx] = { deps };
+  } else {
+    tracker[idx].deps = deps;
+  }
+
+  if (needsRun) {
+    funcManager.scheduleEffect(self, idx, effect);
+  }
+}
+
+/**
+ * Cradova
+ * ---
+ * Memoizes a calculation based on dependencies.
+ * @param factory - Function that returns the value to memoize.
+ * @param deps - Dependencies array. Re-runs factory if deps change.
+ * @returns Memoized value.
+ */
+function useMemo<T>(this: Func, factory: () => T, deps?: unknown[]): T {
+  const self = this;
+  if (typeof self !== "function" || !self._memo_tracker) {
+    throw new Error(
+      "Cradova Hook Error: useMemo called outside of a Cradova component context.",
+    );
+  }
+
+  const idx = ++self._memo_index!;
+  const tracker = self._memo_tracker;
+
+  const prevTracker = tracker[idx];
+  const prevDeps = prevTracker?.deps;
+
+  let needsRecalculate = false;
+  if (deps === undefined || !prevTracker || !depsAreEqual(prevDeps, deps)) {
+    needsRecalculate = true;
+  }
+
+  if (needsRecalculate) {
+    const newValue = factory();
+    tracker[idx] = { deps, value: newValue };
+    return newValue;
+  } else {
+    return prevTracker.value as T;
+  }
+}
+
+/**
+ * Cradova
+ * ---
+ * Memoizes a callback function based on dependencies.
+ * Useful for passing stable callbacks to child components.
+ * @param callback - The callback function to memoize.
+ * @param deps - Dependencies array. Returns the same callback instance if deps are unchanged.
+ * @returns Memoized callback function.
+ */
+export function useCallback<T extends (...args: any[]) => any>(
+  this: Func,
+  callback: T,
+  deps?: unknown[],
+): T {
+  return useMemo.call(this, () => callback, deps) as T;
+}
+
+/**
+ * Cradova
+ * ---
+ * Returns a mutable ref object whose .current property is initialized to the passed argument (initialValue).
+ * The returned object will persist for the full lifetime of the component.
+ * Does NOT cause re-renders when the .current property changes.
+ * @param initialValue - Optional initial value for the ref's current property.
+ * @returns A ref object like { current: T | null }.
+ */
+function useRef<T = unknown>(
+  this: Func,
+): {
+  current: Record<string, T>;
+  bind: (name: string) => any;
+} {
+  // useRef is essentially a memoized object that never changes its dependencies.
+  // We use useMemo with an empty dependency array to achieve this persistence.
+  const self = this;
   if (typeof self !== "function") {
-    console.error("Invalid 'this' value in setEffect");
-    return;
+    throw new Error(
+      "Cradova Hook Error: useRef called outside of a Cradova component context.",
+    );
   }
-  if (self.rendered) return;
-  // @ts-ignore
-
-  window.CradovaEvent.after_comp_is_mounted.push(effect);
-}
-
-/**
- * Cradova
- * ---
- * make reference to dom elements
- */
-
-class __raw_ref {
-  tree: Record<string, any> = {};
-  /**
-   * Bind a DOM element to a reference name.
-   * @param name - The name to reference the DOM element by.
-   */
-  bindAs(name: string) {
-    return [this, name] as unknown as __raw_ref;
-  }
-  /**
-   * Retrieve a referenced DOM element.
-   * @param name - The name of the referenced DOM element.
-   */
-  elem<ElementType extends HTMLElement = HTMLElement>(name: string) {
-    return this.tree[name] as ElementType | undefined;
-  }
-  /**
-   * Append a DOM element to the reference, overwriting any existing reference.
-   * @param name - The name to reference the DOM element by.
-   * @param element - The DOM element to reference.
-   * @internal
-   */
-  _append(name: string, Element: HTMLElement) {
-    this.tree[name] = Element;
-  }
-}
-
-/**
- * Cradova
- * ---
-Returns a mutable reference object of dom elements.
- * @returns reference
- */
-export function useRef() {
   return new __raw_ref();
 }
+// 3. Add useReducer Hook Implementation
+/**
+ * Cradova
+ * ---
+ * An alternative to useState for more complex state logic.
+ * @param reducer - Function that determines state changes: (state, action) => newState
+ * @param initialArg - Initial state value or argument for initializer.
+ * @param initializer - Optional function to compute initial state lazily.
+ * @returns [state, dispatch]
+ */
+export function useReducer<S, A>(
+  this: Func,
+  reducer: (state: S, action: A) => S,
+  initialArg: S,
+  initializer?: (arg: S) => S,
+): [S, (action: A) => void] {
+  const self = this;
+  if (typeof self !== "function" || !self._reducer_tracker) {
+    throw new Error(
+      "Cradova Hook Error: useReducer called outside of a Cradova component context.",
+    );
+  }
 
-export const getSignal = (name: string, func: Func) => {
-  return func.pipes!.get(name);
-};
+  const idx = ++self._reducer_index!;
+  const tracker = self._reducer_tracker;
+
+  if (tracker.length <= idx) {
+    const initialState = typeof initializer === "function"
+      ? initializer(initialArg)
+      : initialArg;
+    tracker[idx] = { state: initialState };
+  }
+
+  const dispatch = (action: A): void => {
+    const currentTracker = tracker[idx]; // Get tracker for current state
+    const currentState = currentTracker.state as S;
+    let nextState: S;
+    try {
+      nextState = reducer(currentState, action);
+    } catch (error) {
+      console.error("Cradova err: Error occurred in reducer:", error);
+      throw error; // Re-throw error after logging
+    }
+
+    // Only trigger recall if state actually changed
+    if (!Object.is(currentState, nextState)) {
+      currentTracker.state = nextState; // Update the stored state
+      funcManager.recall(self); // Schedule a re-render
+    }
+  };
+
+  return [tracker[idx].state as S, dispatch];
+}
 
 export const isArrowFunc = (fn: Function) => !fn.hasOwnProperty("prototype");
-const DEFAULT_STATE = {
+
+// --- Default State and Initialization ---
+
+const DEFAULT_COMPONENT_PROPS: Partial<Func> = {
   rendered: false,
   published: false,
-  preRendered: null,
   reference: null,
-  _state_index: 0,
+
+  // State
+  _state: [],
+  _state_index: -1,
+
+  // Effects
+  _effect_tracker: [], // Use tracker array
+  _effect_index: -1,
+
+  // Memos
+  _memo_tracker: [], // Use tracker array
+  _memo_index: -1,
+  // Reducers
+  _reducer_tracker: [], // Added
+  _reducer_index: -1, // Added
+
+  // Bound hooks
+  useState: useState,
+  useEffect: useEffect,
+  useMemo: useMemo,
+  useCallback: useCallback,
+  useRef: useRef,
+  useReducer: useReducer,
 };
-const toFunc = (func: any) => {
-  if (typeof func._state_index === "number") return funcManager.render(func);
-  Object.assign(func, DEFAULT_STATE);
-  func._state = [];
-  func.signals = new Map();
-  func.pipes = new Map();
-  return funcManager.render(func);
+
+function initializeComponent(func: any): Func {
+  if (typeof func._state_index === "number") {
+    func._state_index = -1;
+    func._effect_index = -1;
+    func._memo_index = -1;
+    func._reducer_index = -1; // Added Reset
+    funcManager.cleanupEffects(func);
+    return func as Func;
+  }
+
+  const component = func as Func;
+  Object.assign(component, {
+    ...DEFAULT_COMPONENT_PROPS, // Apply defaults
+    _state: [], // Ensure fresh arrays on first init
+    _effect_tracker: [],
+    _memo_tracker: [],
+    _reducer_tracker: [], // Added
+  });
+
+  return component;
+}
+
+export const toFunc = (func: any): HTMLElement | undefined => {
+  const component = initializeComponent(func);
+  return funcManager.render(component);
 };
-export const toFuncNoRender = (func: any) => {
-  if (typeof func._state_index === "number") return func;
-  Object.assign(func, DEFAULT_STATE);
-  func._state = [];
-  func.signals = new Map();
-  func.pipes = new Map();
-  return func;
+
+export const toFuncNoRender = (func: any): Func => {
+  return initializeComponent(func);
 };
+
+// --- Function Manager ---
 
 export const funcManager = {
-  render(func: Func) {
-    Object.assign(func, DEFAULT_STATE);
-    func._state = [];
-    const html = func.apply(func);
-    //? parking
+  render(component: Func): HTMLElement | undefined {
+    const html = component.apply(component, []);
+
     if (html instanceof HTMLElement) {
-      func.reference = html;
-      func.rendered = true;
-      func.published = true;
+      component.reference = html;
+      component.rendered = true;
+      component.published = true;
+      // Trigger initial effects *after* rendering and mounting
+      this.runScheduledEffects(component);
+      return html;
     } else {
-      console.error(" ✘  Cradova err :  Invalid html content, got  - " + html);
+      console.error(
+        " Cradova err : Component function must return an HTMLElement. Got:",
+        html,
+      );
+      component.rendered = false;
+      return undefined;
     }
-    return html;
   },
-  recall(func: Func) {
-    if (func.rendered) {
-      if (func.published) {
-        setTimeout(() => {
-          this.activate(func);
-        });
+
+  recall(component: Func): void {
+    if (component.rendered && component.published) {
+      // Schedule the re-render asynchronously
+      setTimeout(() => {
+        this.activate(component);
+      }, 0); // Use setTimeout 0 for async break
+    }
+  },
+
+  activate(component: Func): void {
+    component.published = false; // Mark as updating
+    if (!component.rendered || !component.reference) {
+      return; // Cannot activate if not rendered or no reference
+    }
+
+    const node = component.reference;
+
+    // Check if the component's element is still in the DOM
+    if (document.body.contains(node)) {
+      initializeComponent(component);
+      const newHtml = component.apply(component);
+
+      if (newHtml instanceof HTMLElement) {
+        node.replaceWith(newHtml);
+        // ? replace the Function element with the Function element
+        node!.insertAdjacentElement("beforebegin", newHtml as Element);
+        node!.remove();
+
+        // Update component state
+        component.reference = newHtml;
+        component.published = true;
+
+        this.runScheduledEffects(component);
+      } else {
+        console.error(
+          " Cradova err : Component function must return an HTMLElement during update. Got:",
+          newHtml,
+        );
+        component.reference = node;
+        component.published = false;
       }
+    } else {
+      this.unmount(component);
     }
   },
-  async activate(func: Func) {
-    func.published = false;
-    if (!func.rendered) {
+
+  _effectsToRun: new Map<Func, Map<number, () => (() => void) | void>>(),
+
+  scheduleEffect(
+    component: Func,
+    index: number,
+    effect: () => (() => void) | void,
+  ): void {
+    if (!this._effectsToRun.has(component)) {
+      this._effectsToRun.set(component, new Map());
+    }
+    this._effectsToRun.get(component)!.set(index, effect);
+  },
+
+  runScheduledEffects(component: Func): void {
+    const effectsMap = this._effectsToRun.get(component);
+    if (!effectsMap || effectsMap.size === 0) {
       return;
     }
-    func._state_index = 0;
-    const node = func.reference!;
-    // ? check if this Function element is still in the dom
-    if (document.contains(node)) {
-      // ? compile the Function again
-      const html = func.apply(func);
-      if (html instanceof HTMLElement) {
-        // ? replace the Function element with the Function element
-        node!.insertAdjacentElement("beforebegin", html as Element);
-        node!.remove();
-        func.published = true;
-        func.reference = html;
-        // @ts-ignore
 
-        window.CradovaEvent.dispatchEvent("after_comp_is_mounted");
-      } else {
-        console.error(" ✘  Cradova err :  Invalid html, got  - " + html);
+    effectsMap.forEach((effectFn, index) => {
+      const tracker = component._effect_tracker![index];
+      if (tracker && typeof tracker.cleanup === "function") {
+        try {
+          tracker.cleanup();
+        } catch (err) {
+          console.error("Cradova err: Error during effect cleanup:", err);
+        }
+        tracker.cleanup = undefined;
       }
-    } else {
-      func.reference = null;
-      func.rendered = false;
+
+      try {
+        const cleanup = effectFn();
+        if (tracker) {
+          tracker.cleanup = cleanup;
+        }
+      } catch (err) {
+        console.error("Cradova err: Error during effect execution:", err);
+      }
+    });
+
+    this._effectsToRun.delete(component);
+  },
+
+  cleanupEffects(component: Func): void {
+    if (component._effect_tracker) {
+      component._effect_tracker.forEach((tracker) => {
+        if (typeof tracker?.cleanup === "function") {
+          try {
+            tracker.cleanup();
+          } catch (err) {
+            console.error(
+              "Cradova err: Error during component cleanup/unmount:",
+              err,
+            );
+          }
+        }
+      });
     }
+  },
+
+  unmount(component: Func): void {
+    this.cleanupEffects(component);
+    component.reference = null;
+    component.rendered = false;
+    component.published = false;
+    this._effectsToRun.delete(component);
   },
 };

@@ -4,7 +4,7 @@ const res = await Bun.build({
   // outdir: "./tests/dist",
   target: "node",
   format: "esm",
-  // minify: true,
+  minify: true,
 });
 if (!res.success) {
   console.log(...res.logs);

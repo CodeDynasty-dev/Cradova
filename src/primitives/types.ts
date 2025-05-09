@@ -156,6 +156,9 @@ export interface Func extends Function {
    * @internal
    */
   _reducer_index?: number;
+
+  signals: Map<string, Signal<any>>;
+
   // ? hooks
   useReducer: <S, A>(
     reducer: (state: S, action: A) => S,

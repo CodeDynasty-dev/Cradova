@@ -28,7 +28,7 @@ export const makeElement = <E extends HTMLElement>(
       if (Array.isArray(child)) {
         if (child[1] instanceof Signal) {
           // ? push effect to the listening queue of the signal
-          child[1].listen([child[0] as unknown as string], element, (x) => {
+          child[1].listen([child[0] as unknown as string], (x) => {
             element.innerHTML = "";
             element.appendChild(
               unroll_child_list([
@@ -37,9 +37,8 @@ export const makeElement = <E extends HTMLElement>(
             );
           });
           element.appendChild(
-            unroll_child_list([
-              child[1].pipe[child[0] as unknown as string] as HTMLElement,
-            ])
+            // @ts-ignore
+            unroll_child_list([child[1].pipe[child[0]] as HTMLElement])
           );
           continue;
         }
@@ -97,13 +96,11 @@ export const makeElement = <E extends HTMLElement>(
         }
         // event = [subscription, signal]
         if (value![1] instanceof Signal) {
-          value[1].listen(value[0], element, (x) => {
+          value[1].listen(value[0], (x) => {
             element.setAttribute(prop, x[value[0] as unknown as string] as any);
           });
-          element.setAttribute(
-            prop,
-            value[1].pipe(value[0] as unknown as string) as any
-          );
+          // @ts-ignore
+          element.setAttribute(prop, value[1].pipe[value[0]]);
           continue;
         }
       }
@@ -500,6 +497,9 @@ const DEFAULT_COMPONENT_PROPS: Partial<Func> = {
   _reducer_tracker: [], // Added
   _reducer_index: -1, // Added
 
+  // Signals
+  signals: new Map(),
+
   // Bound hooks
   useState: useState,
   useEffect: useEffect,
@@ -515,6 +515,7 @@ function initializeComponent(func: any): Func {
     func._effect_index = -1;
     func._memo_index = -1;
     func._reducer_index = -1; // Added Reset
+    func.signals.clear();
     funcManager.cleanupEffects(func);
     return func as Func;
   }
@@ -522,10 +523,6 @@ function initializeComponent(func: any): Func {
   const component = func as Func;
   Object.assign(component, {
     ...DEFAULT_COMPONENT_PROPS, // Apply defaults
-    _state: [], // Ensure fresh arrays on first init
-    _effect_tracker: [],
-    _memo_tracker: [],
-    _reducer_tracker: [], // Added
   });
 
   return component;

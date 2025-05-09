@@ -54,5 +54,10 @@
   "homepage": "https://github.com/CodeDynasty-dev/cradova",
   "dependencies": {
     "csstype": "^3.1.2"
+  },
+  "docmach": {
+    "docs-directory": "docs/docs",
+    "build-directory": "docs/build",
+    "assets-folder": "docs/assets"
   }
 }

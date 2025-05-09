@@ -48,6 +48,38 @@ export class cradovaEvent {
 
 //  @ts-ignore
 window.CradovaEvent = new cradovaEvent();
+
+/**
+ * A pipe for data binding
+ * @internal
+ */
+class Pipe<Type extends Record<string, any>> {
+  /**
+   * @internal
+   */
+  private _data: Type;
+  constructor(data: Type) {
+    this._data = data;
+    for (const key in this._data) {
+      if (this._data.hasOwnProperty(key)) {
+        Object.defineProperty(this, key, {
+          get() {
+            return this._data[key];
+          },
+          enumerable: true,
+          configurable: true,
+        });
+      }
+    }
+  }
+
+  /**
+   * @internal
+   */
+  _set(key: keyof Type, value: Type[keyof Type]) {
+    this._data[key] = value;
+  }
+}
 /**
  *  Cradova Signal
  * ----
@@ -66,20 +98,21 @@ export class Signal<Type extends Record<string, any>> {
     keyof Type,
     ((data: Partial<Type>) => void)[]
   > = {} as any;
-  pipe: Type;
+  pipe: Pipe<Type>;
+  passers?: Record<keyof Type, Signal<any>>;
   constructor(initial: Type, props?: { persistName?: string | undefined }) {
-    this.pipe = initial;
+    this.pipe = new Pipe(initial);
     this.subs = {} as any;
     if (props && props.persistName) {
       this.pn = props.persistName;
       const key = localStorage.getItem(props.persistName);
       if (key && key !== "undefined") {
-        this.pipe = JSON.parse(key);
+        this.pipe = new Pipe(JSON.parse(key));
       }
       if (typeof initial === "object") {
         for (const key in initial) {
           if (!Object.prototype.hasOwnProperty.call(this.pipe, key)) {
-            this.pipe[key] = initial[key];
+            this.pipe._set(key, initial[key]);
           }
         }
       }
@@ -93,8 +126,8 @@ export class Signal<Type extends Record<string, any>> {
    * @param data - data for the action
    */
   publish<T extends keyof Type>(eventName: T, data: Type[T]) {
-    this.pipe[eventName] = data;
-    const subs = this.subs![eventName as string] || [];
+    this.pipe._set(eventName, data);
+    const subs = this.subs![eventName] || [];
     for (let i = 0; i < subs.length; i++) {
       const c = subs[i];
       funcManager.recall(c);
@@ -118,8 +151,7 @@ export class Signal<Type extends Record<string, any>> {
     const s = new Set<Func>();
     const s2 = new Set<(data: Partial<Type>) => void>();
     for (const [eventName, data] of Object.entries(events)) {
-      // @ts-ignore
-      this.pipe[eventName] = data;
+      this.pipe._set(eventName as keyof Type, data);
       const subs = this.subs![eventName as string] || [];
       for (let i = 0; i < subs.length; i++) {
         const c = subs[i];
@@ -148,7 +180,7 @@ export class Signal<Type extends Record<string, any>> {
    * @param name of event.
    * @param Func component to bind to.
    */
-  subscribe<T extends keyof Type>(eventName: T | T[], comp: any) {
+  subscribe<T extends keyof Type>(eventName: T | T[], comp: Func) {
     if (typeof comp === "function") {
       if (Array.isArray(eventName)) {
         eventName.forEach((en) => {
@@ -170,7 +202,6 @@ export class Signal<Type extends Record<string, any>> {
       }
       if (comp.signals.get(eventName as string)) return;
       if (eventName in this.pipe) {
-        comp.pipes.set(eventName as string, this.pipe[eventName]);
         comp.signals.set(eventName as string, this);
       } else {
         console.error(
@@ -195,40 +226,39 @@ export class Signal<Type extends Record<string, any>> {
    *  subscribe to an event
    *
    * @param name of event.
-   * @param Func component to bind to.
-   * @internal
+   * @param callback function to call.
    */
   listen<T extends keyof Type>(
     eventName: T | T[],
-    el: HTMLElement,
-    fn: (data: Partial<Type>) => void
+    listener: (data: Partial<Type>) => void
   ) {
     if (Array.isArray(eventName)) {
       eventName.forEach((en) => {
-        this.listen(en, el, fn);
+        this.listen(en, listener);
       });
       return;
     }
     if (!this.listening_subs[eventName]) {
       this.listening_subs[eventName] = [];
     }
-    this.listening_subs[eventName].push(fn);
+    this.listening_subs[eventName].push(listener);
   }
   /**
    *  Cradova Signal
    * ----
    *  subscribe an element to an event
-   *
-   * @param name(s) of event.
-   * @param Func to bind to.
    */
   get pass(): Record<keyof Type, Signal<any>> {
-    const keys = Object.keys(this.pipe) as (keyof Type)[];
-    const obj: Record<keyof Type, Signal<any>> = {} as any;
-    for (const key of keys) {
-      obj[key] = this._embed(key);
+    if (this.passers) {
+      return this.passers;
     }
-    return obj;
+    //? only compute when needed.
+    const keys = Object.keys(this.pipe) as (keyof Type)[];
+    this.passers = {} as any;
+    for (const key of keys) {
+      this.passers![key] = this._embed(key);
+    }
+    return this.passers!;
   }
   /**
    * @internal

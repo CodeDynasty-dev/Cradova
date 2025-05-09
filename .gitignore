@@ -9,4 +9,5 @@ dist
 **/.eslintignore
 coverage
 **/.github/README.md
-package-lock.json 
+package-lock.json
+docs/build

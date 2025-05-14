@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- 
+    Developed with Docmach -  Markdown Reimagined.
+    find more at https://docmach.codedynasty.dev
+    -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cradova - Beautifully Simple</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/bundle.css" />
+    <link rel="icon" href="/icon.png" type="image/png" />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        overflow-x: hidden;
+      }
+      .fade-in-up {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      }
+      .fade-in-up.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      /* Simple hover scale effect for buttons */
+      .hover-scale {
+        transition: transform 0.3s ease-in-out;
+      }
+      .hover-scale:hover {
+        transform: scale(1.05);
+      }
+      /* Background gradient inspired by Google colors */
+      .google-gradient {
+        background: linear-gradient(135deg, #4285f4, #34a853, #fbbc05, #ea4335);
+        background-size: 400% 400%;
+        animation: gradientAnimation 15s ease infinite;
+      }
+
+      @keyframes gradientAnimation {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+      .red {
+        border: 1px solid red;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-800">
+    <header class="absolute top-0 left-0 right-0 z-10 p-4 md:px-8">
+      <nav class="container mx-auto flex items-center justify-between">
+        <div class="text-2xl font-bold text-blue-500">Cradova</div>
+        <div class="flex space-x-1 lg:space-x-4 items-center">
+          <a
+            href="#"
+            class="text-white lg:text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md"
+            >Features</a
+          >
+          <a
+            href="/guides/getting-started.html"
+            class="text-white lg:text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md hidden lg:block"
+            >Docs</a
+          >
+          <a
+            href="https://discord.gg/faqydQASTy"
+            class="text-white lg:text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md"
+            >Discord</a
+          >
+          <a
+            href="#"
+            class="bg-blue-600 text-white px-4 py-2 rounded-full ml-4 hover:bg-blue-700 hover-scale hidden lg:block"
+            >Get Started</a
+          >
+        </div>
+      </nav>
+    </header>
+
+    <section
+      class="relative h-screen grid items-center justify-center google-gradient text-white overflow-hidden"
+    >
+      <div class="absolute inset-0 z-0 opacity-20">
+        <div
+          class="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"
+        ></div>
+        <div
+          class="absolute top-1/2 right-1/4 w-64 h-64 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"
+        ></div>
+        <div
+          class="absolute bottom-1/4 left-1/3 w-64 h-64 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"
+        ></div>
+        <div
+          class="absolute bottom-1/3 right-1/3 w-64 h-64 bg-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-6000"
+        ></div>
+      </div>
+
+      <div class="container mx-auto text-center z-10 p-4">
+        <img src="/icon.png" alt="" class="w-24 h-24 mb-4 mx-auto mb-8" />
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 fade-in-up">
+          Build Web Apps Easily.
+        </h1>
+        <p class="text-xl md:text-2xl mb-8 fade-in-up animation-delay-300">
+          Cradova fixes web development. Lightning fast, simple, and incredibly
+          powerful.
+        </p>
+        <div class="space-x-4 fade-in-up animation-delay-600">
+          <a
+            href="/guides/getting-started.html"
+            class="bg-white text-blue-600 px-8 py-3 rounded-full lg:text-lg font-semibold hover:bg-gray-200 hover-scale inline-block"
+            >Get Started</a
+          >
+          <a
+            href="#create"
+            class="border border-blue-600 text-white px-8 py-3 rounded-full lg:text-lg font-semibold hover:bg-blue-600 hover:text-white hover-scale inline-block"
+            >Create an App</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <section class="py-16 md:py-24 bg-white">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-12 fade-in-up">
+          Powerful Features, Seamless Experience
+        </h2>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="p-6 rounded-lg shadow-lg bg-gray-100 fade-in-up">
+            <div class="text-4xl text-blue-600 mb-4">💡</div>
+            <h3 class="text-xl font-semibold mb-3">Intuitive Design</h3>
+            <p class="text-gray-700">
+              Craft beautiful applications with ease using our simple and
+              elegant API.
+            </p>
+          </div>
+          <div
+            class="p-6 rounded-lg shadow-lg bg-gray-100 fade-in-up animation-delay-200"
+          >
+            <div class="text-4xl text-green-600 mb-4">⚡</div>
+            <h3 class="text-xl font-semibold mb-3">Blazing Fast</h3>
+            <p class="text-gray-700">
+              Optimized for performance, ensuring your applications are
+              lightning quick.
+            </p>
+          </div>
+          <div
+            class="p-6 rounded-lg shadow-lg bg-gray-100 fade-in-up animation-delay-400"
+          >
+            <div class="text-4xl text-yellow-600 mb-4">🔧</div>
+            <h3 class="text-xl font-semibold mb-3">Highly Extensible</h3>
+            <p class="text-gray-700">
+              Easily integrate with existing tools and build custom solutions.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="container mx-auto text-center z-10 p-4 mt-12">
+        <img
+          src="/starburst.png"
+          class="max-w-[200px] mb-4 mx-auto mb-8"
+          alt=""
+        />
+        <div class="space-x-4 fade-in-up animation-delay-600">
+          <a
+            href="#"
+            class="bg-black text-[gold] px-8 py-3 rounded-full lg:text-lg font-semibold hover:bg-gray-200 hover-scale inline-block"
+            >Give us a star</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <section class="py-16 md:py-24 google-gradient text-white" id="create">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-12 fade-in-up">
+          Get Started in Minutes
+        </h2>
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+          <div class="text-left fade-in-up">
+            <h3 class="text-2xl font-semibold mb-4">Simple Setup</h3>
+            <p class="text-lg mb-4">
+              Follow our clear documentation to get your first project running
+              in no time.
+            </p>
+            <h3 class="text-2xl font-semibold mb-4">Write Less Code</h3>
+            <p class="text-lg mb-4">
+              Focus on your application's logic, not boilerplate.
+            </p>
+            <h3 class="text-2xl font-semibold mb-4">Join the Discord</h3>
+            <p class="text-lg mb-4">
+              Get support and share your creations with a growing community.
+            </p>
+            <a
+              href="/guides/getting-started.html"
+              class="mt-6 bg-white text-blue-600 px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-200 hover-scale inline-block"
+              >Read the Docs</a
+            >
+          </div>
+          <div class="fade-in-up animation-delay-300">
+            <div
+              class="bg-gray-800 text-gray-200 p-6 rounded-lg shadow-xl overflow-x-auto"
+            >
+              <pre><code>
+# Example code snippet
+import framework
+
+@framework.route('/')
+def index():
+    return "Hello, World!"
+
+if __name__ == '__main__':
+    framework.run()
+                        </code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-16 md:py-24 bg-white">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-12 fade-in-up">
+          Loved by Developers
+        </h2>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div
+            class="p-6 rounded-lg shadow-lg bg-gray-100 text-left fade-in-up"
+          >
+            <p class="italic mb-4">
+              "This framework completely changed my workflow. Development is so
+              much faster now!"
+            </p>
+            <p class="font-semibold">- Jane Doe, Senior Developer</p>
+          </div>
+          <div
+            class="p-6 rounded-lg shadow-lg bg-gray-100 text-left fade-in-up animation-delay-200"
+          >
+            <p class="italic mb-4">
+              "The documentation is superb, and the community is incredibly
+              helpful."
+            </p>
+            <p class="font-semibold">- John Smith, Open Source Enthusiast</p>
+          </div>
+          <div
+            class="p-6 rounded-lg shadow-lg bg-gray-100 text-left fade-in-up animation-delay-400"
+          >
+            <p class="italic mb-4">
+              "Finally, a framework that makes building complex apps feel
+              simple."
+            </p>
+            <p class="font-semibold">- Alice Johnson, CTO</p>
+          </div>
+        </div>
+        <div class="mt-12 fade-in-up">
+          <a
+            href="https://discord.gg/faqydQASTy"
+            class="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 hover-scale inline-block"
+            >Join the Discord</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <footer class="bg-gray-800 text-gray-300 py-8">
+      <div class="container mx-auto px-4 text-center">
+        <p>&copy; 2021-2025 Cradova. All rights reserved.</p>
+        <div class="mt-4 space-x-4">
+          <a href="https://discord.gg/faqydQASTy" class="hover:text-white"
+            >Discord</a
+          >
+          <a href="#" class="hover:text-white text-2xl">੶</a>
+          <a href="/guides/getting-started.html" class="hover:text-white"
+            >Docs</a
+          >
+          <a href="#" class="hover:text-white text-2xl">੶</a>
+          <a
+            href="https://github.com/CodeDynasty-dev/Cradova"
+            class="hover:text-white"
+            >GitHub</a
+          >
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const elements = document.querySelectorAll(".fade-in-up");
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target); // Stop observing once visible
+              }
+            });
+          },
+          {
+            threshold: 0.1, // Trigger when 10% of the element is visible
+          }
+        );
+
+        elements.forEach((element) => {
+          observer.observe(element);
+        });
+      });
+
+      // Simple animation for the background blobs (pure CSS animation)
+      const styleSheet = document.createElement("style");
+      styleSheet.type = "text/css";
+      styleSheet.innerText = `
+             @keyframes blob {
+                 0% {
+                     transform: translate(0, 0) scale(1);
+                 }
+                 33% {
+                     transform: translate(30px, -50px) scale(1.1);
+                 }
+                 66% {
+                     transform: translate(-20px, 20px) scale(0.9);
+                 }
+                 100% {
+                     transform: translate(0, 0) scale(1);
+                 }
+             }
+             .animate-blob {
+                 animation: blob 7s infinite;
+             }
+             .animation-delay-2000 {
+                 animation-delay: 2s;
+             }
+             .animation-delay-4000 {
+                 animation-delay: 4s;
+             }
+             .animation-delay-6000 {
+                 animation-delay: 6s;
+                 animation-duration: 8s; /* Slightly different duration */
+             }
+         `;
+      document.head.appendChild(styleSheet);
+    </script>
+  </body>
+</html>

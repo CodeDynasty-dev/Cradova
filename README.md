@@ -288,13 +288,13 @@ const todoStore = new Signal({
 
 // create actions
 const addTodo = function (todo: string) {
-  todoStore.publish("todo", [...todoStore.pipe.todo, todo]);
+  todoStore.publish("todo", [...todoStore.store.todo, todo]);
 };
 
 const removeTodo = function (todo: string) {
-  const ind = todoStore.pipe.todo.indexOf(todo);
-  todoStore.pipe.todo.splice(ind, 1);
-  todoStore.publish("todo", todoStore.pipe.todo);
+  const ind = todoStore.store.todo.indexOf(todo);
+  todoStore.store.todo.splice(ind, 1);
+  todoStore.publish("todo", todoStore.store.todo);
 };
 
 

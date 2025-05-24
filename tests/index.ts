@@ -3,10 +3,11 @@
 import {
   a,
   button,
-  div,
   Comp,
+  div,
   h1,
   input,
+  ListCreator,
   main,
   p,
   Page,
@@ -16,18 +17,22 @@ import {
 
 // creating a store
 const todoStore = new Signal({
-  todo: ["take bath", "code coded", "take a break"],
+  store: {
+    todo: ["take bath", "code coded", "take a break"],
+  },
 });
 
 // create actions
 const addTodo = function (todo: string) {
-  todoStore.publish("todo", [...todoStore.pipe.todo, todo]);
+  console.log(todoStore.store, todoStore.list);
+  todoStore.store.todo = [...todoStore.store.todo, todo];
+  todoStore.list.push(todo);
 };
 
 const removeTodo = function (todo: string) {
-  const ind = todoStore.pipe.todo.indexOf(todo);
-  todoStore.pipe.todo.splice(ind, 1);
-  todoStore.publish("todo", todoStore.pipe.todo);
+  const ind = todoStore.store.todo.indexOf(todo);
+  todoStore.store.todo.splice(ind, 1);
+  todoStore.list.remove(ind);
 };
 function TodoList(this: Comp) {
   // can be used to hold multiple references
@@ -45,16 +50,20 @@ function TodoList(this: Comp) {
       button("Add todo", {
         onclick() {
           addTodo(referenceSet.current["todoInput"]?.value || "");
-          referenceSet.current["todoInput"]!.value = "";
+          // referenceSet.current["todoInput"]!.value = "";
         },
-      })
+      }),
     ),
-    todoList
+    todoList,
+    ListCreator(todoStore, (item) => p(item), {
+      listContainerClass: "list",
+      listContainerStyle: { marginTop: "10px", backgroundColor: "red" },
+    }),
   );
 }
 
 const todoList = function (this: Comp) {
-  const data = todoStore.pipe.todo;
+  const data = todoStore.store.todo;
   return div(
     data.map((item: any) =>
       p(item, {
@@ -63,17 +72,18 @@ const todoList = function (this: Comp) {
           removeTodo(item);
         },
       })
-    )
+    ),
   );
 };
 
 const count = function (this: Comp) {
   const [count, setCounter] = this.useState(0);
   this.useEffect(() => {
+    console.log("count updated");
     setInterval(() => {
       setCounter((p) => p + 1);
     }, 1000);
-  });
+  }, []);
   return h1(" count: " + count);
 };
 
@@ -114,7 +124,7 @@ function typingExample(this: Comp) {
       placeholder: "typing simulation",
     }),
     p(" no thing typed yet!", { ref: ref.bind("text") }),
-    a({ href: "/p" }, "log lol in the console")
+    a({ href: "/p" }, "log lol in the console"),
   );
 }
 
@@ -131,6 +141,10 @@ Router.BrowserRoutes({
   "/": new Page({
     name: "boohoo 1",
     snapshotIsolation: true,
+    /**
+     * @returns A page with a button that navigates to another page that renders a Function as its template.
+     * The page also renders a list of todo items and the App component.
+     */
     template() {
       return div(
         button("go to Function as page", {
@@ -141,7 +155,7 @@ Router.BrowserRoutes({
           type: "button",
         }),
         TodoList,
-        App
+        App,
       );
     },
   }),
@@ -156,7 +170,7 @@ Router.BrowserRoutes({
           },
         }),
         TodoList,
-        App
+        App,
       );
     },
   }),

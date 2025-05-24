@@ -242,10 +242,14 @@ we went along with it.
 
 # 3.8.0-rc-1
 
-- Implemented Pipe class for binding signal event to Immutable objects.
+- Implemented Store class for binding signal event to Immutable objects.
 - Implemented signals.pass for binding signal event to specific elements in the a function.
 - Implemented signals.listen for binding signal event to listeners.
 
 # 3.8.0-rc-2 & 3.8.0-rc-3
 
 - Removed Comp.signals and .pipes; to enforces Signal instances to be used only on global scope as a global state manager.
+
+# v3.8.0-rc-4
+
+- Implemented virtual list

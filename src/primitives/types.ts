@@ -13,28 +13,34 @@ type Attributes<E extends HTMLElement> = {
    * Cradova calls this function when this element is rendered on the DOM.
    */
   onmount?: (this: E) => void;
-} & Partial<
-    Omit<
-      E,
-      "style" | `data-${string}` | `aria-${string}` | `on${string}` | "ref"
+};
+
+export type VJS_params_TYPE<E extends HTMLElement> = // children types
+  (
+    | undefined
+    | undefined[]
+    | string
+    | string[]
+    | HTMLElement
+    | HTMLElement[]
+    | DocumentFragment
+    | DocumentFragment[]
+    | (() => HTMLElement)
+    | (() => HTMLElement)[]
+    | [string, Signal<any>]
+    // property types
+    | Attributes<E>
+    // css types
+    | { style: CSS.Properties }
+    | VJS_params_TYPE<E>
+    | VJS_params_TYPE<E>[]
+    | Partial<
+      Omit<
+        E,
+        "style" | `data-${string}` | `aria-${string}` | `on${string}` | "ref"
+      >
     >
-  >;
-export type VJS_params_TYPE<E extends HTMLElement> = (
-  | undefined
-  // children types
-  | string
-  | HTMLElement
-  | HTMLElement[]
-  | DocumentFragment
-  | DocumentFragment[]
-  | (() => HTMLElement)
-  | [string, Signal<any>]
-  // property types
-  | Partial<Attributes<E>>
-  // css types
-  | { style: CSS.Properties }
-  | VJS_params_TYPE<HTMLElement>
-)[];
+  )[];
 /**
  * @internal
  */
@@ -152,16 +158,16 @@ export interface Comp extends Function {
   useReducer: <S, A>(
     reducer: (state: S, action: A) => S,
     initialArg: S,
-    initializer?: (arg: S) => S
+    initializer?: (arg: S) => S,
   ) => [S, (action: A) => void];
   useState: <S>(
-    initialValue: S
+    initialValue: S,
   ) => [S, (newState: S | ((prevState: S) => S)) => void];
   useEffect: (effect: () => (() => void) | void, deps?: unknown[]) => void;
   useMemo: <T>(factory: () => T, deps?: unknown[]) => T;
   useCallback: <T extends (...args: any[]) => any>(
     callback: T,
-    deps?: unknown[]
+    deps?: unknown[],
   ) => T;
   useRef: <T = unknown>() => {
     current: Record<string, T>;

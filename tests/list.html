@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtualized List (2016 Compatible)</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: sans-serif;
+        overflow: hidden;
+      }
+      #app-container {
+        width: 80%;
+        height: 90vh;
+        margin: 20px auto;
+        border: 1px solid #ccc;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: -webkit-box; /* Flexbox for older WebKit */
+        display: -ms-flexbox; /* Flexbox for IE10+ */
+        display: flex;
+        -webkit-box-orient: vertical; /* Older flexbox direction */
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+      #controls {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        background-color: #f9f9f9;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-box-lines: multiple; /* For flex-wrap in older syntax */
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+        gap: 10px; /* Modern feature, fallback might just stack more tightly */
+      }
+      #list-container {
+        -webkit-box-flex: 1; /* flex-grow for older flexbox */
+        -ms-flex-positive: 1;
+        flex-grow: 1;
+        overflow: hidden;
+        position: relative;
+      }
+      .virtual-item-wrapper {
+        display: block; /* or flex, grid, etc. based on your needs */
+        min-height: 0; /* Allow grid to shrink items */
+      }
+      .my-custom-item {
+        padding: 45px;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        background-color: #ffffff;
+        border-bottom: 1px solid #eee;
+      }
+      .my-custom-item strong {
+        color: #333;
+      }
+      .my-custom-item span {
+        font-size: 0.9em;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-container">
+      <div id="controls">
+        <button id="add-item-start">Add Item (Start)</button>
+        <button id="add-item-end">Add Item (End)</button>
+        <button id="update-random-data">Update Random Item</button>
+        <button id="remove-random">Remove Random Item</button>
+        <button id="reset-data">Reset to 1M Items</button>
+        <input
+          type="number"
+          id="update-index-input"
+          placeholder="Index to update"
+          value="1"
+        />
+        <input
+          type="text"
+          id="update-val-input"
+          placeholder="New value"
+          value="Updated!"
+        />
+        <button id="update-specific-data">Update Specific Item</button>
+      </div>
+      <div id="list-container"></div>
+    </div>
+
+    <script src="VirtualList.js"></script>
+    <script>
+      // main.js
+      var listContainer = document.getElementById("list-container");
+
+      // Initialize with some dummy data
+      var initialData = [];
+      for (var i = 0; i < 100; i++) {
+        // Starting with 1 million items
+        initialData.push({ id: i, value: "This is item number " + i });
+      }
+
+      var dataStore = new list(initialData);
+
+      // Your renderItem function: takes data and index, returns an HTMLElement
+      var renderListItem = function (itemData, index) {
+        var itemElement = document.createElement("div");
+        itemElement.classList.add("my-custom-item");
+        itemElement.style.backgroundColor =
+          index % 2 === 0 ? "#f0f0f0" : "#ffffff";
+        itemElement.innerHTML = `
+                <strong>ID: ${itemData.id}</strong>
+                <span>${itemData.value}</span>
+            `;
+        return itemElement;
+      };
+
+      var virtualList = new VirtualList(
+        listContainer,
+        dataStore,
+        renderListItem
+      );
+
+      // --- UI Controls (Now using explicit dataStore methods) ---
+      document
+        .getElementById("add-item-start")
+        .addEventListener("click", function () {
+          var newItemId = dataStore.getLength();
+          dataStore.addItem(
+            { id: newItemId, value: "New Item at Start - " + newItemId },
+            0
+          );
+        });
+
+      document
+        .getElementById("add-item-end")
+        .addEventListener("click", function () {
+          var newItemId = dataStore.getLength();
+          dataStore.addItem({
+            id: newItemId,
+            value: "New Item at End - " + newItemId,
+          });
+        });
+
+      document
+        .getElementById("update-random-data")
+        .addEventListener("click", function () {
+          var totalItems = dataStore.getLength();
+          if (totalItems === 0) return;
+          var randomIndex = Math.floor(Math.random() * totalItems);
+          // Must create a new object or modify a property and then explicitly update
+          var currentItem = dataStore.getItem(randomIndex);
+          if (currentItem) {
+            dataStore.updateItem(randomIndex, {
+              id: currentItem.id,
+              value:
+                "Updated Random Item " +
+                randomIndex +
+                " @ " +
+                new Date().toLocaleTimeString(),
+            });
+          }
+        });
+
+      document
+        .getElementById("remove-random")
+        .addEventListener("click", function () {
+          var totalItems = dataStore.getLength();
+          if (totalItems === 0) return;
+          var randomIndex = Math.floor(Math.random() * totalItems);
+          dataStore.removeItem(randomIndex);
+        });
+
+      document
+        .getElementById("reset-data")
+        .addEventListener("click", function () {
+          var newData = [];
+          for (var i = 0; i < 100; i++) {
+            newData.push({ id: i, value: "Reset Item " + i });
+          }
+          dataStore.setData(newData);
+        });
+
+      document
+        .getElementById("update-specific-data")
+        .addEventListener("click", function () {
+          var indexInput = document.getElementById("update-index-input");
+          var valInput = document.getElementById("update-val-input");
+
+          var index = parseInt(indexInput.value, 10);
+          var val = valInput.value;
+
+          if (isNaN(index) || index < 0 || index >= dataStore.getLength()) {
+            alert("Please enter a valid index within the current data range.");
+            return;
+          }
+          var currentItem = dataStore.getItem(index);
+          if (currentItem) {
+            dataStore.updateItem(index, {
+              id: currentItem.id, // Retain other properties
+              value: val, // Update specific property
+            });
+          }
+        });
+    </script>
+  </body>
+</html>

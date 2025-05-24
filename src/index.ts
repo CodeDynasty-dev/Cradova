@@ -13,23 +13,16 @@ and limitations under the License.
 export * from "./primitives/classes.js";
 export * from "./primitives/functions.js";
 export * from "./primitives/dom-objects.js";
-import type { Func } from "./primitives/types.js";
-export type { Func };
+import type { Comp } from "./primitives/types.js";
+export type { Comp };
 
-declare global {
-  interface Function {
-    cloneFunc(): () => HTMLElement;
-    InvokeWith(args: any[]): Func;
-  }
+// Example utility functions (to be placed in an appropriate file)
+export function clone<T extends (...args: any[]) => any>(fn: T): T {
+  return function (this: any, ...args: any[]) {
+    return fn.apply(this, args);
+  } as T;
 }
 
-Function.prototype.cloneFunc = function () {
-  const pre = this;
-  return function funcClone(this: any) {
-    return pre.call(this);
-  };
-};
-
-Function.prototype.InvokeWith = function (args: any[]) {
-  return this.apply(this, args);
-};
+export function invoke<R>(fn: (...args: any[]) => R, args: any[]): R {
+  return fn.apply(null, args);
+}

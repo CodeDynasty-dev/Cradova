@@ -2,13 +2,9 @@ import * as CSS from "csstype";
 import { __raw_ref, Page, Signal } from "./classes.js";
 
 type Attributes<E extends HTMLElement> = {
-  ref?: {
-    bind: (name: string) => any;
-    current: Record<string, unknown>;
-  };
+  ref?: [__raw_ref<any>, string]; // Updated to reflect tuple from bind()
   value?: any;
   style?: CSS.Properties;
-  recall?: (P: any) => void;
   [key: `data-${string}`]: string | undefined;
   [key: `aria-${string}`]: string | undefined;
   [key: `on${string}`]: (this: E, event: Event) => void;
@@ -20,13 +16,7 @@ type Attributes<E extends HTMLElement> = {
 } & Partial<
     Omit<
       E,
-      | "style"
-      | `data-${string}`
-      | `aria-${string}`
-      | `on${string}`
-      | "ref"
-      | "recall"
-      | "onmount"
+      "style" | `data-${string}` | `aria-${string}` | `on${string}` | "ref"
     >
   >;
 export type VJS_params_TYPE<E extends HTMLElement> = (
@@ -38,11 +28,12 @@ export type VJS_params_TYPE<E extends HTMLElement> = (
   | DocumentFragment
   | DocumentFragment[]
   | (() => HTMLElement)
-  | Signal<any>
+  | [string, Signal<any>]
   // property types
   | Partial<Attributes<E>>
   // css types
   | { style: CSS.Properties }
+  | VJS_params_TYPE<HTMLElement>
 )[];
 /**
  * @internal
@@ -111,7 +102,7 @@ export type browserPageType<importType = Page> =
   | Promise<importType>
   | (() => Promise<importType>);
 
-export interface Func extends Function {
+export interface Comp extends Function {
   /**
    * @internal
    */
@@ -156,8 +147,6 @@ export interface Func extends Function {
    * @internal
    */
   _reducer_index?: number;
-
-  signals: Map<string, Signal<any>>;
 
   // ? hooks
   useReducer: <S, A>(

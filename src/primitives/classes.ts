@@ -1,6 +1,6 @@
 import { div } from "./dom-objects.js";
-import { funcManager, isArrowFunc, toFuncNoRender } from "./functions.js";
-import type { browserPageType, CradovaPageType, Func } from "./types.js";
+import { funcManager, isArrowFunc, toCompNoRender } from "./functions.js";
+import type { browserPageType, CradovaPageType, Comp } from "./types.js";
 
 /**
  * Cradova event
@@ -93,13 +93,13 @@ class Pipe<Type extends Record<string, any>> {
 
 export class Signal<Type extends Record<string, any>> {
   private pn?: string;
-  private subs: Record<keyof Type, Func[]> = {} as any;
+  private subs: Record<keyof Type, Set<Comp>> = {} as any;
   private listening_subs: Record<
     keyof Type,
     ((data: Partial<Type>) => void)[]
   > = {} as any;
   pipe: Pipe<Type>;
-  passers?: Record<keyof Type, Signal<any>>;
+  passers?: Record<keyof Type, [string, Signal<any>]>;
   constructor(initial: Type, props?: { persistName?: string | undefined }) {
     this.pipe = new Pipe(initial);
     this.subs = {} as any;
@@ -128,10 +128,9 @@ export class Signal<Type extends Record<string, any>> {
   publish<T extends keyof Type>(eventName: T, data: Type[T]) {
     this.pipe._set(eventName, data);
     const subs = this.subs![eventName] || [];
-    for (let i = 0; i < subs.length; i++) {
-      const c = subs[i];
+    subs.forEach((c) => {
       funcManager.recall(c);
-    }
+    });
     const subs2 = this.listening_subs![eventName as string];
     if (subs2) {
       for (const fn of subs2) {
@@ -148,14 +147,15 @@ export class Signal<Type extends Record<string, any>> {
    *  fires actions if any available
    */
   batchPublish(events: Partial<Type>) {
-    const s = new Set<Func>();
+    const s = new Set<Comp>();
     const s2 = new Set<(data: Partial<Type>) => void>();
     for (const [eventName, data] of Object.entries(events)) {
       this.pipe._set(eventName as keyof Type, data);
-      const subs = this.subs![eventName as string] || [];
-      for (let i = 0; i < subs.length; i++) {
-        const c = subs[i];
-        s.add(c);
+      const subs = this.subs![eventName as string];
+      if (subs) {
+        subs.forEach((c) => {
+          s.add(c);
+        });
       }
       const subs2 = this.listening_subs![eventName as string];
       if (subs2) {
@@ -178,9 +178,12 @@ export class Signal<Type extends Record<string, any>> {
    *  subscribe to an event
    *
    * @param name of event.
-   * @param Func component to bind to.
+   * @param Comp component to bind to.
    */
-  subscribe<T extends keyof Type>(eventName: T | T[], comp: Func) {
+  subscribe<T extends keyof Type>(
+    eventName: T | T[],
+    comp: Comp | ((this: Comp) => HTMLDivElement)
+  ) {
     if (typeof comp === "function") {
       if (Array.isArray(eventName)) {
         eventName.forEach((en) => {
@@ -188,9 +191,9 @@ export class Signal<Type extends Record<string, any>> {
         });
         return;
       }
-      if (!comp.signals) {
+      if (!(comp as Comp).published) {
         if (!isArrowFunc(comp)) {
-          comp = toFuncNoRender(comp);
+          comp = toCompNoRender(comp);
         } else {
           console.error(
             ` ✘  Cradova err:  ${String(
@@ -200,21 +203,20 @@ export class Signal<Type extends Record<string, any>> {
           return;
         }
       }
-      if (comp.signals.get(eventName as string)) return;
-      if (eventName in this.pipe) {
-        comp.signals.set(eventName as string, this);
-      } else {
+      if ((comp as Comp).published) return;
+      if (!(eventName in this.pipe)) {
         console.error(
           ` ✘  Cradova err:  ${String(
             eventName
           )} is not a valid event for this Signal`
         );
+        return;
       }
       // ? avoid adding a specific Function repeatedly to a Signal
       if (!this.subs![eventName]) {
-        this.subs![eventName] = [comp];
+        this.subs![eventName] = new Set([comp as Comp]);
       } else {
-        this.subs![eventName].push(comp);
+        this.subs![eventName].add(comp as Comp);
       }
     } else {
       console.error(` ✘  Cradova err:  ${comp} is not a valid component`);
@@ -248,7 +250,7 @@ export class Signal<Type extends Record<string, any>> {
    * ----
    *  subscribe an element to an event
    */
-  get pass(): Record<keyof Type, Signal<any>> {
+  get pass(): Record<keyof Type, [string, Signal<any>]> {
     if (this.passers) {
       return this.passers;
     }
@@ -256,16 +258,9 @@ export class Signal<Type extends Record<string, any>> {
     const keys = Object.keys(this.pipe) as (keyof Type)[];
     this.passers = {} as any;
     for (const key of keys) {
-      this.passers![key] = this._embed(key);
+      this.passers![key] = [key as string, this];
     }
     return this.passers!;
-  }
-  /**
-   * @internal
-   */
-  _embed<T extends keyof Type>(eventName: T): Signal<any> {
-    // event = [subscriptions , signal]
-    return [eventName, this] as unknown as Signal<any>;
   }
 
   /**
@@ -743,6 +738,6 @@ export class __raw_ref<T = unknown> {
    * @param name - The name to reference the DOM element by.
    */
   bind(name: string) {
-    return [this, name] as unknown as __raw_ref;
+    return [this, name] as [__raw_ref<T>, string];
   }
 }

@@ -1,4 +1,4 @@
-import type { Func, VJS_params_TYPE } from "./types.js";
+import type { Comp, VJS_params_TYPE } from "./types.js";
 import { __raw_ref, Signal } from "./classes.js";
 /**
  * @internal
@@ -15,7 +15,7 @@ export const makeElement = <E extends HTMLElement>(
       let child = ElementChildrenAndPropertyList[i];
       // single child lane
       if (typeof child === "function") {
-        child = isArrowFunc(child) ? child() : toFunc(child);
+        child = isArrowFunc(child) ? child() : toComp(child);
       }
       // appending child
       if (child instanceof HTMLElement || child instanceof DocumentFragment) {
@@ -90,17 +90,33 @@ export const makeElement = <E extends HTMLElement>(
 
       if (Array.isArray(value)) {
         // reference
-        if (prop == "ref" && (value! as unknown[])![0] instanceof __raw_ref) {
-          (value![0] as __raw_ref).current[value[1]] = element;
+        if (
+          prop === "ref" &&
+          value.length === 2 &&
+          value[0] instanceof __raw_ref &&
+          typeof value[1] === "string"
+        ) {
+          const [refInstance, name] = value as [__raw_ref<unknown>, string];
+          refInstance.current[name] = element;
           continue;
         }
         // event = [subscription, signal]
-        if (value![1] instanceof Signal) {
-          value[1].listen(value[0], (x) => {
-            element.setAttribute(prop, x[value[0] as unknown as string] as any);
+        // Check if it's a tuple of [string, Signal instance]
+        if (
+          value.length === 2 &&
+          value[1] instanceof Signal &&
+          typeof value[0] === "string"
+        ) {
+          const eventName = value[0] as string;
+          const signalInstance = value[1] as Signal<Record<string, any>>;
+          // Ensure listen can handle a single event name if it expects an array
+          signalInstance.listen([eventName] as any, (x) => {
+            element.setAttribute(prop, x[eventName] as string);
           });
-          // @ts-ignore
-          element.setAttribute(prop, value[1].pipe[value[0]]);
+          element.setAttribute(
+            prop,
+            (signalInstance.pipe as Record<string, any>)[eventName]
+          );
           continue;
         }
       }
@@ -123,14 +139,14 @@ function unroll_child_list(l: VJS_params_TYPE<HTMLElement>) {
   const fg = new DocumentFragment();
   for (let ch of l) {
     if (Array.isArray(ch)) {
-      fg.appendChild(unroll_child_list(ch));
+      fg.appendChild(unroll_child_list(ch as VJS_params_TYPE<HTMLElement>));
     } else {
       if (typeof ch === "function") {
-        ch = isArrowFunc(ch) ? ch() : toFunc(ch);
+        ch = isArrowFunc(ch) ? ch() : toComp(ch);
         if (typeof ch === "function") {
           ch = isArrowFunc(ch)
             ? (ch as () => HTMLElement | DocumentFragment)()
-            : toFunc(ch);
+            : toComp(ch);
         }
       }
       if (ch instanceof HTMLElement || ch instanceof DocumentFragment) {
@@ -262,7 +278,7 @@ function depsAreEqual(prevDeps?: unknown[], nextDeps?: unknown[]): boolean {
  * @returns [state, setState]
  */
 function useState<S>(
-  this: Func,
+  this: Comp,
   initialValue: S
 ): [S, (newState: S | ((prevState: S) => S)) => void] {
   const self = this;
@@ -304,7 +320,7 @@ function useState<S>(
  * @param deps - Dependencies array. Effect runs if deps change. Runs on every render if omitted. Runs only on mount/unmount if empty array [].
  */
 function useEffect(
-  this: Func,
+  this: Comp,
   effect: () => (() => void) | void,
   deps?: unknown[]
 ): void {
@@ -350,7 +366,7 @@ function useEffect(
  * @param deps - Dependencies array. Re-runs factory if deps change.
  * @returns Memoized value.
  */
-function useMemo<T>(this: Func, factory: () => T, deps?: unknown[]): T {
+function useMemo<T>(this: Comp, factory: () => T, deps?: unknown[]): T {
   const self = this;
   if (typeof self !== "function" || !self._memo_tracker) {
     throw new Error(
@@ -387,8 +403,8 @@ function useMemo<T>(this: Func, factory: () => T, deps?: unknown[]): T {
  * @param deps - Dependencies array. Returns the same callback instance if deps are unchanged.
  * @returns Memoized callback function.
  */
-export function useCallback<T extends (...args: any[]) => any>(
-  this: Func,
+function useCallback<T extends (...args: any[]) => any>(
+  this: Comp,
   callback: T,
   deps?: unknown[]
 ): T {
@@ -405,7 +421,7 @@ export function useCallback<T extends (...args: any[]) => any>(
  * @returns A ref object like { current: T | null }.
  */
 function useRef<T = unknown>(
-  this: Func
+  this: Comp
 ): {
   current: Record<string, T>;
   bind: (name: string) => any;
@@ -430,8 +446,8 @@ function useRef<T = unknown>(
  * @param initializer - Optional function to compute initial state lazily.
  * @returns [state, dispatch]
  */
-export function useReducer<S, A>(
-  this: Func,
+function useReducer<S, A>(
+  this: Comp,
   reducer: (state: S, action: A) => S,
   initialArg: S,
   initializer?: (arg: S) => S
@@ -477,7 +493,7 @@ export const isArrowFunc = (fn: Function) => !fn.hasOwnProperty("prototype");
 
 // --- Default State and Initialization ---
 
-const DEFAULT_COMPONENT_PROPS: Partial<Func> = {
+const DEFAULT_COMPONENT_PROPS: Partial<Comp> = {
   rendered: false,
   published: false,
   reference: null,
@@ -497,9 +513,6 @@ const DEFAULT_COMPONENT_PROPS: Partial<Func> = {
   _reducer_tracker: [], // Added
   _reducer_index: -1, // Added
 
-  // Signals
-  signals: new Map(),
-
   // Bound hooks
   useState: useState,
   useEffect: useEffect,
@@ -509,18 +522,18 @@ const DEFAULT_COMPONENT_PROPS: Partial<Func> = {
   useReducer: useReducer,
 };
 
-function initializeComponent(func: any): Func {
-  if (typeof func._state_index === "number") {
-    func._state_index = -1;
-    func._effect_index = -1;
-    func._memo_index = -1;
-    func._reducer_index = -1; // Added Reset
-    func.signals.clear();
-    funcManager.cleanupEffects(func);
-    return func as Func;
+function initializeComponent(comp: any): Comp {
+  if (typeof comp._state_index === "number") {
+    comp._state_index = -1;
+    comp._effect_index = -1;
+    comp._memo_index = -1;
+    comp._reducer_index = -1; // Added Reset
+    comp.signals.clear();
+    funcManager.cleanupEffects(comp);
+    return comp as Comp;
   }
 
-  const component = func as Func;
+  const component = comp as Comp;
   Object.assign(component, {
     ...DEFAULT_COMPONENT_PROPS, // Apply defaults
   });
@@ -528,19 +541,19 @@ function initializeComponent(func: any): Func {
   return component;
 }
 
-export const toFunc = (func: any): HTMLElement | undefined => {
-  const component = initializeComponent(func);
+export const toComp = (comp: any): HTMLElement | undefined => {
+  const component = initializeComponent(comp);
   return funcManager.render(component);
 };
 
-export const toFuncNoRender = (func: any): Func => {
-  return initializeComponent(func);
+export const toCompNoRender = (comp: any): Comp => {
+  return initializeComponent(comp);
 };
 
 // --- Function Manager ---
 
 export const funcManager = {
-  render(component: Func): HTMLElement | undefined {
+  render(component: Comp): HTMLElement | undefined {
     const html = component.apply(component, []);
 
     if (html instanceof HTMLElement) {
@@ -560,7 +573,7 @@ export const funcManager = {
     }
   },
 
-  recall(component: Func): void {
+  recall(component: Comp): void {
     if (component.rendered && component.published) {
       // Schedule the re-render asynchronously
       setTimeout(() => {
@@ -569,7 +582,7 @@ export const funcManager = {
     }
   },
 
-  activate(component: Func): void {
+  activate(component: Comp): void {
     component.published = false; // Mark as updating
     if (!component.rendered || !component.reference) {
       return; // Cannot activate if not rendered or no reference
@@ -608,9 +621,9 @@ export const funcManager = {
   /**
    * @internal
    */
-  _effectsToRun: new Map<Func, Map<number, () => (() => void) | void>>(),
+  _effectsToRun: new Map<Comp, Map<number, () => (() => void) | void>>(),
   scheduleEffect(
-    component: Func,
+    component: Comp,
     index: number,
     effect: () => (() => void) | void
   ): void {
@@ -620,7 +633,7 @@ export const funcManager = {
     this._effectsToRun.get(component)!.set(index, effect);
   },
 
-  runScheduledEffects(component: Func): void {
+  runScheduledEffects(component: Comp): void {
     const effectsMap = this._effectsToRun.get(component);
     if (!effectsMap || effectsMap.size === 0) {
       return;
@@ -650,7 +663,7 @@ export const funcManager = {
     this._effectsToRun.delete(component);
   },
 
-  cleanupEffects(component: Func): void {
+  cleanupEffects(component: Comp): void {
     if (component._effect_tracker) {
       component._effect_tracker.forEach((tracker) => {
         if (typeof tracker?.cleanup === "function") {
@@ -667,7 +680,7 @@ export const funcManager = {
     }
   },
 
-  unmount(component: Func): void {
+  unmount(component: Comp): void {
     this.cleanupEffects(component);
     component.reference = null;
     component.rendered = false;

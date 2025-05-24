@@ -4,7 +4,7 @@ import {
   a,
   button,
   div,
-  Func,
+  Comp,
   h1,
   input,
   main,
@@ -12,9 +12,6 @@ import {
   Page,
   Router,
   Signal,
-  useEffect,
-  useRef,
-  useState,
 } from "../dist/index.js";
 
 // creating a store
@@ -32,9 +29,9 @@ const removeTodo = function (todo: string) {
   todoStore.pipe.todo.splice(ind, 1);
   todoStore.publish("todo", todoStore.pipe.todo);
 };
-function TodoList() {
+function TodoList(this: Comp) {
   // can be used to hold multiple references
-  const referenceSet = useRef();
+  const referenceSet = this.useRef<HTMLInputElement>();
   // bind Function to Signal
   todoStore.subscribe("todo", todoList);
   // markup
@@ -43,23 +40,21 @@ function TodoList() {
     div(
       input({
         placeholder: "type in todo",
-        ref: referenceSet.bindAs("todoInput"),
+        ref: referenceSet.bind("todoInput"),
       }),
       button("Add todo", {
         onclick() {
-          addTodo(
-            referenceSet.elem<HTMLInputElement>("todoInput")?.value || "",
-          );
-          referenceSet.elem<HTMLInputElement>("todoInput")!.value = "";
+          addTodo(referenceSet.current["todoInput"]?.value || "");
+          referenceSet.current["todoInput"]!.value = "";
         },
-      }),
+      })
     ),
-    todoList,
+    todoList
   );
 }
 
-const todoList: Func = function () {
-  const data = this.pipes.get("todo");
+const todoList = function (this: Comp) {
+  const data = todoStore.pipe.todo;
   return div(
     data.map((item: any) =>
       p(item, {
@@ -68,17 +63,17 @@ const todoList: Func = function () {
           removeTodo(item);
         },
       })
-    ),
+    )
   );
 };
 
-const count = function () {
-  const [count, setCounter] = useState(0, this);
-  useEffect(() => {
+const count = function (this: Comp) {
+  const [count, setCounter] = this.useState(0);
+  this.useEffect(() => {
     setInterval(() => {
       setCounter((p) => p + 1);
     }, 1000);
-  }, this);
+  });
   return h1(" count: " + count);
 };
 
@@ -93,8 +88,8 @@ function HelloMessage() {
 
 // using CradovaRef
 
-const nameRef = function () {
-  const [name, setName] = useState<string | null>(null, this);
+const nameRef = function (this: Comp) {
+  const [name, setName] = this.useState<string | null>(null);
   return div(name ? "hello " + name : "Click to get a second greeting", {
     onclick() {
       const name = prompt();
@@ -109,17 +104,17 @@ const nameRef = function () {
 
 // reference (not state)
 
-function typingExample() {
-  const ref = useRef();
+function typingExample(this: Comp) {
+  const ref = this.useRef<HTMLElement>();
   return div(
     input({
       oninput() {
-        ref.elem<HTMLParagraphElement>("text")!.innerText = this.value;
+        ref.current["text"]!.innerText = this.value;
       },
       placeholder: "typing simulation",
     }),
-    p(" no thing typed yet!", { ref: ref.bindAs("text") }),
-    a({ href: "/p" }, "log lol in the console"),
+    p(" no thing typed yet!", { ref: ref.bind("text") }),
+    a({ href: "/p" }, "log lol in the console")
   );
 }
 
@@ -146,7 +141,7 @@ Router.BrowserRoutes({
           type: "button",
         }),
         TodoList,
-        App,
+        App
       );
     },
   }),
@@ -161,7 +156,7 @@ Router.BrowserRoutes({
           },
         }),
         TodoList,
-        App,
+        App
       );
     },
   }),

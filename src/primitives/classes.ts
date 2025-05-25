@@ -28,7 +28,7 @@ export class cradovaEvent {
    */
 
   async dispatchEvent(
-    eventName: "after_comp_is_mounted" | "after_page_is_killed",
+    eventName: "after_comp_is_mounted" | "after_page_is_killed"
   ) {
     const eventListeners = this[eventName];
     // if (eventName.includes("Active")) {
@@ -59,7 +59,7 @@ class Store<Type extends Record<string, any>> {
   private _data: Type;
   constructor(
     data: Type,
-    notifier: (key: keyof Type, value: Type[keyof Type]) => void,
+    notifier: (key: keyof Type, value: Type[keyof Type]) => void
   ) {
     this._data = data;
     for (const key in this._data) {
@@ -104,14 +104,14 @@ class List<Type extends any[]> {
   };
   notifier: (
     eventType: "dataChanged" | "itemUpdated",
-    newItemData: Type[number],
+    newItemData: Type[number]
   ) => void;
   constructor(
     initialData: Type,
     notifier: (
       eventType: "dataChanged" | "itemUpdated",
-      newItemData: Type[number],
-    ) => void,
+      newItemData: Type[number]
+    ) => void
   ) {
     this._data = initialData || [];
     this._dirtyIndices = new Set();
@@ -126,9 +126,9 @@ class List<Type extends any[]> {
    * @internal
    */
   _publish(eventType: "dataChanged" | "itemUpdated", payload: any) {
-    var subs = this._subscribers[eventType];
+    const subs = this._subscribers[eventType];
     if (subs) {
-      for (var i = 0; i < subs.length; i++) {
+      for (let i = 0; i < subs.length; i++) {
         subs[i](payload);
       }
     }
@@ -138,7 +138,7 @@ class List<Type extends any[]> {
    */
   _subscribe(
     eventType: "dataChanged" | "itemUpdated",
-    callback: (payload: any) => void,
+    callback: (payload: any) => void
   ) {
     if (this._subscribers[eventType]) {
       this._subscribers[eventType].push(callback);
@@ -149,13 +149,13 @@ class List<Type extends any[]> {
    */
   _unsubscribe(
     eventType: "dataChanged" | "itemUpdated",
-    callback: (payload: any) => void,
+    callback: (payload: any) => void
   ) {
     if (this._subscribers[eventType]) {
       this._subscribers[eventType] = this._subscribers[eventType].filter(
         function (cb) {
           return cb !== callback;
-        },
+        }
       );
     }
   }
@@ -231,7 +231,7 @@ class List<Type extends any[]> {
 
 export class Signal<
   StoreType extends Record<string, any>,
-  ListType extends any[],
+  ListType extends any[]
 > {
   private pn?: string;
   private subs: Record<keyof StoreType, Set<Comp>> = {} as any;
@@ -247,7 +247,7 @@ export class Signal<
       store = {} as unknown as StoreType,
       list = [] as unknown as ListType,
     }: { store: StoreType; list?: ListType },
-    props?: { persistName?: string | undefined },
+    props?: { persistName?: string | undefined }
   ) {
     this.store = new Store(store, (key, value) => {
       this.publish(key as keyof StoreType, value);
@@ -269,7 +269,7 @@ export class Signal<
           if (!Object.prototype.hasOwnProperty.call(this.store, key)) {
             this.store["_set"](
               key as keyof StoreType,
-              store[key as keyof StoreType],
+              store[key as keyof StoreType]
             );
           }
         }
@@ -341,7 +341,7 @@ export class Signal<
    */
   subscribe<T extends keyof StoreType>(
     eventName: T | "dataChanged" | "itemUpdated" | T[],
-    comp: Comp | ((this: Comp) => HTMLDivElement),
+    comp: Comp | ((this: Comp) => HTMLDivElement)
   ) {
     if (typeof comp === "function") {
       if (Array.isArray(eventName)) {
@@ -355,11 +355,9 @@ export class Signal<
           comp = toCompNoRender(comp as Comp);
         } else {
           console.error(
-            ` ✘  Cradova err:  ${
-              String(
-                comp,
-              )
-            } is not a valid component or function`,
+            ` ✘  Cradova err:  ${String(
+              comp
+            )} is not a valid component or function`
           );
           return;
         }
@@ -367,11 +365,9 @@ export class Signal<
       if ((comp as Comp).published) return;
       if (!(eventName in this.store)) {
         console.error(
-          ` ✘  Cradova err:  ${
-            String(
-              eventName,
-            )
-          } is not a valid event for this Signal`,
+          ` ✘  Cradova err:  ${String(
+            eventName
+          )} is not a valid event for this Signal`
         );
         return;
       }
@@ -395,7 +391,7 @@ export class Signal<
    */
   listen<T extends keyof StoreType>(
     eventName: T | "dataChanged" | "itemUpdated" | T[],
-    listener: (data: Partial<StoreType>) => void,
+    listener: (data: Partial<StoreType>) => void
   ) {
     if (Array.isArray(eventName)) {
       eventName.forEach((en) => {
@@ -475,7 +471,7 @@ export class Page {
     const { template, name } = pageParams;
     if (typeof template !== "function") {
       throw new Error(
-        ` ✘  Cradova err:  template function for the page is not a function`,
+        ` ✘  Cradova err:  template function for the page is not a function`
       );
     }
     this._html = template;
@@ -653,7 +649,7 @@ class RouterBoxClass {
   }
 
   checker(
-    url: string,
+    url: string
   ): [Page | (() => Promise<Page | undefined>), Record<string, any>] {
     if (url[0] !== "/") {
       url = url.slice(url.indexOf("/", 8));
@@ -753,9 +749,8 @@ export class Router {
       ) {
         // ? creating the lazy
         RouterBox.routes[path] = async () => {
-          const paged: Page = typeof page === "function"
-            ? await page()
-            : await page;
+          const paged: Page =
+            typeof page === "function" ? await page() : await page;
           return RouterBox.route(path, paged);
         };
       } else {
@@ -794,7 +789,7 @@ export class Router {
       console.error(
         " ✘  Cradova err:  href must be a defined path but got " +
           href +
-          " instead",
+          " instead"
       );
     }
     let route = null,
@@ -830,7 +825,7 @@ export class Router {
       RouterBox.loadingPage = page;
     } else {
       throw new Error(
-        " ✘  Cradova err:  Loading Page should be a cradova page class",
+        " ✘  Cradova err:  Loading Page should be a cradova page class"
       );
     }
   }
@@ -862,7 +857,7 @@ export class Router {
       RouterBox["errorHandler"] = callback;
     } else {
       throw new Error(
-        " ✘  Cradova err:  callback for error event is not a function",
+        " ✘  Cradova err:  callback for error event is not a function"
       );
     }
   }
@@ -876,7 +871,7 @@ export class Router {
       RouterBox.doc = doc;
     } else {
       throw new Error(
-        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `,
+        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `
       );
     }
     window.addEventListener("pageshow", () => RouterBox.router());
@@ -924,10 +919,6 @@ export class VirtualList {
   /**
    * @internal
    */
-  domElementsPool: HTMLElement[];
-  /**
-   * @internal
-   */
   numVisibleSlots: number;
   /**
    * @internal
@@ -960,22 +951,19 @@ export class VirtualList {
   constructor(
     containerElement: HTMLElement,
     dataStore: Signal<any, any[]>,
-    renderItemFunction: (item: any, index: number) => HTMLElement,
+    renderItemFunction: (item: any, index: number) => HTMLElement
   ) {
     this.container = containerElement;
     this.dataStore = dataStore;
     this.renderItem = renderItemFunction;
     this.itemHeightEstimator = 50;
 
-    this.domElementsPool = [];
     this.numVisibleSlots = 0;
     this.totalHeight = 0;
     this.currentScrollTop = 0;
     this.startIndex = 0;
     this.scrollAnimationFrame = null;
     this.renderScheduled = false;
-
-    var self = this; // Capture 'this'
 
     // Init elements
     this.scrollableArea = document.createElement("div");
@@ -988,58 +976,14 @@ export class VirtualList {
     this.contentContainer.style.position = "relative";
     this.scrollableArea.appendChild(this.contentContainer);
 
-    // Start Initialization sequence
-    this._initMeasureHeight()
-      .then(function () {
-        // Bind 'this' implicitly via self
-        self._postMeasureInit();
-      })
-      .catch(function (error) {
-        console.error("VL Init Error:", error); // Simplified error logging
-        self.itemHeightEstimator = 50; // Fallback
-        self._postMeasureInit();
-      });
+    this._init();
   }
+
   /**
    * @internal
    */
-  _initMeasureHeight() {
-    var self = this;
-    return new Promise<void>(function (resolve, reject) {
-      if (self.dataStore.list.items.length === 0) {
-        self.itemHeightEstimator = 50;
-        return resolve();
-      }
-
-      var tempContainer = document.createElement("div");
-      tempContainer.style.position = "absolute";
-      tempContainer.style.visibility = "hidden";
-      tempContainer.style.width = "100%";
-      document.body.appendChild(tempContainer);
-
-      var firstItemData = self.dataStore.list.items[0];
-      var itemElement = self.renderItem(firstItemData, 0);
-
-      if (itemElement instanceof HTMLElement) {
-        tempContainer.appendChild(itemElement);
-        requestAnimationFrame(function () {
-          self.itemHeightEstimator = itemElement.offsetHeight || 50;
-          document.body.removeChild(tempContainer);
-          resolve();
-        });
-      } else {
-        document.body.removeChild(tempContainer);
-        reject(new Error("Render function no HTML element"));
-      }
-    });
-  }
-  /**
-   * @internal
-   */
-  _postMeasureInit() {
+  _init() {
     this.calculateVisibleSlots();
-    this.createDOMElementPool();
-    this.updateTotalHeight();
     this._attachEventListeners();
     this._subscribeToDataStoreEvents();
     this.scheduleRender();
@@ -1054,40 +998,14 @@ export class VirtualList {
   /**
    * @internal
    */
-  createDOMElementPool() {
-    var fragment = document.createDocumentFragment();
-    for (var i = 0; i < this.numVisibleSlots; i++) {
-      var itemElement = document.createElement("div");
-      itemElement.style.position = "absolute";
-      itemElement.style.left = "0";
-      itemElement.style.width = "100%";
-      itemElement.style.boxSizing = "border-box";
-      itemElement.classList.add("virtual-item-wrapper");
-      itemElement.style.height = this.itemHeightEstimator + "px";
-
-      this.domElementsPool.push(itemElement);
-      fragment.appendChild(itemElement);
-    }
-    this.contentContainer.appendChild(fragment);
-  }
-  /**
-   * @internal
-   */
-  updateTotalHeight() {
-    this.totalHeight = this.dataStore.list.items.length *
-      this.itemHeightEstimator;
-    this.contentContainer.style.height = this.totalHeight + "px";
-  }
-  /**
-   * @internal
-   */
   _attachEventListeners() {
+    console.log("attach listeners");
     this.scrollableArea.addEventListener(
       "scroll",
-      this.handleScroll.bind(this),
+      this.handleScroll.bind(this)
     );
 
-    var resizeTimeout: number;
+    let resizeTimeout: number;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(this.onResize.bind(this), 100);
@@ -1097,33 +1015,31 @@ export class VirtualList {
    * @internal
    */
   _subscribeToDataStoreEvents() {
-    this.dataStore.list._subscribe(
-      "dataChanged",
-      this.handleDataChange.bind(this),
-    );
-    this.dataStore.list._subscribe(
-      "itemUpdated",
-      this.handleItemUpdate.bind(this),
-    );
+    this.dataStore.list._subscribe("dataChanged", this.handleChange.bind(this));
+    this.dataStore.list._subscribe("itemUpdated", this.handleChange.bind(this));
   }
   /**
    * @internal
    */
-  handleDataChange() {
-    this.updateTotalHeight();
+  handleChange() {
     this.scheduleRender();
   }
+
   /**
    * @internal
    */
-  handleItemUpdate() {
-    this.scheduleRender();
+  hasOverflow() {
+    return (
+      this.scrollableArea.scrollHeight > this.scrollableArea.clientHeight ||
+      this.scrollableArea.scrollWidth > this.scrollableArea.clientWidth
+    );
   }
   /**
    * @internal
    */
   handleScroll() {
-    var newScrollTop = this.scrollableArea.scrollTop;
+    const newScrollTop = this.scrollableArea.scrollTop;
+    console.log("boohoo", newScrollTop, this.currentScrollTop);
     if (newScrollTop === this.currentScrollTop) return;
     this.currentScrollTop = newScrollTop;
     this.scheduleRender();
@@ -1147,46 +1063,55 @@ export class VirtualList {
    * @internal
    */
   renderVisibleRange() {
-    var newStartIndex = Math.floor(
-      this.currentScrollTop / this.itemHeightEstimator,
+    if (!this.hasOverflow()) {
+      this.calculateVisibleSlots();
+    }
+    const newStartIndex = Math.floor(
+      this.currentScrollTop / this.itemHeightEstimator
     );
-    var maxStartIndex = Math.max(
+    const maxStartIndex = Math.max(
       0,
-      this.dataStore.list.items.length - this.numVisibleSlots,
+      this.dataStore.list.items.length - this.numVisibleSlots
     );
     this.startIndex = Math.min(newStartIndex, maxStartIndex);
+    const loop = Math.min(
+      this.dataStore.list.items.length,
+      this.numVisibleSlots
+    );
 
-    this.contentContainer.style.transform = "translateY(" +
-      this.startIndex * this.itemHeightEstimator + "px)";
+    this.contentContainer.style.transform =
+      "translateY(" + this.startIndex * this.itemHeightEstimator + "px)";
 
-    var needsFullRender = this.dataStore.list.isDirty("all");
+    const needsFullRender = this.dataStore.list.isDirty();
+    console.log(
+      this.numVisibleSlots,
+      this.dataStore.list.items.length,
+      needsFullRender
+    );
 
-    for (var i = 0; i < this.numVisibleSlots; i++) {
-      var dataIndex = this.startIndex + i;
-      var itemElementWrapper = this.domElementsPool[i];
-      var previousDataIndex = itemElementWrapper.dataset["dataIndex"];
+    for (let i = 0; i < loop; i++) {
+      const dataIndex = this.startIndex + i;
 
-      if (
-        needsFullRender ||
-        previousDataIndex !== String(dataIndex) ||
-        this.dataStore.list.isDirty(dataIndex)
-      ) {
-        itemElementWrapper.innerHTML = "";
-
-        var dataItem = this.dataStore.list.items[dataIndex];
-        if (dataItem !== undefined) {
-          var newItemDOM = this.renderItem(dataItem, dataIndex);
-          if (newItemDOM instanceof HTMLElement) {
-            itemElementWrapper.appendChild(newItemDOM);
+      if (needsFullRender || this.dataStore.list.isDirty(dataIndex)) {
+        const dataItem = this.dataStore.list.items[dataIndex];
+        const newDOM = this.renderItem(dataItem, dataIndex);
+        if (newDOM instanceof HTMLElement) {
+          const oldDOM = this.contentContainer.children[dataIndex];
+          // console.log({ oldDOM, dataIndex, newDOM });
+          if (oldDOM) {
+            if (dataItem === undefined) {
+              oldDOM.remove();
+              console.log("removed");
+              continue;
+            }
+            this.contentContainer.replaceChild(newDOM, oldDOM);
+            console.log("replaced");
           } else {
-            itemElementWrapper.textContent = "Render Error";
+            this.contentContainer.appendChild(newDOM);
+            console.log("appended");
           }
-        } else {
-          itemElementWrapper.style.height = "0px";
         }
       }
-      itemElementWrapper.dataset["dataIndex"] = dataIndex.toString();
-      itemElementWrapper.style.top = i * this.itemHeightEstimator + "px";
     }
 
     if (needsFullRender) {

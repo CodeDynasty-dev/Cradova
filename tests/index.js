@@ -5,23 +5,25 @@ const todoStore = new Signal({
     store: {
         todo: ["take bath", "code coded", "take a break"],
     },
+    list: ["take bath", "code coded", "take a break"],
 });
 // create actions
 const addTodo = function (todo) {
-    console.log(todoStore.store, todoStore.list);
-    todoStore.store.todo = [...todoStore.store.todo, todo];
+    console.log(todoStore.list);
+    // todoStore.store.todo = [...todoStore.store.todo, todo];
     todoStore.list.push(todo);
 };
 const removeTodo = function (todo) {
-    const ind = todoStore.store.todo.indexOf(todo);
-    todoStore.store.todo.splice(ind, 1);
+    // const ind = todoStore.store.todo.indexOf(todo);
+    // todoStore.store.todo.splice(ind, 1);
+    const ind = todoStore.list.items.indexOf(todo);
     todoStore.list.remove(ind);
 };
 function TodoList() {
     // can be used to hold multiple references
     const referenceSet = this.useRef();
     // bind Function to Signal
-    todoStore.subscribe("todo", todoList);
+    // todoStore.subscribe("todo", todoList);
     // markup
     return main(h1(`Todo List`), div(input({
         placeholder: "type in todo",
@@ -31,7 +33,17 @@ function TodoList() {
             addTodo(referenceSet.current["todoInput"]?.value || "");
             // referenceSet.current["todoInput"]!.value = "";
         },
-    })), todoList, ListCreator(todoStore, (item) => p(item), {
+    })), 
+    // todoList,
+    ListCreator(todoStore, (item) => p(item, {
+        title: "click to remove",
+        onclick() {
+            removeTodo(item);
+        },
+        style: {
+            border: "1px solid yellow",
+        },
+    }), {
         listContainerClass: "list",
         listContainerStyle: { marginTop: "10px", backgroundColor: "red" },
     }));

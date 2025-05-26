@@ -1,19 +1,19 @@
 import * as CSS from "csstype";
 import { __raw_ref, Page, Signal } from "./classes.js";
 
-type Attributes<E extends HTMLElement> = {
-  ref?: [__raw_ref<any>, string]; // Updated to reflect tuple from bind()
+interface Attributes<E extends HTMLElement> {
+  ref?: [__raw_ref<any>, string];
   value?: any;
-  style?: CSS.Properties;
+  style?: Partial<CSS.Properties>;
   [key: `data-${string}`]: string | undefined;
   [key: `aria-${string}`]: string | undefined;
-  [key: `on${string}`]: (this: E, event: Event) => void;
-} & {
-  /**
-   * Cradova calls this function when this element is rendered on the DOM.
-   */
-  onmount?: (this: E) => void;
-};
+  [key: `on${string}`]: ((this: E, event: Event) => void) | undefined;
+}
+
+type StandardElementEventNames<E extends HTMLElement> = Extract<
+  keyof E,
+  `on${string}`
+>;
 
 export type VJS_params_TYPE<E extends HTMLElement> = // children types
   (
@@ -27,19 +27,12 @@ export type VJS_params_TYPE<E extends HTMLElement> = // children types
     | DocumentFragment[]
     | (() => HTMLElement)
     | (() => HTMLElement)[]
-    | [string, Signal<any>]
-    // property types
-    | Attributes<E>
-    // css types
-    | { style: CSS.Properties }
-    | VJS_params_TYPE<E>
-    | VJS_params_TYPE<E>[]
-    | Partial<
-      Omit<
-        E,
-        "style" | `data-${string}` | `aria-${string}` | `on${string}` | "ref"
-      >
-    >
+    | [string, Signal<any, any[]>]
+    // attributes types
+    | (
+      & Attributes<E>
+      & Omit<Partial<E>, keyof Attributes<E> | StandardElementEventNames<E>>
+    )
   )[];
 /**
  * @internal

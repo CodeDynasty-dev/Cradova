@@ -7,7 +7,7 @@ import {
   div,
   h1,
   input,
-  ListCreator,
+  List,
   main,
   p,
   Page,
@@ -17,79 +17,48 @@ import {
 
 // creating a store
 const todoStore = new Signal({
-  store: {
-    todo: ["take bath", "code coded", "take a break"],
-  },
   list: ["take bath", "code coded", "take a break"],
 });
 
-// create actions
-const addTodo = function (todo: string) {
-  console.log(todoStore.list);
-  // todoStore.store.todo = [...todoStore.store.todo, todo];
-  todoStore.list.push(todo);
-};
-
-const removeTodo = function (todo: string) {
-  // const ind = todoStore.store.todo.indexOf(todo);
-  // todoStore.store.todo.splice(ind, 1);
-  const ind = todoStore.list.items.indexOf(todo);
-  todoStore.list.remove(ind);
-};
 function TodoList(this: Comp) {
   // can be used to hold multiple references
-  const referenceSet = this.useRef<HTMLInputElement>();
-  // bind Function to Signal
-  // todoStore.subscribe("todo", todoList);
+  const ref = this.useRef<HTMLInputElement>();
   // markup
   return main(
     h1(`Todo List`),
     div(
       input({
         placeholder: "type in todo",
-        ref: referenceSet.bind("todoInput"),
+        ref: ref.bind("todoInput"),
       }),
       button("Add todo", {
         onclick() {
-          addTodo(referenceSet.current["todoInput"]?.value || "");
-          // referenceSet.current["todoInput"]!.value = "";
+          const todo = ref.current["todoInput"]?.value;
+          if (todo) {
+            todoStore.list.push(todo);
+            ref.current["todoInput"]!.value = "";
+          }
         },
-      })
+      }),
     ),
-    // todoList,
-    ListCreator(
+    List(
       todoStore,
       (item) =>
         p(item, {
           title: "click to remove",
           onclick() {
-            removeTodo(item);
+            todoStore.list.remove(todoStore.list.indexOf(item));
           },
           style: {
-            border: "1px solid yellow",
+            border: "1px solid green",
           },
         }),
       {
-        listContainerClass: "list",
-        listContainerStyle: { marginTop: "10px", backgroundColor: "red" },
-      }
-    )
+        className: "list",
+      },
+    ),
   );
 }
-
-const todoList = function (this: Comp) {
-  const data = todoStore.store.todo;
-  return div(
-    data.map((item: any) =>
-      p(item, {
-        title: "click to remove",
-        onclick() {
-          removeTodo(item);
-        },
-      })
-    )
-  );
-};
 
 const count = function (this: Comp) {
   const [count, setCounter] = this.useState(0);
@@ -139,7 +108,7 @@ function typingExample(this: Comp) {
       placeholder: "typing simulation",
     }),
     p(" no thing typed yet!", { ref: ref.bind("text") }),
-    a({ href: "/p" }, "log lol in the console")
+    a({ href: "/p" }, "log lol in the console"),
   );
 }
 
@@ -170,7 +139,7 @@ Router.BrowserRoutes({
           type: "button",
         }),
         TodoList,
-        App
+        App,
       );
     },
   }),
@@ -185,16 +154,18 @@ Router.BrowserRoutes({
           },
         }),
         TodoList,
-        App
+        App,
       );
     },
   }),
 });
 
 const something = input({
-  oninput(e) {
-    e.target;
-    console.log(this.value); // ✅ Works! `this` is correctly inferred as `HTMLInputElement`
+  oninput() {
+    console.log(this.value); // (property) GlobalEventHandlers.oninput: ((this: GlobalEventHandlers, ev: Event) => any) | null
   },
   placeholder: "Typing simulation",
+  onmount() {
+    console.log("mounted");
+  },
 });

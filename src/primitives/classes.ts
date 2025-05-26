@@ -28,7 +28,7 @@ export class cradovaEvent {
    */
 
   async dispatchEvent(
-    eventName: "after_comp_is_mounted" | "after_page_is_killed"
+    eventName: "after_comp_is_mounted" | "after_page_is_killed",
   ) {
     const eventListeners = this[eventName];
     // if (eventName.includes("Active")) {
@@ -59,7 +59,7 @@ class Store<Type extends Record<string, any>> {
   private _data: Type;
   constructor(
     data: Type,
-    notifier: (key: keyof Type, value: Type[keyof Type]) => void
+    notifier: (key: keyof Type, value: Type[keyof Type]) => void,
   ) {
     this._data = data;
     for (const key in this._data) {
@@ -104,14 +104,14 @@ class List<Type extends any[]> {
   };
   notifier: (
     eventType: "dataChanged" | "itemUpdated",
-    newItemData: Type[number]
+    newItemData: Type[number],
   ) => void;
   constructor(
     initialData: Type,
     notifier: (
       eventType: "dataChanged" | "itemUpdated",
-      newItemData: Type[number]
-    ) => void
+      newItemData: Type[number],
+    ) => void,
   ) {
     this._data = initialData || [];
     this._dirtyIndices = new Set();
@@ -138,30 +138,35 @@ class List<Type extends any[]> {
    */
   _subscribe(
     eventType: "dataChanged" | "itemUpdated",
-    callback: (payload: any) => void
+    callback: (payload: any) => void,
   ) {
     if (this._subscribers[eventType]) {
       this._subscribers[eventType].push(callback);
     }
   }
-  /**
-   * @internal
-   */
-  _unsubscribe(
-    eventType: "dataChanged" | "itemUpdated",
-    callback: (payload: any) => void
-  ) {
-    if (this._subscribers[eventType]) {
-      this._subscribers[eventType] = this._subscribers[eventType].filter(
-        function (cb) {
-          return cb !== callback;
-        }
-      );
-    }
+
+  get items(): IterableIterator<Type[number]> {
+    // the returned value should be an iterator
+
+    return {
+      [Symbol.iterator]: () => {
+        return this._data[Symbol.iterator]();
+      },
+      next: () => {
+        return this._data[Symbol.iterator]().next();
+      },
+    };
   }
-  get items() {
-    return this._data;
+  get length() {
+    return this._data.length;
   }
+  get(index: number) {
+    return this._data[index];
+  }
+  indexOf(item: Type[number]) {
+    return this._data.indexOf(item);
+  }
+
   update(index: number, newItemData: Type[number]) {
     if (
       index >= 0 &&
@@ -201,9 +206,6 @@ class List<Type extends any[]> {
    * @internal
    */
   isDirty(index: number | "all" = "all") {
-    if (index === "all") {
-      return this._dirtyIndices.has("all");
-    }
     if (this._dirtyIndices.has(index)) {
       this._dirtyIndices.delete(index);
       return true;
@@ -231,7 +233,7 @@ class List<Type extends any[]> {
 
 export class Signal<
   StoreType extends Record<string, any>,
-  ListType extends any[]
+  ListType extends any[],
 > {
   private pn?: string;
   private subs: Record<keyof StoreType, Set<Comp>> = {} as any;
@@ -239,15 +241,15 @@ export class Signal<
     keyof StoreType,
     ((data: Partial<StoreType>) => void)[]
   > = {} as any;
-  store: StoreType;
-  list: List<ListType>;
+  store: StoreType = {} as unknown as StoreType;
+  list: List<ListType> = [] as unknown as List<ListType>;
   passers?: Record<keyof StoreType, [string, Signal<StoreType, ListType>]>;
   constructor(
     {
       store = {} as unknown as StoreType,
       list = [] as unknown as ListType,
-    }: { store: StoreType; list?: ListType },
-    props?: { persistName?: string | undefined }
+    }: { store?: StoreType; list?: ListType },
+    props?: { persistName?: string | undefined },
   ) {
     this.store = new Store(store, (key, value) => {
       this.publish(key as keyof StoreType, value);
@@ -269,7 +271,7 @@ export class Signal<
           if (!Object.prototype.hasOwnProperty.call(this.store, key)) {
             this.store["_set"](
               key as keyof StoreType,
-              store[key as keyof StoreType]
+              store[key as keyof StoreType],
             );
           }
         }
@@ -341,7 +343,7 @@ export class Signal<
    */
   subscribe<T extends keyof StoreType>(
     eventName: T | "dataChanged" | "itemUpdated" | T[],
-    comp: Comp | ((this: Comp) => HTMLDivElement)
+    comp: Comp | ((this: Comp) => HTMLDivElement),
   ) {
     if (typeof comp === "function") {
       if (Array.isArray(eventName)) {
@@ -355,9 +357,11 @@ export class Signal<
           comp = toCompNoRender(comp as Comp);
         } else {
           console.error(
-            ` ✘  Cradova err:  ${String(
-              comp
-            )} is not a valid component or function`
+            ` ✘  Cradova err:  ${
+              String(
+                comp,
+              )
+            } is not a valid component or function`,
           );
           return;
         }
@@ -365,9 +369,11 @@ export class Signal<
       if ((comp as Comp).published) return;
       if (!(eventName in this.store)) {
         console.error(
-          ` ✘  Cradova err:  ${String(
-            eventName
-          )} is not a valid event for this Signal`
+          ` ✘  Cradova err:  ${
+            String(
+              eventName,
+            )
+          } is not a valid event for this Signal`,
         );
         return;
       }
@@ -391,7 +397,7 @@ export class Signal<
    */
   listen<T extends keyof StoreType>(
     eventName: T | "dataChanged" | "itemUpdated" | T[],
-    listener: (data: Partial<StoreType>) => void
+    listener: (data: Partial<StoreType>) => void,
   ) {
     if (Array.isArray(eventName)) {
       eventName.forEach((en) => {
@@ -471,7 +477,7 @@ export class Page {
     const { template, name } = pageParams;
     if (typeof template !== "function") {
       throw new Error(
-        ` ✘  Cradova err:  template function for the page is not a function`
+        ` ✘  Cradova err:  template function for the page is not a function`,
       );
     }
     this._html = template;
@@ -649,7 +655,7 @@ class RouterBoxClass {
   }
 
   checker(
-    url: string
+    url: string,
   ): [Page | (() => Promise<Page | undefined>), Record<string, any>] {
     if (url[0] !== "/") {
       url = url.slice(url.indexOf("/", 8));
@@ -749,8 +755,9 @@ export class Router {
       ) {
         // ? creating the lazy
         RouterBox.routes[path] = async () => {
-          const paged: Page =
-            typeof page === "function" ? await page() : await page;
+          const paged: Page = typeof page === "function"
+            ? await page()
+            : await page;
           return RouterBox.route(path, paged);
         };
       } else {
@@ -789,7 +796,7 @@ export class Router {
       console.error(
         " ✘  Cradova err:  href must be a defined path but got " +
           href +
-          " instead"
+          " instead",
       );
     }
     let route = null,
@@ -825,7 +832,7 @@ export class Router {
       RouterBox.loadingPage = page;
     } else {
       throw new Error(
-        " ✘  Cradova err:  Loading Page should be a cradova page class"
+        " ✘  Cradova err:  Loading Page should be a cradova page class",
       );
     }
   }
@@ -857,7 +864,7 @@ export class Router {
       RouterBox["errorHandler"] = callback;
     } else {
       throw new Error(
-        " ✘  Cradova err:  callback for error event is not a function"
+        " ✘  Cradova err:  callback for error event is not a function",
       );
     }
   }
@@ -871,7 +878,7 @@ export class Router {
       RouterBox.doc = doc;
     } else {
       throw new Error(
-        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `
+        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `,
       );
     }
     window.addEventListener("pageshow", () => RouterBox.router());
@@ -903,10 +910,6 @@ export class VirtualList {
   /**
    * @internal
    */
-  container: HTMLElement;
-  /**
-   * @internal
-   */
   dataStore: Signal<any, any[]>;
   /**
    * @internal
@@ -915,200 +918,65 @@ export class VirtualList {
   /**
    * @internal
    */
-  itemHeightEstimator: number;
-  /**
-   * @internal
-   */
-  numVisibleSlots: number;
-  /**
-   * @internal
-   */
-  totalHeight: number;
-  /**
-   * @internal
-   */
-  currentScrollTop: number;
-  /**
-   * @internal
-   */
-  startIndex: number;
-  /**
-   * @internal
-   */
-  scrollAnimationFrame: number | null;
-  /**
-   * @internal
-   */
   renderScheduled: boolean;
   /**
    * @internal
    */
-  scrollableArea: HTMLElement;
-  /**
-   * @internal
-   */
-  contentContainer: HTMLElement;
+  container: HTMLElement;
   constructor(
-    containerElement: HTMLElement,
+    container: HTMLElement,
     dataStore: Signal<any, any[]>,
-    renderItemFunction: (item: any, index: number) => HTMLElement
+    renderItemFunction: (item: any, index: number) => HTMLElement,
   ) {
-    this.container = containerElement;
     this.dataStore = dataStore;
     this.renderItem = renderItemFunction;
-    this.itemHeightEstimator = 50;
-
-    this.numVisibleSlots = 0;
-    this.totalHeight = 0;
-    this.currentScrollTop = 0;
-    this.startIndex = 0;
-    this.scrollAnimationFrame = null;
     this.renderScheduled = false;
+    this.container = container;
 
-    // Init elements
-    this.scrollableArea = document.createElement("div");
-    this.scrollableArea.style.overflowY = "scroll";
-    this.scrollableArea.style.position = "relative";
-    this.scrollableArea.style.height = "100%";
-    this.container.appendChild(this.scrollableArea);
-
-    this.contentContainer = document.createElement("div");
-    this.contentContainer.style.position = "relative";
-    this.scrollableArea.appendChild(this.contentContainer);
-
-    this._init();
-  }
-
-  /**
-   * @internal
-   */
-  _init() {
-    this.calculateVisibleSlots();
-    this._attachEventListeners();
-    this._subscribeToDataStoreEvents();
     this.scheduleRender();
-  }
-  /**
-   * @internal
-   */
-  calculateVisibleSlots() {
-    this.numVisibleSlots =
-      Math.ceil(this.container.clientHeight / this.itemHeightEstimator) + 3; // Reduced buffer
-  }
-  /**
-   * @internal
-   */
-  _attachEventListeners() {
-    console.log("attach listeners");
-    this.scrollableArea.addEventListener(
-      "scroll",
-      this.handleScroll.bind(this)
-    );
-
-    let resizeTimeout: number;
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(this.onResize.bind(this), 100);
+    this.dataStore.list._subscribe("dataChanged", () => {
+      this.scheduleRender();
+    });
+    this.dataStore.list._subscribe("itemUpdated", () => {
+      this.scheduleRender();
     });
   }
-  /**
-   * @internal
-   */
-  _subscribeToDataStoreEvents() {
-    this.dataStore.list._subscribe("dataChanged", this.handleChange.bind(this));
-    this.dataStore.list._subscribe("itemUpdated", this.handleChange.bind(this));
-  }
-  /**
-   * @internal
-   */
-  handleChange() {
-    this.scheduleRender();
-  }
 
-  /**
-   * @internal
-   */
-  hasOverflow() {
-    return (
-      this.scrollableArea.scrollHeight > this.scrollableArea.clientHeight ||
-      this.scrollableArea.scrollWidth > this.scrollableArea.clientWidth
-    );
-  }
-  /**
-   * @internal
-   */
-  handleScroll() {
-    const newScrollTop = this.scrollableArea.scrollTop;
-    console.log("boohoo", newScrollTop, this.currentScrollTop);
-    if (newScrollTop === this.currentScrollTop) return;
-    this.currentScrollTop = newScrollTop;
-    this.scheduleRender();
-  }
-  /**
-   * @internal
-   */
-  onResize() {
-    this.calculateVisibleSlots();
-    this.scheduleRender();
-  }
   /**
    * @internal
    */
   scheduleRender() {
     if (this.renderScheduled) return;
     this.renderScheduled = true;
-    requestAnimationFrame(this.renderVisibleRange.bind(this));
+    requestAnimationFrame(this.render.bind(this));
   }
   /**
    * @internal
    */
-  renderVisibleRange() {
-    if (!this.hasOverflow()) {
-      this.calculateVisibleSlots();
-    }
-    const newStartIndex = Math.floor(
-      this.currentScrollTop / this.itemHeightEstimator
+  render() {
+    const loop = Math.max(
+      this.dataStore.list.length,
+      this.container.children.length,
     );
-    const maxStartIndex = Math.max(
-      0,
-      this.dataStore.list.items.length - this.numVisibleSlots
-    );
-    this.startIndex = Math.min(newStartIndex, maxStartIndex);
-    const loop = Math.min(
-      this.dataStore.list.items.length,
-      this.numVisibleSlots
-    );
-
-    this.contentContainer.style.transform =
-      "translateY(" + this.startIndex * this.itemHeightEstimator + "px)";
-
     const needsFullRender = this.dataStore.list.isDirty();
-    console.log(
-      this.numVisibleSlots,
-      this.dataStore.list.items.length,
-      needsFullRender
-    );
-
     for (let i = 0; i < loop; i++) {
-      const dataIndex = this.startIndex + i;
-
-      if (needsFullRender || this.dataStore.list.isDirty(dataIndex)) {
-        const dataItem = this.dataStore.list.items[dataIndex];
-        const newDOM = this.renderItem(dataItem, dataIndex);
+      if (needsFullRender || this.dataStore.list.isDirty(i)) {
+        const dataItem = this.dataStore.list.get(i);
+        const newDOM = this.renderItem(dataItem, i);
+        const oldDOM = this.container.children[i];
         if (newDOM instanceof HTMLElement) {
-          const oldDOM = this.contentContainer.children[dataIndex];
-          // console.log({ oldDOM, dataIndex, newDOM });
           if (oldDOM) {
             if (dataItem === undefined) {
               oldDOM.remove();
-              console.log("removed");
               continue;
             }
-            this.contentContainer.replaceChild(newDOM, oldDOM);
-            console.log("replaced");
+            this.container.replaceChild(newDOM, oldDOM);
           } else {
-            this.contentContainer.appendChild(newDOM);
-            console.log("appended");
+            this.container.appendChild(newDOM);
+          }
+        } else {
+          if (oldDOM) {
+            oldDOM.remove();
           }
         }
       }

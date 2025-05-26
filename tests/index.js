@@ -1,62 +1,36 @@
 // Simple todo list
-import { a, button, div, h1, input, ListCreator, main, p, Page, Router, Signal, } from "../dist/index.js";
+import { a, button, div, h1, input, List, main, p, Page, Router, Signal, } from "../dist/index.js";
 // creating a store
 const todoStore = new Signal({
-    store: {
-        todo: ["take bath", "code coded", "take a break"],
-    },
     list: ["take bath", "code coded", "take a break"],
 });
-// create actions
-const addTodo = function (todo) {
-    console.log(todoStore.list);
-    // todoStore.store.todo = [...todoStore.store.todo, todo];
-    todoStore.list.push(todo);
-};
-const removeTodo = function (todo) {
-    // const ind = todoStore.store.todo.indexOf(todo);
-    // todoStore.store.todo.splice(ind, 1);
-    const ind = todoStore.list.items.indexOf(todo);
-    todoStore.list.remove(ind);
-};
 function TodoList() {
     // can be used to hold multiple references
-    const referenceSet = this.useRef();
-    // bind Function to Signal
-    // todoStore.subscribe("todo", todoList);
+    const ref = this.useRef();
     // markup
     return main(h1(`Todo List`), div(input({
         placeholder: "type in todo",
-        ref: referenceSet.bind("todoInput"),
+        ref: ref.bind("todoInput"),
     }), button("Add todo", {
         onclick() {
-            addTodo(referenceSet.current["todoInput"]?.value || "");
-            // referenceSet.current["todoInput"]!.value = "";
+            const todo = ref.current["todoInput"]?.value;
+            if (todo) {
+                todoStore.list.push(todo);
+                ref.current["todoInput"].value = "";
+            }
         },
-    })), 
-    // todoList,
-    ListCreator(todoStore, (item) => p(item, {
+    })), List(todoStore, (item) => p(item, {
         title: "click to remove",
         onclick() {
-            removeTodo(item);
+            todoStore.list.remove(todoStore.list.indexOf(item));
         },
         style: {
-            border: "1px solid yellow",
+            border: "1px solid green",
         },
     }), {
-        listContainerClass: "list",
-        listContainerStyle: { marginTop: "10px", backgroundColor: "red" },
+        className: "list",
     }));
 }
-const todoList = function () {
-    const data = todoStore.store.todo;
-    return div(data.map((item) => p(item, {
-        title: "click to remove",
-        onclick() {
-            removeTodo(item);
-        },
-    })));
-};
 const count = function () {
     const [count, setCounter] = this.useState(0);
     this.useEffect(() => {

@@ -1,3 +1,4 @@
+import * as CSS from "csstype";
 import type { Comp, VJS_params_TYPE } from "./types.js";
 import { __raw_ref, Signal, VirtualList } from "./classes.js";
 import { div } from "./dom-objects.js";
@@ -690,22 +691,26 @@ export const funcManager = {
   },
 };
 
-export const ListCreator = (
-  signal: Signal<any, any[]>,
-  item: (item: any) => HTMLElement,
+export const List = <T>(
+  signal: Signal<any, T[]>,
+  item: (item: T) => HTMLElement,
   options?: {
-    listContainerClass?: string;
-    listContainerId?: string;
-    listContainerStyle?: Partial<CSSStyleDeclaration>;
+    className?: string;
+    id?: string;
+    style?: Partial<CSS.Properties>;
   },
 ) => {
-  const list = div({
-    className: options?.listContainerClass,
-    id: options?.listContainerId || "",
-    style: options?.listContainerStyle as CSSStyleDeclaration,
-    onmount() {
-      new VirtualList(list, signal, item);
+  const list = div(
+    {
+      className: options?.className,
+      id: options?.id,
+      style: options?.style,
     },
-  });
+    {
+      onmount() {
+        new VirtualList(this, signal, item);
+      },
+    },
+  );
   return list;
 };

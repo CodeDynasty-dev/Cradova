@@ -1,9 +1,7 @@
 // Simple todo list
-import { a, button, div, h1, input, List, main, p, Page, Router, Signal, } from "../dist/index.js";
+import { $if, a, button, div, h1, input, List, main, p, Page, Router, Signal, } from "../dist/index.js";
 // creating a store
-const todoStore = new Signal({
-    list: ["take bath", "code coded", "take a break"],
-});
+const todoStore = new Signal(["take bath", "code coded", "take a break"]);
 function TodoList() {
     // can be used to hold multiple references
     const ref = this.useRef();
@@ -15,14 +13,14 @@ function TodoList() {
         onclick() {
             const todo = ref.current["todoInput"]?.value;
             if (todo) {
-                todoStore.list.push(todo);
+                todoStore.store.push(todo);
                 ref.current["todoInput"].value = "";
             }
         },
     })), List(todoStore, (item) => p(item, {
         title: "click to remove",
         onclick() {
-            todoStore.list.remove(todoStore.list.indexOf(item));
+            todoStore.store.remove(todoStore.store.indexOf(item));
         },
         style: {
             border: "1px solid green",
@@ -39,7 +37,7 @@ const count = function () {
             setCounter((p) => p + 1);
         }, 1000);
     }, []);
-    return h1(" count: " + count);
+    return div($if(count > 5, h1("count is greater than 5")), h1(" count: " + count));
 };
 function HelloMessage() {
     return div("Click to get a greeting", {
@@ -113,9 +111,11 @@ Router.BrowserRoutes({
     }),
 });
 const something = input({
-    oninput(e) {
-        e.target;
-        console.log(this.value); // ✅ Works! `this` is correctly inferred as `HTMLInputElement`
+    oninput() {
+        console.log(this.value); // (property) GlobalEventHandlers.oninput: ((this: GlobalEventHandlers, ev: Event) => any) | null
     },
     placeholder: "Typing simulation",
+    onmount() {
+        console.log("mounted");
+    },
 });

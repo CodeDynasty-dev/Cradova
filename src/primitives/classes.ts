@@ -61,21 +61,21 @@ class Store<Type extends Record<string, any>> {
   /**
    * @internal
    */
-  private _data: Type;
+  $_internal_data: Type;
   constructor(
     data: Type,
     notifier: (key: keyof Type, value: Type[keyof Type]) => void,
   ) {
-    this._data = data;
-    for (const key in this._data) {
-      if (this._data.hasOwnProperty(key)) {
+    this.$_internal_data = data;
+    for (const key in this.$_internal_data) {
+      if (this.$_internal_data.hasOwnProperty(key)) {
         Object.defineProperty(this, key, {
           get() {
-            return this._data[key];
+            return this.$_internal_data[key];
           },
           set(value) {
+            this.$_internal_data[key] = value;
             notifier(key, value);
-            this._data[key] = value;
           },
           enumerable: true,
           configurable: true,
@@ -86,8 +86,9 @@ class Store<Type extends Record<string, any>> {
   /**
    * @internal
    */
-  _set(key: keyof Type, value: Type[keyof Type]) {
-    this._data[key] = value;
+  _set(data: Type) {
+    this.$_internal_data = data;
+    return Object.keys(this.$_internal_data);
   }
 }
 
@@ -100,13 +101,6 @@ class List<Type extends any[]> {
    * @internal
    */
   private _dirtyIndices: Set<any>;
-  /**
-   * @internal
-   */
-  private _subscribers: {
-    dataChanged: any[];
-    itemUpdated: any[];
-  };
   notifier: (
     eventType: "dataChanged" | "itemUpdated",
     newItemData: Type[number],
@@ -121,38 +115,11 @@ class List<Type extends any[]> {
     this._data = initialData || [];
     this._dirtyIndices = new Set();
     this.notifier = notifier;
-    this._subscribers = {
-      dataChanged: [],
-      itemUpdated: [],
-    };
     this._dirtyIndices.add("all");
-  }
-  /**
-   * @internal
-   */
-  _publish(eventType: "dataChanged" | "itemUpdated", payload: any) {
-    const subs = this._subscribers[eventType];
-    if (subs) {
-      for (let i = 0; i < subs.length; i++) {
-        subs[i](payload);
-      }
-    }
-  }
-  /**
-   * @internal
-   */
-  _subscribe(
-    eventType: "dataChanged" | "itemUpdated",
-    callback: (payload: any) => void,
-  ) {
-    if (this._subscribers[eventType]) {
-      this._subscribers[eventType].push(callback);
-    }
   }
 
   get items(): IterableIterator<Type[number]> {
-    // the returned value should be an iterator
-
+    //? the returned value should be an iterator
     return {
       [Symbol.iterator]: () => {
         return this._data[Symbol.iterator]();
@@ -181,7 +148,6 @@ class List<Type extends any[]> {
       this._data[index] = newItemData;
       this._dirtyIndices.add(index);
       this.notifier("itemUpdated", { index: index, newItemData: newItemData });
-      this._publish("itemUpdated", { index: index, newItemData: newItemData });
     }
   }
   push(itemData: Type[number], index?: number) {
@@ -191,26 +157,27 @@ class List<Type extends any[]> {
     this._data.splice(index, 0, itemData);
     this._dirtyIndices.add("all");
     this.notifier("dataChanged", { type: "add", index: index });
-    this._publish("dataChanged", { type: "add", index: index });
   }
   remove(index: number, count: number = 1) {
     if (index >= 0 && index < this._data.length && count > 0) {
       this._data.splice(index, count);
       this._dirtyIndices.add("all");
-      this._publish("dataChanged", { type: "remove", index: index });
+      this.notifier("dataChanged", { type: "remove", index: index });
     }
-  }
-  set(newData: Type) {
-    this._data = newData || [];
-    this._dirtyIndices.clear();
-    this._dirtyIndices.add("all");
-    this.notifier("dataChanged", { type: "reset" });
-    this._publish("dataChanged", { type: "reset" });
   }
   /**
    * @internal
    */
-  isDirty(index: number | "all" = "all") {
+  _set(newData: Type) {
+    this._data = newData || [];
+    this._dirtyIndices.clear();
+    this._dirtyIndices.add("all");
+    return ["dataChanged"];
+  }
+  /**
+   * @internal
+   */
+  _isDirty(index: number | "all" = "all") {
     if (this._dirtyIndices.has(index)) {
       this._dirtyIndices.delete(index);
       return true;
@@ -220,7 +187,7 @@ class List<Type extends any[]> {
   /**
    * @internal
    */
-  clearAllDirty() {
+  _clearAllDirty() {
     this._dirtyIndices.clear();
   }
 }
@@ -236,51 +203,57 @@ class List<Type extends any[]> {
  * @constructor initial: Record<string, any>, props: {persist}
  */
 
-export class Signal<
-  StoreType extends Record<string, any>,
-  ListType extends any[],
-> {
+export class Signal<Type = any> {
   private pn?: string;
-  private subs: Record<keyof StoreType, Set<Comp>> = {} as any;
+  private subs: Record<keyof Type | "dataChanged" | "itemUpdated", Set<Comp>> =
+    {} as any;
+  private isList: boolean = false;
   private listening_subs: Record<
-    keyof StoreType,
-    ((data: Partial<StoreType>) => void)[]
+    keyof Type | "dataChanged" | "itemUpdated",
+    ((
+      data: Type extends Array<any> ? List<Type>
+        : Type extends Record<string, any> ? Type
+        : never,
+    ) => void)[]
   > = {} as any;
-  store: StoreType = {} as unknown as StoreType;
-  list: List<ListType> = [] as unknown as List<ListType>;
-  passers?: Record<keyof StoreType, [string, Signal<StoreType, ListType>]>;
-  constructor(
-    {
-      store = {} as unknown as StoreType,
-      list = [] as unknown as ListType,
-    }: { store?: StoreType; list?: ListType },
-    props?: { persistName?: string | undefined },
-  ) {
-    this.store = new Store(store, (key, value) => {
-      this.publish(key as keyof StoreType, value);
-    }) as unknown as StoreType;
+  store: Type extends Array<any> ? List<Type>
+    : Type extends Record<string, any> ? Type
+    : never;
+  passers?: Record<keyof Type, [string, Signal<Type>]>;
+  constructor(initial: Type, props?: { persistName?: string | undefined }) {
+    if (!initial || typeof initial !== "object") {
+      throw new Error("Initial signal value must be an array or object");
+    }
+    if (!Array.isArray(initial)) {
+      this.store = new Store(initial, (key) => {
+        this.publish(key as keyof Type);
+      }) as any;
+    } else {
+      this.isList = true;
+      this.store = new List(initial, (eventType) => {
+        this.publish(eventType);
+      }) as any;
+    }
+
     this.subs = {} as any;
-    this.list = new List(list, (eventType, value) => {
-      this.publish(eventType, value);
-    });
     if (props && props.persistName) {
       this.pn = props.persistName;
       const key = localStorage.getItem(props.persistName);
+      //
       if (key && key !== "undefined") {
-        this.store = new Store(JSON.parse(key), (key, value) => {
-          this.publish(key as keyof StoreType, value);
-        }) as unknown as StoreType;
-      }
-      if (typeof store === "object") {
-        for (const key in store) {
-          if (!Object.prototype.hasOwnProperty.call(this.store, key)) {
-            this.store["_set"](
-              key as keyof StoreType,
-              store[key as keyof StoreType],
-            );
-          }
+        const restored = JSON.parse(key);
+        if (!Array.isArray(restored)) {
+          this.store = new Store(restored, (key) => {
+            this.publish(key as keyof Type);
+          }) as any;
+        } else {
+          this.isList = true;
+          this.store = new List(restored, (eventType) => {
+            this.publish(eventType);
+          }) as any;
         }
       }
+      //
     }
   }
   /**
@@ -288,42 +261,44 @@ export class Signal<
    * ----
    *  fires an action if available
    * @param key - string key of the action
-   * @param data - data for the action
-   * @returns void
    * @internal
    */
-  publish<T extends keyof StoreType>(eventName: T, data: StoreType[T]) {
-    const subs = this.subs![eventName] || [];
-    subs.forEach((c) => {
+  private publish<T extends keyof Type | "dataChanged" | "itemUpdated">(
+    eventName: T,
+  ) {
+    this.subs![eventName]?.forEach((c) => {
       funcManager.recall(c);
     });
-    const subs2 = this.listening_subs![eventName];
-    if (subs2) {
-      for (const fn of subs2) {
-        fn({ [eventName]: data } as any);
-      }
-    }
+    this.listening_subs![eventName]?.forEach((c) => {
+      c(this.store);
+    });
     if (this.pn) {
-      localStorage.setItem(this.pn, JSON.stringify(this.store));
+      localStorage.setItem(
+        this.pn,
+        JSON.stringify(
+          this.isList ? this.store.items : (this.store as any).$_internal_data,
+        ),
+      );
     }
   }
+
   /**
    *  Cradova Signal
    * ----
    *  fires actions if any available
    */
-  batch(events: Partial<StoreType>) {
+  set(NEW: Type) {
     const s = new Set<Comp>();
-    const s2 = new Set<(data: Partial<StoreType>) => void>();
-    for (const [eventName, data] of Object.entries(events)) {
-      this.store["_set"](eventName as keyof StoreType, data);
-      const subs = this.subs![eventName as keyof StoreType];
+    const events = this.store._set(NEW);
+    const s2 = new Set<(data: any) => void>();
+    for (const event of events) {
+      const subs = this.subs![event as keyof Type];
       if (subs) {
         subs.forEach((c) => {
           s.add(c);
         });
       }
-      const subs2 = this.listening_subs![eventName as keyof StoreType];
+      const subs2 = this.listening_subs![event as keyof Type];
       if (subs2) {
         for (const fn of subs2) {
           s2.add(fn);
@@ -334,8 +309,14 @@ export class Signal<
       funcManager.recall(c);
     }
     for (const fn of s2.values()) fn(events);
+
     if (this.pn) {
-      localStorage.setItem(this.pn, JSON.stringify(this.store));
+      localStorage.setItem(
+        this.pn,
+        JSON.stringify(
+          this.isList ? this.store.items : (this.store as any).$_internal_data,
+        ),
+      );
     }
   }
   /**
@@ -346,7 +327,7 @@ export class Signal<
    * @param name of event.
    * @param Comp component to bind to.
    */
-  subscribe<T extends keyof StoreType>(
+  subscribe<T extends keyof Type>(
     eventName: T | "dataChanged" | "itemUpdated" | T[],
     comp: Comp | ((this: Comp) => HTMLDivElement),
   ) {
@@ -400,9 +381,13 @@ export class Signal<
    * @param name of event.
    * @param callback function to call.
    */
-  listen<T extends keyof StoreType>(
+  listen<T extends keyof Type>(
     eventName: T | "dataChanged" | "itemUpdated" | T[],
-    listener: (data: Partial<StoreType>) => void,
+    listener: (
+      store: Type extends Array<any> ? List<Type>
+        : Type extends Record<string, any> ? Type
+        : never,
+    ) => void,
   ) {
     if (Array.isArray(eventName)) {
       eventName.forEach((en) => {
@@ -416,13 +401,15 @@ export class Signal<
     this.listening_subs[eventName].push(listener);
   }
 
-  computed<T extends keyof StoreType>(
+  computed<T extends keyof Type>(
     eventName: T | "dataChanged" | "itemUpdated" | T[],
     element: (
-      data: Partial<StoreType>,
+      store: Type extends Array<any> ? List<Type>
+        : Type extends Record<string, any> ? Type
+        : never,
     ) => HTMLElement | VJS_params_TYPE<HTMLElement>,
   ): HTMLElement | undefined {
-    let el = element(this.store[eventName as keyof StoreType]);
+    let el = element(this.store);
     if (el === undefined || !(el instanceof HTMLElement)) {
       console.error(
         ` ✘  Cradova err:  ${
@@ -434,7 +421,7 @@ export class Signal<
       return;
     }
     const listener = () => {
-      const newEl = element(this.store[eventName as keyof StoreType]);
+      const newEl = element(this.store);
       if (newEl === undefined || !(newEl instanceof HTMLElement)) {
         console.error(
           ` ✘  Cradova err:  ${
@@ -467,12 +454,12 @@ export class Signal<
    * ----
    *  subscribe an element to an event
    */
-  get pass(): Record<keyof StoreType, [string, Signal<any, any>]> {
+  get pass(): Record<keyof Type, [string, Signal<any>]> {
     if (this.passers) {
       return this.passers;
     }
     //? only compute when needed.
-    const keys = Object.keys(this.store) as (keyof StoreType)[];
+    const keys = Object.keys(this.store) as (keyof Type)[];
     this.passers = {} as any;
     for (const key of keys) {
       this.passers![key] = [key as string, this];
@@ -962,7 +949,7 @@ export class VirtualList {
   /**
    * @internal
    */
-  dataStore: Signal<any, any[]>;
+  dataStore: Signal<any[]>;
   /**
    * @internal
    */
@@ -977,7 +964,7 @@ export class VirtualList {
   container: HTMLElement;
   constructor(
     container: HTMLElement,
-    dataStore: Signal<any, any[]>,
+    dataStore: Signal<any[]>,
     renderItemFunction: (item: any, index: number) => HTMLElement,
   ) {
     this.dataStore = dataStore;
@@ -986,10 +973,10 @@ export class VirtualList {
     this.container = container;
 
     this.scheduleRender();
-    this.dataStore.list._subscribe("dataChanged", () => {
+    this.dataStore.listen("dataChanged", () => {
       this.scheduleRender();
     });
-    this.dataStore.list._subscribe("itemUpdated", () => {
+    this.dataStore.listen("itemUpdated", () => {
       this.scheduleRender();
     });
   }
@@ -1007,13 +994,13 @@ export class VirtualList {
    */
   render() {
     const loop = Math.max(
-      this.dataStore.list.length,
+      this.dataStore.store.length,
       this.container.children.length,
     );
-    const needsFullRender = this.dataStore.list.isDirty();
+    const needsFullRender = this.dataStore.store._isDirty();
     for (let i = 0; i < loop; i++) {
-      if (needsFullRender || this.dataStore.list.isDirty(i)) {
-        const dataItem = this.dataStore.list.get(i);
+      if (needsFullRender || this.dataStore.store._isDirty(i)) {
+        const dataItem = this.dataStore.store.get(i);
         const newDOM = this.renderItem(dataItem, i);
         const oldDOM = this.container.children[i];
         if (newDOM instanceof HTMLElement) {
@@ -1035,7 +1022,7 @@ export class VirtualList {
     }
 
     if (needsFullRender) {
-      this.dataStore.list.clearAllDirty();
+      this.dataStore.store._clearAllDirty();
     }
     this.renderScheduled = false;
   }

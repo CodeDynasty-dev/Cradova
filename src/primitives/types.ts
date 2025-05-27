@@ -27,7 +27,7 @@ export type VJS_params_TYPE<E extends HTMLElement> = // children types
     | DocumentFragment[]
     | (() => HTMLElement)
     | (() => HTMLElement)[]
-    | [string, Signal<any, any[]>]
+    | [string, Signal<any>]
     | VJS_params_TYPE<E>
     | VJS_params_TYPE<E>[]
     // attributes types

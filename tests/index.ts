@@ -17,9 +17,7 @@ import {
 } from "../dist/index.js";
 
 // creating a store
-const todoStore = new Signal({
-  list: ["take bath", "code coded", "take a break"],
-});
+const todoStore = new Signal(["take bath", "code coded", "take a break"]);
 
 function TodoList(this: Comp) {
   // can be used to hold multiple references
@@ -36,7 +34,7 @@ function TodoList(this: Comp) {
         onclick() {
           const todo = ref.current["todoInput"]?.value;
           if (todo) {
-            todoStore.list.push(todo);
+            todoStore.store.push(todo);
             ref.current["todoInput"]!.value = "";
           }
         },
@@ -48,7 +46,7 @@ function TodoList(this: Comp) {
         p(item, {
           title: "click to remove",
           onclick() {
-            todoStore.list.remove(todoStore.list.indexOf(item));
+            todoStore.store.remove(todoStore.store.indexOf(item));
           },
           style: {
             border: "1px solid green",

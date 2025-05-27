@@ -110,7 +110,7 @@ export const makeElement = <E extends HTMLElement>(
           typeof value[0] === "string"
         ) {
           const eventName = value[0] as string;
-          const signalInstance = value[1] as Signal<Record<string, any>, any[]>;
+          const signalInstance = value[1] as Signal<Record<string, any>>;
           // Ensure listen can handle a single event name if it expects an array
           signalInstance.listen([eventName] as any, (x) => {
             element.setAttribute(prop, x[eventName] as string);
@@ -692,7 +692,7 @@ export const funcManager = {
 };
 
 export const List = <T>(
-  signal: Signal<any, T[]>,
+  signal: Signal<T[]>,
   item: (item: T) => HTMLElement,
   options?: {
     className?: string;

@@ -1,6 +1,7 @@
 // Simple todo list
 
 import {
+  $if,
   a,
   button,
   Comp,
@@ -68,7 +69,10 @@ const count = function (this: Comp) {
       setCounter((p) => p + 1);
     }, 1000);
   }, []);
-  return h1(" count: " + count);
+  return div(
+    $if(count > 5, h1("count is greater than 5")),
+    h1(" count: " + count),
+  );
 };
 
 function HelloMessage() {

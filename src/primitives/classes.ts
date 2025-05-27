@@ -1,6 +1,11 @@
 import { div } from "./dom-objects.js";
 import { funcManager, isArrowFunc, toCompNoRender } from "./functions.js";
-import type { browserPageType, Comp, CradovaPageType } from "./types.js";
+import type {
+  browserPageType,
+  Comp,
+  CradovaPageType,
+  VJS_params_TYPE,
+} from "./types.js";
 
 /**
  * Cradova event
@@ -409,6 +414,53 @@ export class Signal<
       this.listening_subs[eventName] = [];
     }
     this.listening_subs[eventName].push(listener);
+  }
+
+  computed<T extends keyof StoreType>(
+    eventName: T | "dataChanged" | "itemUpdated" | T[],
+    element: (
+      data: Partial<StoreType>,
+    ) => HTMLElement | VJS_params_TYPE<HTMLElement>,
+  ): HTMLElement | undefined {
+    let el = element(this.store[eventName as keyof StoreType]);
+    if (el === undefined || !(el instanceof HTMLElement)) {
+      console.error(
+        ` ✘  Cradova err:  ${
+          String(
+            element,
+          )
+        } is not a valid element or function`,
+      );
+      return;
+    }
+    const listener = () => {
+      const newEl = element(this.store[eventName as keyof StoreType]);
+      if (newEl === undefined || !(newEl instanceof HTMLElement)) {
+        console.error(
+          ` ✘  Cradova err:  ${
+            String(
+              element,
+            )
+          } is not a valid element or function`,
+        );
+        return;
+      }
+      listener.element.insertAdjacentElement("beforebegin", newEl);
+      listener.element.remove();
+      listener.element = newEl;
+    };
+    listener.element = el;
+    if (Array.isArray(eventName)) {
+      eventName.forEach((en) => {
+        this.listen(en, listener);
+      });
+      return el;
+    }
+    if (!this.listening_subs[eventName]) {
+      this.listening_subs[eventName] = [];
+    }
+    this.listening_subs[eventName].push(listener);
+    return el;
   }
   /**
    *  Cradova Signal

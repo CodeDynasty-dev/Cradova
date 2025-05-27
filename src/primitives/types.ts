@@ -10,10 +10,10 @@ interface Attributes<E extends HTMLElement> {
   [key: `on${string}`]: ((this: E, event: Event) => void) | undefined;
 }
 
-type StandardElementEventNames<E extends HTMLElement> = Extract<
-  keyof E,
-  `on${string}`
->;
+type StandardEvents<E extends HTMLElement> = {
+  [key in keyof E]: E[key] extends (this: E, event: Event) => void ? key
+    : never;
+}[keyof E];
 
 export type VJS_params_TYPE<E extends HTMLElement> = // children types
   (
@@ -28,10 +28,12 @@ export type VJS_params_TYPE<E extends HTMLElement> = // children types
     | (() => HTMLElement)
     | (() => HTMLElement)[]
     | [string, Signal<any, any[]>]
+    | VJS_params_TYPE<E>
+    | VJS_params_TYPE<E>[]
     // attributes types
     | (
       & Attributes<E>
-      & Omit<Partial<E>, keyof Attributes<E> | StandardElementEventNames<E>>
+      & Omit<Partial<E>, keyof Attributes<E> | StandardEvents<E>>
     )
   )[];
 /**

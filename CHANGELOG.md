@@ -253,3 +253,7 @@ we went along with it.
 # v3.8.0-rc-4
 
 - Implemented virtual list
+
+# v3.11.0
+
+- Improved Signals, API changes.

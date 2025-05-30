@@ -18,27 +18,34 @@ import {
 
 // creating a store
 const todoStore = new Signal(["take bath", "code coded", "take a break"]);
-
+todoStore.notify(TodoList); // notify the store to update the UI
 function TodoList(this: Comp) {
   // can be used to hold multiple references
   const ref = this.useRef<HTMLInputElement>();
   // markup
+  console.log(todoStore.store);
   return main(
     h1(`Todo List`),
     div(
-      input({
-        placeholder: "type in todo",
-        ref: ref.bind("todoInput"),
+      todoStore.computed(function () {
+        const placeholderText = todoStore.store.length
+          ? "type in todo"
+          : "no todos yet, type in todo";
+        return input({
+          placeholder: placeholderText,
+          ref: ref.bind("todoInput"),
+        });
       }),
       button("Add todo", {
         onclick() {
           const todo = ref.current["todoInput"]?.value;
           if (todo) {
             todoStore.store.push(todo);
+
             ref.current["todoInput"]!.value = "";
           }
         },
-      }),
+      })
     ),
     List(
       todoStore,
@@ -54,8 +61,18 @@ function TodoList(this: Comp) {
         }),
       {
         className: "list",
-      },
+      }
     ),
+    todoStore.computed(function () {
+      return div(
+        p("Total todos: " + todoStore.store.length, {
+          style: {
+            fontWeight: "bold",
+            color: "blue",
+          },
+        })
+      );
+    })
   );
 }
 
@@ -69,7 +86,7 @@ const count = function (this: Comp) {
   }, []);
   return div(
     $if(count > 5, h1("count is greater than 5")),
-    h1(" count: " + count),
+    h1(" count: " + count)
   );
 };
 
@@ -110,7 +127,7 @@ function typingExample(this: Comp) {
       placeholder: "typing simulation",
     }),
     p(" no thing typed yet!", { ref: ref.bind("text") }),
-    a({ href: "/p" }, "log lol in the console"),
+    a({ href: "/p" }, "log lol in the console")
   );
 }
 
@@ -141,7 +158,7 @@ Router.BrowserRoutes({
           type: "button",
         }),
         TodoList,
-        App,
+        App
       );
     },
   }),
@@ -156,7 +173,7 @@ Router.BrowserRoutes({
           },
         }),
         TodoList,
-        App,
+        App
       );
     },
   }),

@@ -1,11 +1,11 @@
 import { div } from "./dom-objects.js";
-import { funcManager, isArrowFunc, toCompNoRender } from "./functions.js";
-import type {
-  browserPageType,
-  Comp,
-  CradovaPageType,
-  VJS_params_TYPE,
-} from "./types.js";
+import {
+  funcManager,
+  isArrowFunc,
+  toComp,
+  toCompNoRender,
+} from "./functions.js";
+import type { browserPageType, Comp, CradovaPageType } from "./types.js";
 
 /**
  * Cradova event
@@ -44,7 +44,7 @@ export class cradovaEvent {
     // }
     while (eventListeners.length !== 0) {
       const en_cb = await eventListeners.shift()!();
-      if (en_cb) {
+      if (typeof en_cb === "function") {
         this.after_page_is_killed.push(en_cb);
       }
     }
@@ -204,17 +204,20 @@ class List<Type extends any[]> {
  */
 
 export class Signal<Type = any> {
+  /**
+   * @internal
+   */
   private pn?: string;
-  private subs: Record<keyof Type | "dataChanged" | "itemUpdated", Set<Comp>> =
-    {} as any;
+  /**
+   * @internal
+   */
   private isList: boolean = false;
-  private listening_subs: Record<
-    keyof Type | "dataChanged" | "itemUpdated",
-    ((
-      data: Type extends Array<any> ? List<Type>
-        : Type extends Record<string, any> ? Type
-        : never,
-    ) => void)[]
+  /**
+   * @internal
+   */
+  subscribers: Record<
+    keyof Type | "dataChanged" | "itemUpdated" | "__ALL__",
+    ((() => void) | Comp)[]
   > = {} as any;
   store: Type extends Array<any> ? List<Type>
     : Type extends Record<string, any> ? Type
@@ -235,7 +238,6 @@ export class Signal<Type = any> {
       }) as any;
     }
 
-    this.subs = {} as any;
     if (props && props.persistName) {
       this.pn = props.persistName;
       const key = localStorage.getItem(props.persistName);
@@ -266,11 +268,19 @@ export class Signal<Type = any> {
   private publish<T extends keyof Type | "dataChanged" | "itemUpdated">(
     eventName: T,
   ) {
-    this.subs![eventName]?.forEach((c) => {
-      funcManager.recall(c);
+    this.subscribers![eventName]?.forEach((c) => {
+      if ((c as Comp).published) {
+        funcManager.recall(c as Comp, undefined);
+      } else {
+        (c as () => void)();
+      }
     });
-    this.listening_subs![eventName]?.forEach((c) => {
-      c(this.store);
+    this.subscribers!["__ALL__"]?.forEach((c) => {
+      if ((c as Comp).published) {
+        funcManager.recall(c as Comp, undefined);
+      } else {
+        (c as () => void)();
+      }
     });
     if (this.pn) {
       localStorage.setItem(
@@ -288,27 +298,28 @@ export class Signal<Type = any> {
    *  fires actions if any available
    */
   set(NEW: Type) {
-    const s = new Set<Comp>();
+    const s = new Set<Comp | (() => void)>();
     const events = this.store._set(NEW);
-    const s2 = new Set<(data: any) => void>();
     for (const event of events) {
-      const subs = this.subs![event as keyof Type];
-      if (subs) {
-        subs.forEach((c) => {
-          s.add(c);
-        });
-      }
-      const subs2 = this.listening_subs![event as keyof Type];
+      const subs2 = this.subscribers![event as keyof Type];
       if (subs2) {
         for (const fn of subs2) {
-          s2.add(fn);
+          s.add(fn);
         }
       }
     }
-    for (const c of s.values()) {
-      funcManager.recall(c);
+    if (this.subscribers["__ALL__"]) {
+      for (const fn of this.subscribers["__ALL__"]) {
+        s.add(fn);
+      }
     }
-    for (const fn of s2.values()) fn(events);
+    for (const c of s.values()) {
+      if ((c as Comp).published) {
+        funcManager.recall(c as Comp, undefined);
+      } else {
+        (c as () => void)();
+      }
+    }
 
     if (this.pn) {
       localStorage.setItem(
@@ -325,91 +336,97 @@ export class Signal<Type = any> {
    *  subscribe to an event
    *
    * @param name of event.
-   * @param Comp component to bind to.
-   */
-  subscribe<T extends keyof Type>(
-    eventName: T | "dataChanged" | "itemUpdated" | T[],
-    comp: Comp | ((this: Comp) => HTMLDivElement),
-  ) {
-    if (typeof comp === "function") {
-      if (Array.isArray(eventName)) {
-        eventName.forEach((en) => {
-          this.subscribe(en, comp);
-        });
-        return;
-      }
-      if (!(comp as Comp).published) {
-        if (!isArrowFunc(comp)) {
-          comp = toCompNoRender(comp as Comp);
-        } else {
-          console.error(
-            ` ✘  Cradova err:  ${
-              String(
-                comp,
-              )
-            } is not a valid component or function`,
-          );
-          return;
-        }
-      }
-      if ((comp as Comp).published) return;
-      if (!(eventName in this.store)) {
-        console.error(
-          ` ✘  Cradova err:  ${
-            String(
-              eventName,
-            )
-          } is not a valid event for this Signal`,
-        );
-        return;
-      }
-      // ? avoid adding a specific Function repeatedly to a Signal
-      if (!this.subs![eventName]) {
-        this.subs![eventName] = new Set([comp as Comp]);
-      } else {
-        this.subs![eventName].add(comp as Comp);
-      }
-    } else {
-      console.error(` ✘  Cradova err:  ${comp} is not a valid component`);
-    }
-  }
-  /**
-   *  Cradova Signal
-   * ----
-   *  subscribe to an event
-   *
-   * @param name of event.
    * @param callback function to call.
    */
-  listen<T extends keyof Type>(
-    eventName: T | "dataChanged" | "itemUpdated" | T[],
-    listener: (
-      store: Type extends Array<any> ? List<Type>
-        : Type extends Record<string, any> ? Type
-        : never,
-    ) => void,
+  notify<T extends keyof Type>(
+    eventName:
+      | (T | "dataChanged" | "itemUpdated" | T[])
+      | (() => HTMLElement | void)
+      | Comp
+      | ((this: Comp) => HTMLElement),
+    listener?:
+      | (() => HTMLElement | void)
+      | Comp
+      | ((this: Comp) => HTMLElement),
   ) {
+    if (!eventName) {
+      console.error(
+        ` ✘  Cradova err:  eventName ${String(eventName)} or listener ${
+          String(
+            listener,
+          )
+        } is not a valid event name or function`,
+      );
+      return;
+    }
+    if (typeof eventName === "function") {
+      listener = eventName as () => HTMLElement;
+      if (this.isList) {
+        eventName = ["dataChanged", "itemUpdated"] as any[];
+      } else {
+        eventName = Object.keys(this.store) as any[];
+      }
+    }
+    if (typeof listener !== "function" || !eventName) {
+      console.error(
+        ` ✘  Cradova err: listener or eventName ${
+          String(
+            listener,
+          )
+        } is not a valid listener function or string`,
+      );
+      return;
+    }
+
     if (Array.isArray(eventName)) {
       eventName.forEach((en) => {
-        this.listen(en, listener);
+        this.notify(en, listener);
       });
       return;
     }
-    if (!this.listening_subs[eventName]) {
-      this.listening_subs[eventName] = [];
+    if (!this.subscribers[eventName]) {
+      this.subscribers[eventName] = [];
     }
-    this.listening_subs[eventName].push(listener);
+
+    if (!isArrowFunc(listener)) {
+      listener = toCompNoRender(listener as Comp);
+    }
+    this.subscribers[eventName].push(listener);
   }
 
   computed<T extends keyof Type>(
-    eventName: T | "dataChanged" | "itemUpdated" | T[],
-    element: (
-      store: Type extends Array<any> ? List<Type>
-        : Type extends Record<string, any> ? Type
-        : never,
-    ) => HTMLElement | VJS_params_TYPE<HTMLElement>,
+    eventName:
+      | (T | "dataChanged" | "itemUpdated")
+      | (() => HTMLElement)
+      | Comp
+      | ((this: Comp) => HTMLElement),
+    element?: (() => HTMLElement) | Comp | ((this: Comp) => HTMLElement),
   ): HTMLElement | undefined {
-    let el = element(this.store);
+    if (!eventName) {
+      console.error(
+        ` ✘  Cradova err:  eventName ${String(eventName)} or element ${
+          String(
+            element,
+          )
+        } is not a valid event name or function`,
+      );
+      return;
+    }
+    if (typeof eventName === "function") {
+      element = eventName as () => HTMLElement;
+      if (this.isList) {
+        eventName = "__ALL__" as any;
+      } else {
+        eventName = "__ALL__" as any;
+      }
+    }
+    const isComp = !isArrowFunc(element as Comp);
+    let el;
+    if (isComp) {
+      el = toComp(element as Comp);
+    } else {
+      el = (element as () => HTMLElement)?.();
+    }
     if (el === undefined || !(el instanceof HTMLElement)) {
       console.error(
         ` ✘  Cradova err:  ${
@@ -421,7 +438,20 @@ export class Signal<Type = any> {
       return;
     }
     const listener = () => {
-      const newEl = element(this.store);
+      if (!document.body.contains(listener.element)) {
+        console.log(
+          "----------------->",
+          this.subscribers[eventName as keyof Type],
+        );
+        this.subscribers[eventName as keyof Type].splice(listener.idx, 1);
+        return;
+      }
+      let newEl;
+      if (isComp) {
+        newEl = toComp(element as unknown as Comp);
+      } else {
+        newEl = (element as () => HTMLElement)?.();
+      }
       if (newEl === undefined || !(newEl instanceof HTMLElement)) {
         console.error(
           ` ✘  Cradova err:  ${
@@ -437,16 +467,11 @@ export class Signal<Type = any> {
       listener.element = newEl;
     };
     listener.element = el;
-    if (Array.isArray(eventName)) {
-      eventName.forEach((en) => {
-        this.listen(en, listener);
-      });
-      return el;
+    if (!this.subscribers[eventName as keyof Type]) {
+      this.subscribers[eventName as keyof Type] = [];
     }
-    if (!this.listening_subs[eventName]) {
-      this.listening_subs[eventName] = [];
-    }
-    this.listening_subs[eventName].push(listener);
+    listener.idx = this.subscribers[eventName as keyof Type].length;
+    this.subscribers[eventName as keyof Type].push(listener);
     return el;
   }
   /**
@@ -962,6 +987,7 @@ export class VirtualList {
    * @internal
    */
   container: HTMLElement;
+  idxs: number[] = [];
   constructor(
     container: HTMLElement,
     dataStore: Signal<any[]>,
@@ -973,10 +999,12 @@ export class VirtualList {
     this.container = container;
 
     this.scheduleRender();
-    this.dataStore.listen("dataChanged", () => {
+    this.idxs.push(dataStore.subscribers["dataChanged"]?.length || 0);
+    this.dataStore.notify("dataChanged", () => {
       this.scheduleRender();
     });
-    this.dataStore.listen("itemUpdated", () => {
+    this.idxs.push(dataStore.subscribers["itemUpdated"]?.length || 0);
+    this.dataStore.notify("itemUpdated", () => {
       this.scheduleRender();
     });
   }
@@ -1025,5 +1053,18 @@ export class VirtualList {
       this.dataStore.store._clearAllDirty();
     }
     this.renderScheduled = false;
+  }
+  /**
+   * @internal
+   */
+  destroy() {
+    this.renderItem = null as any;
+    this.container.innerHTML = "";
+    this.container = null as any;
+    this.renderScheduled = false;
+    this.dataStore.subscribers["dataChanged"].splice(this.idxs[0], 1);
+    this.dataStore.subscribers["itemUpdated"].splice(this.idxs[1], 1);
+    this.idxs.length = 0;
+    this.dataStore = null as any;
   }
 }

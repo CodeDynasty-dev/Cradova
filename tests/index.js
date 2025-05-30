@@ -2,13 +2,20 @@
 import { $if, a, button, div, h1, input, List, main, p, Page, Router, Signal, } from "../dist/index.js";
 // creating a store
 const todoStore = new Signal(["take bath", "code coded", "take a break"]);
+todoStore.notify(TodoList); // notify the store to update the UI
 function TodoList() {
     // can be used to hold multiple references
     const ref = this.useRef();
     // markup
-    return main(h1(`Todo List`), div(input({
-        placeholder: "type in todo",
-        ref: ref.bind("todoInput"),
+    console.log(todoStore.store);
+    return main(h1(`Todo List`), div(todoStore.computed(function () {
+        const placeholderText = todoStore.store.length
+            ? "type in todo"
+            : "no todos yet, type in todo";
+        return input({
+            placeholder: placeholderText,
+            ref: ref.bind("todoInput"),
+        });
     }), button("Add todo", {
         onclick() {
             const todo = ref.current["todoInput"]?.value;
@@ -27,6 +34,13 @@ function TodoList() {
         },
     }), {
         className: "list",
+    }), todoStore.computed(function () {
+        return div(p("Total todos: " + todoStore.store.length, {
+            style: {
+                fontWeight: "bold",
+                color: "blue",
+            },
+        }));
     }));
 }
 const count = function () {

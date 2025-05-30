@@ -715,7 +715,7 @@ export const List = <T>(
       onmount() {
         const vl = new VirtualList(this, signal, item);
         return () => {
-          console.log("Destroying virtual list");
+          // console.log("Destroying virtual list");
           vl.destroy();
         };
       },

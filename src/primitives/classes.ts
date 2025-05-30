@@ -439,10 +439,10 @@ export class Signal<Type = any> {
     }
     const listener = () => {
       if (!document.body.contains(listener.element)) {
-        console.log(
-          "----------------->",
-          this.subscribers[eventName as keyof Type],
-        );
+        // console.log(
+        //   "----------------->",
+        //   this.subscribers[eventName as keyof Type],
+        // );
         this.subscribers[eventName as keyof Type].splice(listener.idx, 1);
         return;
       }

@@ -18,14 +18,21 @@ export const makeElement = <E extends HTMLElement>(
       // single child lane
       if (typeof child === "function") {
         child = isArrowFunc(child) ? child() : toComp(child as unknown as Comp);
+        if (typeof child === "function") {
+          child = isArrowFunc(child)
+            ? (child as () => HTMLElement | DocumentFragment)()
+            : toComp(child as unknown as Comp);
+        }
       }
       // appending child
       if (child instanceof HTMLElement || child instanceof DocumentFragment) {
         element.appendChild(child as Node);
-
         continue;
+      } else {
+        console.error(
+          " ✘  Cradova err:  " + child + " is not a valid element received"
+        );
       }
-
       // children array
       if (Array.isArray(child)) {
         if (child[1] instanceof Signal) {
@@ -715,7 +722,6 @@ export const List = <T>(
       onmount() {
         const vl = new VirtualList(this, signal, item);
         return () => {
-          // console.log("Destroying virtual list");
           vl.destroy();
         };
       },

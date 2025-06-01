@@ -18,20 +18,16 @@ export const makeElement = <E extends HTMLElement>(
       // single child lane
       if (typeof child === "function") {
         child = isArrowFunc(child) ? child() : toComp(child as unknown as Comp);
-        if (typeof child === "function") {
-          child = isArrowFunc(child)
-            ? (child as () => HTMLElement | DocumentFragment)()
-            : toComp(child as unknown as Comp);
-        }
+        // if (typeof child === "function") {
+        //   child = isArrowFunc(child)
+        //     ? (child as () => HTMLElement | DocumentFragment)()
+        //     : toComp(child as unknown as Comp);
+        // }
       }
       // appending child
       if (child instanceof HTMLElement || child instanceof DocumentFragment) {
         element.appendChild(child as Node);
         continue;
-      } else {
-        console.error(
-          " ✘  Cradova err:  " + child + " is not a valid element received"
-        );
       }
       // children array
       if (Array.isArray(child)) {
@@ -187,7 +183,11 @@ export function $if<E extends HTMLElement>(
   return undefined;
 }
 
-export function $ifelse(condition: any, ifTrue: any, ifFalse?: any) {
+export function $ifelse(
+  condition: any,
+  ifTrue: VJS_params_TYPE<any>,
+  ifFalse?: VJS_params_TYPE<any>
+) {
   if (condition) {
     return ifTrue;
   }
@@ -196,7 +196,7 @@ export function $ifelse(condition: any, ifTrue: any, ifFalse?: any) {
 
 export function $case<E extends HTMLElement = HTMLElement>(
   value: any,
-  ...elements: VJS_params_TYPE<E>
+  elements: VJS_params_TYPE<E>
 ) {
   return (key: any) => {
     if (key === value) {
@@ -205,8 +205,11 @@ export function $case<E extends HTMLElement = HTMLElement>(
     return undefined;
   };
 }
-export function $switch(key: unknown, ...cases: ((key: any) => any)[]) {
-  let elements;
+export function $switch<K = unknown>(
+  key: K,
+  ...cases: ((key: K) => VJS_params_TYPE<any>)[]
+): VJS_params_TYPE<any> | undefined {
+  let elements: VJS_params_TYPE<any> | undefined;
   if (cases.length) {
     for (let i = 0; i < cases.length; i++) {
       elements = cases[i](key);

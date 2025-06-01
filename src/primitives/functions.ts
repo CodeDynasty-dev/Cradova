@@ -194,10 +194,10 @@ export function $ifelse(
   return ifFalse;
 }
 
-export function $case<E extends HTMLElement = HTMLElement>(
+export function $case(
   value: any,
-  elements: VJS_params_TYPE<E>
-) {
+  elements: () => HTMLElement
+): (key: any) => (() => HTMLElement) | undefined {
   return (key: any) => {
     if (key === value) {
       return elements;
@@ -205,11 +205,12 @@ export function $case<E extends HTMLElement = HTMLElement>(
     return undefined;
   };
 }
+
 export function $switch<K = unknown>(
   key: K,
-  ...cases: ((key: K) => VJS_params_TYPE<any>)[]
-): VJS_params_TYPE<any> | undefined {
-  let elements: VJS_params_TYPE<any> | undefined;
+  ...cases: ((key: K) => HTMLElement | undefined)[]
+): HTMLElement | undefined {
+  let elements: HTMLElement | undefined;
   if (cases.length) {
     for (let i = 0; i < cases.length; i++) {
       elements = cases[i](key);

@@ -196,13 +196,13 @@ export function $ifelse(
 
 export function $case(
   value: any,
-  elements: () => HTMLElement
-): (key: any) => (() => HTMLElement) | undefined {
+  element: () => HTMLElement
+): (key: any) => HTMLElement {
   return (key: any) => {
     if (key === value) {
-      return elements;
+      return element as unknown as HTMLElement;
     }
-    return undefined;
+    return undefined as unknown as HTMLElement;
   };
 }
 

@@ -257,3 +257,7 @@ we went along with it.
 # v3.11.0
 
 - Improved Signals, API changes.
+
+# v3.11.7
+
+- Implemented useExternalEffect for external effects to a Comp instance

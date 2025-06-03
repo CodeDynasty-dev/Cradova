@@ -173,10 +173,10 @@ function unroll_child_list(l: VJS_params_TYPE<HTMLElement>) {
  * @param {function} elements[]
  */
 
-export function $if<E extends HTMLElement>(
+export function $if(
   condition: any,
-  ...elements: VJS_params_TYPE<E>
-): VJS_params_TYPE<E> | undefined {
+  ...elements: (() => HTMLElement | undefined)[]
+) {
   if (condition) {
     return elements;
   }
@@ -513,18 +513,18 @@ const DEFAULT_COMPONENT_PROPS: Partial<Comp> = {
   reference: null,
 
   // State
-  _state: [],
+  // _state: [],
   _state_index: -1,
 
   // Effects
-  _effect_tracker: [], // Use tracker array
+  // _effect_tracker: [], // Use tracker array
   _effect_index: -1,
 
   // Memos
-  _memo_tracker: [], // Use tracker array
+  // _memo_tracker: [], // Use tracker array
   _memo_index: -1,
   // Reducers
-  _reducer_tracker: [], // Added
+  // _reducer_tracker: [], // Added
   _reducer_index: -1, // Added
 
   // Bound hooks
@@ -552,6 +552,11 @@ export const toComp = (comp: Comp, args?: any[]): HTMLElement | undefined => {
   Object.assign(comp, {
     ...DEFAULT_COMPONENT_PROPS, // Apply defaults
   });
+
+  comp._state = [];
+  comp._effect_tracker = [];
+  comp._memo_tracker = [];
+  comp._reducer_tracker = [];
   return funcManager.render(comp, args);
 };
 

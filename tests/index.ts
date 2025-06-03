@@ -14,6 +14,9 @@ import {
   Page,
   Router,
   Signal,
+  $switch,
+  $case,
+  $ifelse,
 } from "../dist/index.js";
 
 // creating a store
@@ -86,6 +89,24 @@ const count = function (this: Comp) {
   }, []);
   return div(
     $if(count > 5, h1("count is greater than 5")),
+    $ifelse(
+      count > 10,
+      () => h1("count is greater than 10"),
+      () => h1("count is not greater than 10")
+    ),
+    $switch(
+      count,
+      $case(1, () => h1("count is 1")),
+      $case(2, () => h1("count is 2")),
+      $case(3, () => h1("count is 3")),
+      $case(4, () => h1("count is 4")),
+      $case(5, () => h1("count is 5")),
+      $case(6, () => h1("count is 6")),
+      $case(7, () => h1("count is 7")),
+      $case(8, () => h1("count is 8")),
+      $case(9, () => h1("count is 9")),
+      $case(10, () => h1("count is 10"))
+    ),
     h1(" count: " + count)
   );
 };

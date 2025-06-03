@@ -185,30 +185,29 @@ export function $if<E extends HTMLElement>(
 
 export function $ifelse(
   condition: any,
-  ifTrue: VJS_params_TYPE<any>,
-  ifFalse?: VJS_params_TYPE<any>
-) {
+  ifTrue: () => HTMLElement,
+  ifFalse?: () => HTMLElement
+): HTMLElement | undefined {
   if (condition) {
-    return ifTrue;
+    return ifTrue as unknown as HTMLElement;
   }
-  return ifFalse;
+  return ifFalse as unknown as HTMLElement;
 }
 
-export function $case(
-  value: any,
-  element: () => HTMLElement
-): (key: any) => HTMLElement {
+type Case<K> = (key: K) => HTMLElement | undefined;
+
+export const $case = (value: any, element: any): Case<any> => {
   return (key: any) => {
     if (key === value) {
-      return element as unknown as HTMLElement;
+      return element;
     }
-    return undefined as unknown as HTMLElement;
+    return undefined;
   };
-}
+};
 
 export function $switch<K = unknown>(
   key: K,
-  ...cases: ((key: K) => HTMLElement | undefined)[]
+  ...cases: Case<K>[]
 ): HTMLElement | undefined {
   let elements: HTMLElement | undefined;
   if (cases.length) {
@@ -537,7 +536,7 @@ const DEFAULT_COMPONENT_PROPS: Partial<Comp> = {
   useReducer: useReducer,
 };
 
-function initializeComponent(comp: Comp): Comp {
+function resetComponent(comp: Comp): Comp {
   if (typeof comp._state_index === "number") {
     comp._state_index = -1;
     comp._effect_index = -1;
@@ -546,22 +545,28 @@ function initializeComponent(comp: Comp): Comp {
     funcManager.cleanupEffects(comp);
     return comp as Comp;
   }
-
-  const component = comp as Comp;
-  Object.assign(component, {
-    ...DEFAULT_COMPONENT_PROPS, // Apply defaults
-  });
-
-  return component;
+  return comp as Comp;
 }
 
 export const toComp = (comp: Comp, args?: any[]): HTMLElement | undefined => {
-  const component = initializeComponent(comp);
-  return funcManager.render(component, args);
+  Object.assign(comp, {
+    ...DEFAULT_COMPONENT_PROPS, // Apply defaults
+  });
+  return funcManager.render(comp, args);
 };
 
 export const toCompNoRender = (comp: Comp): Comp => {
-  return initializeComponent(comp);
+  if (typeof comp._state_index !== "number") {
+    Object.assign(comp, {
+      ...DEFAULT_COMPONENT_PROPS, // Apply defaults
+    });
+  }
+  comp._state_index = -1;
+  comp._effect_index = -1;
+  comp._memo_index = -1;
+  comp._reducer_index = -1; // Added Reset
+  funcManager.cleanupEffects(comp);
+  return comp;
 };
 
 // --- Function Manager ---
@@ -610,7 +615,7 @@ export const funcManager = {
 
     // Check if the component's element is still in the DOM
     if (document.body.contains(node)) {
-      initializeComponent(component);
+      resetComponent(component);
       const newHtml = component.apply(component, args);
 
       if (newHtml instanceof HTMLElement) {
@@ -682,7 +687,7 @@ export const funcManager = {
   },
 
   cleanupEffects(component: Comp): void {
-    if (component._effect_tracker) {
+    if (component._effect_tracker?.length) {
       component._effect_tracker.forEach((tracker) => {
         if (typeof tracker?.cleanup === "function") {
           try {

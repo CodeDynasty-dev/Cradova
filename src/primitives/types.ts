@@ -11,7 +11,8 @@ interface Attributes<E extends HTMLElement> {
 }
 
 type StandardEvents<E extends HTMLElement> = {
-  [key in keyof E]: E[key] extends (this: E, event: Event) => void ? key
+  [key in keyof E]: E[key] extends (this: E, event: Event) => void
+    ? key
     : never;
 }[keyof E];
 
@@ -31,10 +32,8 @@ export type VJS_params_TYPE<E extends HTMLElement> = // children types
     | VJS_params_TYPE<E>
     | VJS_params_TYPE<E>[]
     // attributes types
-    | (
-      & Attributes<E>
-      & Omit<Partial<E>, keyof Attributes<E> | StandardEvents<E>>
-    )
+    | (Attributes<E> &
+        Omit<Partial<E>, keyof Attributes<E> | StandardEvents<E>>)
   )[];
 /**
  * @internal
@@ -104,6 +103,7 @@ export type browserPageType<importType = Page> =
   | (() => Promise<importType>);
 
 export interface Comp extends Function {
+  (this: Comp): HTMLElement;
   /**
    * @internal
    */
@@ -153,16 +153,16 @@ export interface Comp extends Function {
   useReducer: <S, A>(
     reducer: (state: S, action: A) => S,
     initialArg: S,
-    initializer?: (arg: S) => S,
+    initializer?: (arg: S) => S
   ) => [S, (action: A) => void];
   useState: <S>(
-    initialValue: S,
+    initialValue: S
   ) => [S, (newState: S | ((prevState: S) => S)) => void];
   useEffect: (effect: () => (() => void) | void, deps?: unknown[]) => void;
   useMemo: <T>(factory: () => T, deps?: unknown[]) => T;
   useCallback: <T extends (...args: any[]) => any>(
     callback: T,
-    deps?: unknown[],
+    deps?: unknown[]
   ) => T;
   useRef: <T = unknown>() => {
     current: Record<string, T>;

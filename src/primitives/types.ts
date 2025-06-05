@@ -149,6 +149,10 @@ export interface Comp extends Function {
    * @internal
    */
   _reducer_index?: number;
+  /**
+   * @internal
+   */
+  _args?: any[];
 
   // ? hooks
   useReducer: <S, A>(

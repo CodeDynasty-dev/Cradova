@@ -261,3 +261,7 @@ we went along with it.
 # v3.11.7
 
 - Implemented useExternalEffect for external effects to a Comp instance
+
+# v3.11.9
+
+- Implemented args to Comp component.\_args

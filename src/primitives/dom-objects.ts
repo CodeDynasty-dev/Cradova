@@ -1,5 +1,4 @@
-import { cra, makeElement } from "./functions.js";
-import { type VJS_params_TYPE } from "./types.js";
+import { cra } from "./functions.js";
 
 export const a = cra<HTMLAnchorElement>("a");
 export const audio = cra<HTMLAudioElement>("audio");
@@ -36,15 +35,6 @@ export const tbody = cra<HTMLTableElement>("table");
 export const table = cra<HTMLTableSectionElement>("tbody");
 export const td = cra<HTMLTableCellElement>("td");
 export const tr = cra<HTMLTableColElement>("tr");
-
-export const svg = (
-  svg: string,
-  properties?: VJS_params_TYPE<HTMLSpanElement>,
-): HTMLSpanElement => {
-  const span = document.createElement("span");
-  span.innerHTML = svg;
-  return makeElement<HTMLSpanElement>(span, properties || ([] as any));
-};
 
 export const raw = (html: string | TemplateStringsArray): DocumentFragment => {
   const div = document.createElement("div");

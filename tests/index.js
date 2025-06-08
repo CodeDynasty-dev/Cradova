@@ -1,11 +1,11 @@
 // Simple todo list
-import { $if, a, button, div, h1, input, List, main, p, Page, Router, Signal, $switch, $case, $ifelse, } from "../dist/index.js";
+import { $case, $switch, a, button, div, h1, input, main, p, Page, Router, Signal, } from "../dist/index.js";
 // creating a store
 const todoStore = new Signal(["take bath", "code coded", "take a break"]);
-todoStore.notify(TodoList); // notify the store to update the UI
-function TodoList() {
+todoStore.notify(TodoList);
+function TodoList(ctx) {
     // can be used to hold multiple references
-    const ref = this.useRef();
+    const ref = ctx.useRef();
     // markup
     console.log(todoStore.store);
     return main(h1(`Todo List`), div(todoStore.computed(function () {
@@ -24,7 +24,7 @@ function TodoList() {
                 ref.current["todoInput"].value = "";
             }
         },
-    })), List(todoStore, (item) => p(item, {
+    })), todoStore.store.map((item) => p(item, {
         title: "click to remove",
         onclick() {
             todoStore.store.remove(todoStore.store.indexOf(item));
@@ -32,9 +32,7 @@ function TodoList() {
         style: {
             border: "1px solid green",
         },
-    }), {
-        className: "list",
-    }), todoStore.computed(function () {
+    })), todoStore.computed(function () {
         return div(p("Total todos: " + todoStore.store.length, {
             style: {
                 fontWeight: "bold",
@@ -43,15 +41,19 @@ function TodoList() {
         }));
     }));
 }
-const count = function () {
-    const [count, setCounter] = this.useState(0);
-    this.useEffect(() => {
-        console.log("count updated");
-        setInterval(() => {
+const count = function (ctx) {
+    const [count, setCounter] = ctx.useState(0);
+    ctx.useEffect(() => {
+        // ? setInterval is unnnecessary here,
+        // ? it's just to demostrate the cleanup function
+        const interval = setInterval(() => {
             setCounter((p) => p + 1);
         }, 1000);
-    }, []);
-    return div($if(count > 5, h1("count is greater than 5")), $ifelse(count > 10, () => h1("count is greater than 10"), () => h1("count is not greater than 10")), $switch(count, $case(1, () => h1("count is 1")), $case(2, () => h1("count is 2")), $case(3, () => h1("count is 3")), $case(4, () => h1("count is 4")), $case(5, () => h1("count is 5")), $case(6, () => h1("count is 6")), $case(7, () => h1("count is 7")), $case(8, () => h1("count is 8")), $case(9, () => h1("count is 9")), $case(10, () => h1("count is 10"))), h1(" count: " + count));
+        return () => clearInterval(interval);
+    }, [count]);
+    return div(count > 5 ? () => h1("count is greater than 5") : undefined, count > 10
+        ? () => h1("count is greater than 10")
+        : () => h1("count is not greater than 10"), $switch(count, $case(1, () => h1("count is 1")), $case(2, () => h1("count is 2")), $case(3, () => h1("count is 3")), $case(4, () => h1("count is 4")), $case(5, () => h1("count is 5")), $case(6, () => h1("count is 6")), $case(7, () => h1("count is 7")), $case(8, () => h1("count is 8")), $case(9, () => h1("count is 9")), $case(10, () => h1("count is 10"))), h1(" count: " + count));
 };
 function HelloMessage() {
     return div("Click to get a greeting", {
@@ -62,8 +64,8 @@ function HelloMessage() {
     });
 }
 // using CradovaRef
-const nameRef = function () {
-    const [name, setName] = this.useState(null);
+const nameRef = function (ctx) {
+    const [name, setName] = ctx.useState(null);
     return div(name ? "hello " + name : "Click to get a second greeting", {
         onclick() {
             const name = prompt();
@@ -77,11 +79,12 @@ const nameRef = function () {
     });
 };
 // reference (not state)
-function typingExample() {
-    const ref = this.useRef();
+function typingExample(ctx) {
+    const ref = ctx.useRef();
     return div(input({
+        ref: ref.bind("input"),
         oninput() {
-            ref.current["text"].innerText = this.value;
+            ref.current["text"].innerText = ref.current["input"].value;
         },
         placeholder: "typing simulation",
     }), p(" no thing typed yet!", { ref: ref.bind("text") }), a({ href: "/p" }, "log lol in the console"));
@@ -123,13 +126,4 @@ Router.BrowserRoutes({
             }), TodoList, App);
         },
     }),
-});
-const something = input({
-    oninput() {
-        console.log(this.value); // (property) GlobalEventHandlers.oninput: ((this: GlobalEventHandlers, ev: Event) => any) | null
-    },
-    placeholder: "Typing simulation",
-    onmount() {
-        console.log("mounted");
-    },
 });

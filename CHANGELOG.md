@@ -265,3 +265,7 @@ we went along with it.
 # v3.11.9
 
 - Implemented args to Comp component.\_args
+
+# v3.12.0
+
+- Discharged this feature to allow more flexibility in the way you use args

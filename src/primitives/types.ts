@@ -1,8 +1,8 @@
 import * as CSS from "csstype";
-import { __raw_ref, Page, Signal } from "./classes.js";
+import { Page, RefInstance, Signal } from "./classes.js";
 
 interface Attributes<E extends HTMLElement> {
-  ref?: [__raw_ref<any>, string];
+  ref?: [RefInstance<any>, string];
   value?: any;
   style?: Partial<CSS.Properties>;
   [key: `data-${string}`]: string | undefined;
@@ -27,9 +27,11 @@ export type VJS_params_TYPE<E extends HTMLElement> = // children types
     | DocumentFragment[]
     | (() => HTMLElement)
     | (() => HTMLElement)[]
+    | ((ctx: Comp) => HTMLElement)
+    | ((ctx: Comp) => HTMLElement)[]
     | [string, Signal<any>]
-    | VJS_params_TYPE<E>
-    | VJS_params_TYPE<E>[]
+    // | VJS_params_TYPE<E>
+    // | VJS_params_TYPE<E>[]
     // attributes types
     | (
       & Attributes<E>
@@ -104,7 +106,7 @@ export type browserPageType<importType = Page> =
   | (() => Promise<importType>);
 
 export interface Comp extends Function {
-  (this: Comp): HTMLElement;
+  (ctx: Comp, ...args: any[]): HTMLElement;
   /**
    * @internal
    */

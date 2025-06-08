@@ -15,7 +15,8 @@
   },
   "scripts": {
     "compile": "bun bundle.ts",
-    "lint": "eslint . --fix"
+    "lint": "eslint . --fix",
+    "tsc": "tsc --target esnext  tests/index.ts --watch --moduleResolution NodeNext --module NodeNext"
   },
   "keywords": [
     "frontend library",

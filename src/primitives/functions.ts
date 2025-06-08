@@ -1,6 +1,6 @@
 import * as CSS from "csstype";
 import type { Comp, VJS_params_TYPE } from "./types.js";
-import { __raw_ref, Signal, VirtualList } from "./classes.js";
+import { RefInstance, Signal, VirtualList } from "./classes.js";
 import { div } from "./dom-objects.js";
 /**
  * @internal
@@ -17,7 +17,9 @@ export const makeElement = <E extends HTMLElement>(
       let child = ElementChildrenAndPropertyList[i];
       // single child lane
       if (typeof child === "function") {
-        child = isArrowFunc(child) ? child() : toComp(child as unknown as Comp);
+        child = isArrowFunc(child)
+          ? (child as any)()
+          : toComp(child as unknown as Comp);
         // if (typeof child === "function") {
         //   child = isArrowFunc(child)
         //     ? (child as () => HTMLElement | DocumentFragment)()
@@ -97,10 +99,10 @@ export const makeElement = <E extends HTMLElement>(
         if (
           prop === "ref" &&
           value.length === 2 &&
-          value[0] instanceof __raw_ref &&
+          value[0] instanceof RefInstance &&
           typeof value[1] === "string"
         ) {
-          const [refInstance, name] = value as [__raw_ref<unknown>, string];
+          const [refInstance, name] = value as [RefInstance<unknown>, string];
           refInstance.current[name] = element;
           continue;
         }
@@ -149,11 +151,11 @@ function unroll_child_list(l: VJS_params_TYPE<HTMLElement>) {
       fg.appendChild(unroll_child_list(ch as VJS_params_TYPE<HTMLElement>));
     } else {
       if (typeof ch === "function") {
-        ch = isArrowFunc(ch) ? ch() : toComp(ch as unknown as Comp);
+        ch = isArrowFunc(ch) ? (ch as any)() : toComp(ch as unknown as Comp);
         if (typeof ch === "function") {
           ch = isArrowFunc(ch)
             ? (ch as () => HTMLElement | DocumentFragment)()
-            : toComp(ch);
+            : toComp(ch as unknown as Comp);
         }
       }
       if (ch instanceof HTMLElement || ch instanceof DocumentFragment) {
@@ -166,32 +168,6 @@ function unroll_child_list(l: VJS_params_TYPE<HTMLElement>) {
     }
   }
   return fg;
-}
-
-/**
- * @param {expression} condition
- * @param {function} elements[]
- */
-
-export function $if(
-  condition: any,
-  ...elements: (() => HTMLElement | undefined)[]
-) {
-  if (condition) {
-    return elements;
-  }
-  return undefined;
-}
-
-export function $ifelse(
-  condition: any,
-  ifTrue: () => HTMLElement,
-  ifFalse?: () => HTMLElement,
-): HTMLElement | undefined {
-  if (condition) {
-    return ifTrue as unknown as HTMLElement;
-  }
-  return ifFalse as unknown as HTMLElement;
 }
 
 type Case<K> = (key: K) => HTMLElement | undefined;
@@ -448,7 +424,7 @@ function useRef<T = unknown>(
       "Cradova Hook Error: useRef called outside of a Cradova component context.",
     );
   }
-  return new __raw_ref();
+  return new RefInstance();
 }
 // 3. Add useReducer Hook Implementation
 /**
@@ -580,7 +556,7 @@ export const toCompNoRender = (comp: Comp): Comp => {
 
 export const funcManager = {
   render(component: Comp): HTMLElement | undefined {
-    const html = component.apply(component, component._args);
+    const html = component(component, ...(component._args || []));
 
     if (html instanceof HTMLElement) {
       component.reference = html;
@@ -623,7 +599,7 @@ export const funcManager = {
     // Check if the component's element is still in the DOM
     if (document.body.contains(node)) {
       resetComponent(component);
-      const newHtml = component.apply(component, component._args);
+      const newHtml = component(component, ...(component._args || []));
 
       if (newHtml instanceof HTMLElement) {
         node.replaceWith(newHtml);

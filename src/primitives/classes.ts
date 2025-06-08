@@ -33,7 +33,7 @@ export class cradovaEvent {
    */
 
   async dispatchEvent(
-    eventName: "after_comp_is_mounted" | "after_page_is_killed"
+    eventName: "after_comp_is_mounted" | "after_page_is_killed",
   ) {
     const eventListeners = this[eventName];
     // if (eventName.includes("Active")) {
@@ -64,7 +64,7 @@ class Store<Type extends Record<string, any>> {
   $_internal_data: Type;
   constructor(
     data: Type,
-    notifier: (key: keyof Type, value: Type[keyof Type]) => void
+    notifier: (key: keyof Type, value: Type[keyof Type]) => void,
   ) {
     this.$_internal_data = data;
     for (const key in this.$_internal_data) {
@@ -103,14 +103,14 @@ class List<Type extends any[]> {
   private _dirtyIndices: Set<any>;
   notifier: (
     eventType: "dataChanged" | "itemUpdated",
-    newItemData: Type[number]
+    newItemData: Type[number],
   ) => void;
   constructor(
     initialData: Type,
     notifier: (
       eventType: "dataChanged" | "itemUpdated",
-      newItemData: Type[number]
-    ) => void
+      newItemData: Type[number],
+    ) => void,
   ) {
     this._data = initialData || [];
     this._dirtyIndices = new Set();
@@ -150,6 +150,7 @@ class List<Type extends any[]> {
       this.notifier("itemUpdated", { index: index, newItemData: newItemData });
     }
   }
+
   push(itemData: Type[number], index?: number) {
     if (index === undefined || index > this._data.length || index < 0) {
       index = this._data.length;
@@ -158,6 +159,11 @@ class List<Type extends any[]> {
     this._dirtyIndices.add("all");
     this.notifier("dataChanged", { type: "add", index: index });
   }
+
+  map<T>(callback: (item: Type[number], index: number) => T) {
+    return this._data.map(callback);
+  }
+
   remove(index: number, count: number = 1) {
     if (index >= 0 && index < this._data.length && count > 0) {
       this._data.splice(index, count);
@@ -219,10 +225,8 @@ export class Signal<Type = any> {
     keyof Type | "dataChanged" | "itemUpdated" | "__ALL__",
     ((() => void) | Comp)[]
   > = {} as any;
-  store: Type extends Array<any>
-    ? List<Type>
-    : Type extends Record<string, any>
-    ? Type
+  store: Type extends Array<any> ? List<Type>
+    : Type extends Record<string, any> ? Type
     : never;
   passers?: Record<keyof Type, [string, Signal<Type>]>;
   constructor(initial: Type, props?: { persistName?: string | undefined }) {
@@ -268,7 +272,7 @@ export class Signal<Type = any> {
    * @internal
    */
   private publish<T extends keyof Type | "dataChanged" | "itemUpdated">(
-    eventName: T
+    eventName: T,
   ) {
     this.subscribers![eventName]?.forEach((c) => {
       if ((c as Comp).published) {
@@ -288,8 +292,8 @@ export class Signal<Type = any> {
       localStorage.setItem(
         this.pn,
         JSON.stringify(
-          this.isList ? this.store.items : (this.store as any).$_internal_data
-        )
+          this.isList ? this.store.items : (this.store as any).$_internal_data,
+        ),
       );
     }
   }
@@ -327,8 +331,8 @@ export class Signal<Type = any> {
       localStorage.setItem(
         this.pn,
         JSON.stringify(
-          this.isList ? this.store.items : (this.store as any).$_internal_data
-        )
+          this.isList ? this.store.items : (this.store as any).$_internal_data,
+        ),
       );
     }
   }
@@ -345,14 +349,19 @@ export class Signal<Type = any> {
       | (T | "dataChanged" | "itemUpdated" | T[])
       | (() => HTMLElement | void)
       | Comp
+      | ((ctx: Comp) => HTMLElement),
+    listener?:
+      | (() => HTMLElement | void)
+      | Comp
       | ((this: Comp) => HTMLElement),
-    listener?: (() => HTMLElement | void) | Comp | ((this: Comp) => HTMLElement)
   ) {
     if (!eventName) {
       console.error(
-        ` ✘  Cradova err:  eventName ${String(eventName)} or listener ${String(
-          listener
-        )} is not a valid event name or function`
+        ` ✘  Cradova err:  eventName ${String(eventName)} or listener ${
+          String(
+            listener,
+          )
+        } is not a valid event name or function`,
       );
       return;
     }
@@ -366,9 +375,11 @@ export class Signal<Type = any> {
     }
     if (typeof listener !== "function" || !eventName) {
       console.error(
-        ` ✘  Cradova err: listener or eventName ${String(
-          listener
-        )} is not a valid listener function or string`
+        ` ✘  Cradova err: listener or eventName ${
+          String(
+            listener,
+          )
+        } is not a valid listener function or string`,
       );
       return;
     }
@@ -395,13 +406,15 @@ export class Signal<Type = any> {
       | (() => HTMLElement)
       | Comp
       | ((this: Comp) => HTMLElement),
-    element?: (() => HTMLElement) | Comp | ((this: Comp) => HTMLElement)
+    element?: (() => HTMLElement) | Comp | ((this: Comp) => HTMLElement),
   ): HTMLElement | undefined {
     if (!eventName) {
       console.error(
-        ` ✘  Cradova err:  eventName ${String(eventName)} or element ${String(
-          element
-        )} is not a valid event name or function`
+        ` ✘  Cradova err:  eventName ${String(eventName)} or element ${
+          String(
+            element,
+          )
+        } is not a valid event name or function`,
       );
       return;
     }
@@ -422,9 +435,11 @@ export class Signal<Type = any> {
     }
     if (el === undefined || !(el instanceof HTMLElement)) {
       console.error(
-        ` ✘  Cradova err:  ${String(
-          element
-        )} is not a valid element or function`
+        ` ✘  Cradova err:  ${
+          String(
+            element,
+          )
+        } is not a valid element or function`,
       );
       return;
     }
@@ -445,9 +460,11 @@ export class Signal<Type = any> {
       }
       if (newEl === undefined || !(newEl instanceof HTMLElement)) {
         console.error(
-          ` ✘  Cradova err:  ${String(
-            element
-          )} is not a valid element or function`
+          ` ✘  Cradova err:  ${
+            String(
+              element,
+            )
+          } is not a valid element or function`,
         );
         return;
       }
@@ -530,7 +547,7 @@ export class Page {
     const { template, name } = pageParams;
     if (typeof template !== "function") {
       throw new Error(
-        ` ✘  Cradova err:  template function for the page is not a function`
+        ` ✘  Cradova err:  template function for the page is not a function`,
       );
     }
     this._html = template;
@@ -708,7 +725,7 @@ class RouterBoxClass {
   }
 
   checker(
-    url: string
+    url: string,
   ): [Page | (() => Promise<Page | undefined>), Record<string, any>] {
     if (url[0] !== "/") {
       url = url.slice(url.indexOf("/", 8));
@@ -808,8 +825,9 @@ export class Router {
       ) {
         // ? creating the lazy
         RouterBox.routes[path] = async () => {
-          const paged: Page =
-            typeof page === "function" ? await page() : await page;
+          const paged: Page = typeof page === "function"
+            ? await page()
+            : await page;
           return RouterBox.route(path, paged);
         };
       } else {
@@ -844,11 +862,14 @@ export class Router {
    * @param force boolean
    */
   static navigate(href: string, data?: Record<string, any>) {
+    if (RouterBox["paused"]) {
+      return;
+    }
     if (typeof href !== "string") {
       console.error(
         " ✘  Cradova err:  href must be a defined path but got " +
           href +
-          " instead"
+          " instead",
       );
     }
     let route = null,
@@ -884,7 +905,7 @@ export class Router {
       RouterBox.loadingPage = page;
     } else {
       throw new Error(
-        " ✘  Cradova err:  Loading Page should be a cradova page class"
+        " ✘  Cradova err:  Loading Page should be a cradova page class",
       );
     }
   }
@@ -916,7 +937,7 @@ export class Router {
       RouterBox["errorHandler"] = callback;
     } else {
       throw new Error(
-        " ✘  Cradova err:  callback for error event is not a function"
+        " ✘  Cradova err:  callback for error event is not a function",
       );
     }
   }
@@ -930,12 +951,24 @@ export class Router {
       RouterBox.doc = doc;
     } else {
       throw new Error(
-        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `
+        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `,
       );
     }
     window.addEventListener("pageshow", () => RouterBox.router());
+    window.addEventListener("hashchange", () => {
+      if (RouterBox["paused"]) {
+        history.forward();
+        return;
+      }
+      RouterBox.router();
+    });
+
     window.addEventListener("popstate", (_e) => {
       _e.preventDefault();
+      if (RouterBox["paused"]) {
+        history.forward();
+        return;
+      }
       RouterBox.router();
     });
   }
@@ -946,14 +979,14 @@ export class Router {
  * ---
  * make reference to dom elements
  */
-export class __raw_ref<T = unknown> {
+export class RefInstance<T = unknown> {
   current: Record<string, T> = {};
   /**
    * Bind a DOM element to a reference name.
    * @param name - The name to reference the DOM element by.
    */
   bind(name: string) {
-    return [this, name] as [__raw_ref<T>, string];
+    return [this, name] as [RefInstance<T>, string];
   }
 }
 
@@ -979,7 +1012,7 @@ export class VirtualList {
   constructor(
     container: HTMLElement,
     dataStore: Signal<any[]>,
-    renderItemFunction: (item: any, index: number) => HTMLElement
+    renderItemFunction: (item: any, index: number) => HTMLElement,
   ) {
     this.dataStore = dataStore;
     this.renderItem = renderItemFunction;
@@ -1011,7 +1044,7 @@ export class VirtualList {
   render() {
     const loop = Math.max(
       this.dataStore.store.length,
-      this.container.children.length
+      this.container.children.length,
     );
     const needsFullRender = this.dataStore.store._isDirty();
     for (let i = 0; i < loop; i++) {

@@ -1,30 +1,27 @@
 // Simple todo list
 
 import {
-  $if,
+  $case,
+  $switch,
   a,
   button,
-  Comp,
+  type Comp,
   div,
   h1,
   input,
-  List,
   main,
   p,
   Page,
   Router,
   Signal,
-  $switch,
-  $case,
-  $ifelse,
 } from "../dist/index.js";
 
 // creating a store
 const todoStore = new Signal(["take bath", "code coded", "take a break"]);
-todoStore.notify(TodoList); // notify the store to update the UI
-function TodoList(this: Comp) {
+todoStore.notify(TodoList);
+function TodoList(ctx: Comp) {
   // can be used to hold multiple references
-  const ref = this.useRef<HTMLInputElement>();
+  const ref = ctx.useRef<HTMLInputElement>();
   // markup
   console.log(todoStore.store);
   return main(
@@ -50,21 +47,16 @@ function TodoList(this: Comp) {
         },
       })
     ),
-    List(
-      todoStore,
-      (item) =>
-        p(item, {
-          title: "click to remove",
-          onclick() {
-            todoStore.store.remove(todoStore.store.indexOf(item));
-          },
-          style: {
-            border: "1px solid green",
-          },
-        }),
-      {
-        className: "list",
-      }
+    todoStore.store.map((item) =>
+      p(item, {
+        title: "click to remove",
+        onclick() {
+          todoStore.store.remove(todoStore.store.indexOf(item));
+        },
+        style: {
+          border: "1px solid green",
+        },
+      })
     ),
     todoStore.computed(function () {
       return div(
@@ -79,21 +71,23 @@ function TodoList(this: Comp) {
   );
 }
 
-const count = function (this: Comp) {
-  const [count, setCounter] = this.useState(0);
-  this.useEffect(() => {
-    console.log("count updated");
-    setInterval(() => {
+const count = function (ctx: Comp) {
+  const [count, setCounter] = ctx.useState(0);
+
+  ctx.useEffect(() => {
+    // ? setInterval is unnnecessary here,
+    // ? it's just to demostrate the cleanup function
+    const interval = setInterval(() => {
       setCounter((p) => p + 1);
     }, 1000);
-  }, []);
+    return () => clearInterval(interval);
+  }, [count]);
+
   return div(
-    $if(count > 5, h1("count is greater than 5")),
-    $ifelse(
-      count > 10,
-      () => h1("count is greater than 10"),
-      () => h1("count is not greater than 10")
-    ),
+    count > 5 ? () => h1("count is greater than 5") : undefined,
+    count > 10
+      ? () => h1("count is greater than 10")
+      : () => h1("count is not greater than 10"),
     $switch(
       count,
       $case(1, () => h1("count is 1")),
@@ -122,8 +116,8 @@ function HelloMessage() {
 
 // using CradovaRef
 
-const nameRef = function (this: Comp) {
-  const [name, setName] = this.useState<string | null>(null);
+const nameRef = function (ctx: Comp) {
+  const [name, setName] = ctx.useState<string | null>(null);
   return div(name ? "hello " + name : "Click to get a second greeting", {
     onclick() {
       const name = prompt();
@@ -138,12 +132,13 @@ const nameRef = function (this: Comp) {
 
 // reference (not state)
 
-function typingExample(this: Comp) {
-  const ref = this.useRef<HTMLElement>();
+function typingExample(ctx: Comp) {
+  const ref = ctx.useRef<HTMLInputElement>();
   return div(
     input({
+      ref: ref.bind("input"),
       oninput() {
-        ref.current["text"]!.innerText = this.value;
+        ref.current["text"]!.innerText = ref.current["input"]!.value;
       },
       placeholder: "typing simulation",
     }),
@@ -198,14 +193,4 @@ Router.BrowserRoutes({
       );
     },
   }),
-});
-
-const something = input({
-  oninput() {
-    console.log(this.value); // (property) GlobalEventHandlers.oninput: ((this: GlobalEventHandlers, ev: Event) => any) | null
-  },
-  placeholder: "Typing simulation",
-  onmount() {
-    console.log("mounted");
-  },
 });

@@ -269,3 +269,7 @@ we went along with it.
 # v3.12.0
 
 - Discharged this feature to allow more flexibility in the way you use args
+
+# v3.12.1
+
+- added and fixed silentStore property for cradova signals.

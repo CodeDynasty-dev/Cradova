@@ -171,10 +171,7 @@ export interface Comp extends Function {
     callback: T,
     deps?: unknown[],
   ) => T;
-  useRef: <T = unknown>() => {
-    current: Record<string, T>;
-    bind: (name: string) => any;
-  };
+  useRef: <T extends HTMLElement | Node | DocumentFragment>() => RefInstance<T>;
 }
 
 type EffectTracker = {

@@ -104,9 +104,6 @@ class SilentStore<Type extends Record<string, any>> {
     for (const key in this.$store.$_internal_data) {
       if (this.$store.$_internal_data.hasOwnProperty(key)) {
         Object.defineProperty(this, key, {
-          get() {
-            return this.$store.$_internal_data[key];
-          },
           set(value) {
             this.$store.$_internal_data[key] = value;
           },

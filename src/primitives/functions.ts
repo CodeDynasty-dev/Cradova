@@ -1,13 +1,13 @@
-import * as CSS from "csstype";
+// import * as CSS from "csstype";
 import type { Comp, VJS_params_TYPE } from "./types.js";
-import { RefInstance, Signal, VirtualList } from "./classes.js";
-import { div } from "./dom-objects.js";
+import { RefInstance, Signal } from "./classes.js";
+// import { div } from "./dom-objects.js";
 /**
  * @internal
  */
 export const makeElement = <E extends HTMLElement>(
   element: E & HTMLElement,
-  ElementChildrenAndPropertyList: VJS_params_TYPE<E>,
+  ElementChildrenAndPropertyList: VJS_params_TYPE<E>
 ) => {
   const props: Record<string, any> = {};
   let text: string | undefined = undefined;
@@ -40,12 +40,12 @@ export const makeElement = <E extends HTMLElement>(
             element.appendChild(
               unroll_child_list([
                 (child[1] as Signal).store[child[0] as string] as HTMLElement,
-              ]),
+              ])
             );
           });
           element.appendChild(
             // @ts-ignore
-            unroll_child_list([child[1].store[child[0]] as HTMLElement]),
+            unroll_child_list([child[1].store[child[0]] as HTMLElement])
           );
           continue;
         }
@@ -83,7 +83,7 @@ export const makeElement = <E extends HTMLElement>(
       if (prop === "onmount" && typeof props["onmount"] === "function") {
         // @ts-ignore
         window.CradovaEvent.after_comp_is_mounted.push(
-          props["onmount"].bind(element),
+          props["onmount"].bind(element)
         );
         continue;
       }
@@ -119,12 +119,12 @@ export const makeElement = <E extends HTMLElement>(
           signalInstance.notify([eventName] as any, () => {
             element.setAttribute(
               prop,
-              signalInstance.store[eventName] as string,
+              signalInstance.store[eventName] as string
             );
           });
           element.setAttribute(
             prop,
-            (signalInstance.store as Record<string, any>)[eventName],
+            (signalInstance.store as Record<string, any>)[eventName]
           );
           continue;
         }
@@ -204,14 +204,14 @@ export function loop<Type>(
   component: (
     value: Type,
     index?: number,
-    array?: LoopData<Type>,
+    array?: LoopData<Type>
   ) =>
     | HTMLElement
     | HTMLElement[]
     | DocumentFragment
     | DocumentFragment[]
     | undefined
-    | undefined[],
+    | undefined[]
 ) {
   return Array.isArray(datalist)
     ? (datalist.map(component) as unknown as HTMLElement[])
@@ -269,12 +269,12 @@ function depsAreEqual(prevDeps?: unknown[], nextDeps?: unknown[]): boolean {
  */
 function useState<S>(
   this: Comp,
-  initialValue: S,
+  initialValue: S
 ): [S, (newState: S | ((prevState: S) => S)) => void] {
   const self = this;
   if (typeof self !== "function" || !self._state) {
     throw new Error(
-      "Cradova Hook Error: useState called outside of a Cradova component context.",
+      "Cradova Hook Error: useState called outside of a Cradova component context."
     );
   }
 
@@ -295,7 +295,7 @@ function useState<S>(
 
     if (!Object.is(currentState, nextState)) {
       self._state![idx] = nextState;
-      funcManager.recall(self); // Trigger re-render
+      compManager.recall(self); // Trigger re-render
     }
   };
 
@@ -312,12 +312,12 @@ function useState<S>(
 function useEffect(
   this: Comp,
   effect: () => (() => void) | void,
-  deps?: unknown[],
+  deps?: unknown[]
 ): void {
   const self = this;
   if (typeof self !== "function" || !self._effect_tracker) {
     throw new Error(
-      "Cradova Hook Error: useEffect called outside of a Cradova component context.",
+      "Cradova Hook Error: useEffect called outside of a Cradova component context."
     );
   }
 
@@ -344,7 +344,7 @@ function useEffect(
   }
 
   if (needsRun) {
-    funcManager.scheduleEffect(self, idx, effect);
+    compManager.scheduleEffect(self, idx, effect);
   }
 }
 
@@ -360,7 +360,7 @@ function useMemo<T>(this: Comp, factory: () => T, deps?: unknown[]): T {
   const self = this;
   if (typeof self !== "function" || !self._memo_tracker) {
     throw new Error(
-      "Cradova Hook Error: useMemo called outside of a Cradova component context.",
+      "Cradova Hook Error: useMemo called outside of a Cradova component context."
     );
   }
 
@@ -396,7 +396,7 @@ function useMemo<T>(this: Comp, factory: () => T, deps?: unknown[]): T {
 function useCallback<T extends (...args: any[]) => any>(
   this: Comp,
   callback: T,
-  deps?: unknown[],
+  deps?: unknown[]
 ): T {
   return useMemo.call(this, () => callback, deps) as T;
 }
@@ -411,7 +411,7 @@ function useCallback<T extends (...args: any[]) => any>(
  * @returns A ref object like { current: T | null }.
  */
 function useRef<
-  T extends HTMLElement | Node | DocumentFragment,
+  T extends HTMLElement | Node | DocumentFragment
 >(): RefInstance<T> {
   return new RefInstance();
 }
@@ -429,12 +429,12 @@ function useReducer<S, A>(
   this: Comp,
   reducer: (state: S, action: A) => S,
   initialArg: S,
-  initializer?: (arg: S) => S,
+  initializer?: (arg: S) => S
 ): [S, (action: A) => void] {
   const self = this;
   if (typeof self !== "function" || !self._reducer_tracker) {
     throw new Error(
-      "Cradova Hook Error: useReducer called outside of a Cradova component context.",
+      "Cradova Hook Error: useReducer called outside of a Cradova component context."
     );
   }
 
@@ -442,9 +442,8 @@ function useReducer<S, A>(
   const tracker = self._reducer_tracker;
 
   if (tracker.length <= idx) {
-    const initialState = typeof initializer === "function"
-      ? initializer(initialArg)
-      : initialArg;
+    const initialState =
+      typeof initializer === "function" ? initializer(initialArg) : initialArg;
     tracker[idx] = { state: initialState };
   }
 
@@ -462,7 +461,7 @@ function useReducer<S, A>(
     // Only trigger recall if state actually changed
     if (!Object.is(currentState, nextState)) {
       currentTracker.state = nextState; // Update the stored state
-      funcManager.recall(self); // Schedule a re-render
+      compManager.recall(self); // Schedule a re-render
     }
   };
 
@@ -508,7 +507,7 @@ function resetComponent(comp: Comp): Comp {
     comp._effect_index = -1;
     comp._memo_index = -1;
     comp._reducer_index = -1; // Added Reset
-    funcManager.cleanupEffects(comp);
+    compManager.cleanupEffects(comp);
     return comp as Comp;
   }
   return comp as Comp;
@@ -524,7 +523,7 @@ export const toComp = (comp: Comp, args?: any[]): HTMLElement | undefined => {
   comp._memo_tracker = [];
   comp._reducer_tracker = [];
   comp._args = args;
-  return funcManager.render(comp);
+  return compManager.render(comp);
 };
 
 export const toCompNoRender = (comp: Comp): Comp => {
@@ -537,13 +536,13 @@ export const toCompNoRender = (comp: Comp): Comp => {
   comp._effect_index = -1;
   comp._memo_index = -1;
   comp._reducer_index = -1; // Added Reset
-  funcManager.cleanupEffects(comp);
+  compManager.cleanupEffects(comp);
   return comp;
 };
 
 // --- Function Manager ---
 
-export const funcManager = {
+export const compManager = {
   render(component: Comp): HTMLElement | undefined {
     const html = component(component, ...(component._args || []));
 
@@ -557,7 +556,7 @@ export const funcManager = {
     } else {
       console.error(
         " Cradova err : Component function must return an HTMLElement. Got:",
-        html,
+        html
       );
       component.rendered = false;
       return undefined;
@@ -604,7 +603,7 @@ export const funcManager = {
       } else {
         console.error(
           " Cradova err : Component function must return an HTMLElement during update. Got:",
-          newHtml,
+          newHtml
         );
         component.reference = node;
         component.published = false;
@@ -620,7 +619,7 @@ export const funcManager = {
   scheduleEffect(
     component: Comp,
     index: number,
-    effect: () => (() => void) | void,
+    effect: () => (() => void) | void
   ): void {
     if (!this._effectsToRun.has(component)) {
       this._effectsToRun.set(component, new Map());
@@ -667,7 +666,7 @@ export const funcManager = {
           } catch (err) {
             console.error(
               "Cradova err: Error during component cleanup/unmount:",
-              err,
+              err
             );
           }
         }
@@ -684,32 +683,32 @@ export const funcManager = {
   },
 };
 
-export const List = <T>(
-  signal: Signal<T[]>,
-  item: (item: T) => HTMLElement,
-  options?: {
-    className?: string;
-    id?: string;
-    style?: Partial<CSS.Properties>;
-  },
-) => {
-  const list = div(
-    {
-      className: options?.className,
-      id: options?.id,
-      style: options?.style,
-    },
-    {
-      onmount() {
-        const vl = new VirtualList(this, signal, item);
-        return () => {
-          vl.destroy();
-        };
-      },
-    },
-  );
-  return list;
-};
+// export const List = <T>(
+//   signal: Signal<T[]>,
+//   item: (item: T) => HTMLElement,
+//   options?: {
+//     className?: string;
+//     id?: string;
+//     style?: Partial<CSS.Properties>;
+//   }
+// ) => {
+//   const list = div(
+//     {
+//       className: options?.className,
+//       id: options?.id,
+//       style: options?.style,
+//     },
+//     {
+//       onmount() {
+//         const vl = new VirtualList(this, signal, item);
+//         return () => {
+//           vl.destroy();
+//         };
+//       },
+//     }
+//   );
+//   return list;
+// };
 
 /**
  * Invokes a function with the provided arguments.
@@ -727,7 +726,7 @@ export function invoke(fn: (...args: any[]) => HTMLElement, ...args: any[]) {
  */
 
 export const useExternalEffect = <T>(
-  effect: (ctx: Comp, ...args: any[]) => T,
+  effect: (ctx: Comp, ...args: any[]) => T
 ) => {
   /**
    * @param comp - The component instance

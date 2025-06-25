@@ -1,6 +1,6 @@
 import { div } from "./dom-objects.js";
 import {
-  funcManager,
+  compManager,
   isArrowFunc,
   toComp,
   toCompNoRender,
@@ -13,7 +13,7 @@ import type { browserPageType, Comp, CradovaPageType } from "./types.js";
 /**
  * @internal
  */
-export class cradovaEvent {
+class cradovaEvent {
   /**
    * the events runs only once and removed to avoid duplication when added on the next rendering
    * these event are call and removed once when when a Function is rendered to the dom
@@ -304,14 +304,14 @@ export class Signal<Type = any> {
   ) {
     this.subscribers![eventName]?.forEach((c) => {
       if ((c as Comp).published) {
-        funcManager.recall(c as Comp);
+        compManager.recall(c as Comp);
       } else {
         (c as () => void)();
       }
     });
     this.subscribers!["__ALL__"]?.forEach((c) => {
       if ((c as Comp).published) {
-        funcManager.recall(c as Comp);
+        compManager.recall(c as Comp);
       } else {
         (c as () => void)();
       }
@@ -349,7 +349,7 @@ export class Signal<Type = any> {
     }
     for (const c of s.values()) {
       if ((c as Comp).published) {
-        funcManager.recall(c as Comp);
+        compManager.recall(c as Comp);
       } else {
         (c as () => void)();
       }
@@ -532,7 +532,6 @@ export class Signal<Type = any> {
  * @param name
  * @param template
  */
-// TODO: make this class internal using lower abstractions for pages, let users provide regular Funcs type instead.
 export class Page {
   /**
    * @internal
@@ -546,18 +545,19 @@ export class Page {
    * @internal
    */
   public _template?: HTMLElement;
-  /**
-   * @internal
-   */
-  private _snapshot: boolean;
-  /**
-   * @internal
-   */
-  private _snapshot_html?: string;
-  /**
-   * @internal
-   */
-  _unload_CB?: () => Promise<void> | void;
+  // /**
+  //  * @internal
+  //  */
+  // private _snapshot: boolean;
+  // /**
+  //  * @internal
+  //  */
+  // private _snapshot_html?: string;
+  // /**
+  //  * @internal
+  //  */
+  _unload_CB?: (this: Page) => Promise<void> | void;
+  _activate_CB?: (this: Page) => Promise<void> | void;
   constructor(pageParams: CradovaPageType) {
     const { template, name } = pageParams;
     if (typeof template !== "function") {
@@ -565,45 +565,48 @@ export class Page {
         ` ✘  Cradova err:  template function for the page is not a function`
       );
     }
-    this._html = template;
+    this._html = template as () => HTMLElement;
     this._name = name || document.title;
-    this._snapshot = pageParams.snapshotIsolation || false;
+    // this._snapshot = snapshotIsolation || false;
   }
-  private async _takeSnapShot() {
-    //? Prevent snapshot if already exists
-    if (RouterBox.doc!.dataset["snapshot"] === "true") return;
-    try {
-      const response = await fetch(location.href);
-      if (!response.ok) throw new Error("Failed to fetch the page");
-      const html = await response.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
-      doc.title = this._name;
-      const wrapper = doc.querySelector('[data-wrapper="app"]');
-      if (wrapper) {
-        wrapper.setAttribute("data-snapshot", "true");
-        wrapper.innerHTML = this._snapshot_html!;
-      } else {
-        console.error("Wrapper or template is not found");
-        return;
-      }
-      const snapshot = doc.documentElement.outerHTML;
-      await fetch(location.origin, {
-        body: snapshot,
-        method: "POST",
-        headers: {
-          "Content-Type": "text/html",
-          "cradova-snapshot": location.href.slice(location.origin.length),
-        },
-      });
-    } catch (error) {
-      console.error("Snapshot error:", error);
-    }
-    this._snapshot_html = undefined;
-  }
+  // private async _takeSnapShot() {
+  //   //? Prevent snapshot if already exists
+  //   if (RouterBox.doc!.dataset["snapshot"] === "true") return;
+  //   try {
+  //     const response = await fetch(location.href);
+  //     if (!response.ok) throw new Error("Failed to fetch the page");
+  //     const html = await response.text();
+  //     const parser = new DOMParser();
+  //     const doc = parser.parseFromString(html, "text/html");
+  //     doc.title = this._name;
+  //     const wrapper = doc.querySelector('[data-wrapper="app"]');
+  //     if (wrapper) {
+  //       wrapper.setAttribute("data-snapshot", "true");
+  //       wrapper.innerHTML = this._snapshot_html!;
+  //     } else {
+  //       console.error("Wrapper or template is not found");
+  //       return;
+  //     }
+  //     const snapshot = doc.documentElement.outerHTML;
+  //     await fetch(location.origin, {
+  //       body: snapshot,
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "text/html",
+  //         "cradova-snapshot": location.href.slice(location.origin.length),
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error("Snapshot error:", error);
+  //   }
+  //   this._snapshot_html = undefined;
+  // }
 
-  set onDeactivate(cb: () => Promise<void> | void) {
+  set onDeactivate(cb: (this: Page) => Promise<void> | void) {
     this._unload_CB = cb;
+  }
+  set onActivate(cb: (this: Page) => Promise<void> | void) {
+    this._activate_CB = cb;
   }
   /**
    * @internal
@@ -618,19 +621,13 @@ export class Page {
     this._template = div({ id: "page" }, this._html);
     RouterBox.doc!.innerHTML = "";
     // ? create save the snapshot html
-    if (this._snapshot) this._snapshot_html = this._template.outerHTML;
+    // if (this._snapshot) this._snapshot_html = this._template.outerHTML;
     RouterBox.doc!.appendChild(this._template);
+    if (this._activate_CB) await this._activate_CB.apply(this);
     // ? call any onmount event added in the cradova event loop
     // @ts-ignore
-
     window.CradovaEvent.dispatchEvent("after_comp_is_mounted");
-    // window.scrollTo({
-    //   top: 0,
-    //   left: 0,
-    //   // @ts-ignore
-    //   behavior: "instant",
-    // });
-    if (this._snapshot) this._takeSnapShot();
+    // if (this._snapshot) this._takeSnapShot();
   }
 }
 
@@ -721,7 +718,11 @@ class RouterBoxClass {
         }
         await route!._load();
         this.lastNavigatedRouteController &&
-          this.lastNavigatedRouteController._unload_CB?.();
+          (this.lastNavigatedRouteController._template = undefined) &&
+          this.lastNavigatedRouteController._unload_CB?.apply(
+            this.lastNavigatedRouteController
+          );
+
         this.lastNavigatedRoute = url;
         this.lastNavigatedRouteController = route;
       } catch (error) {
@@ -1015,101 +1016,101 @@ export class RefInstance<T = unknown> {
 }
 
 // VirtualList component
-export class VirtualList {
-  /**
-   * @internal
-   */
-  dataStore: Signal<any[]>;
-  /**
-   * @internal
-   */
-  renderItem: (item: any, index: number) => HTMLElement;
-  /**
-   * @internal
-   */
-  renderScheduled: boolean;
-  /**
-   * @internal
-   */
-  container: HTMLElement;
-  idxs: number[] = [];
-  constructor(
-    container: HTMLElement,
-    dataStore: Signal<any[]>,
-    renderItemFunction: (item: any, index: number) => HTMLElement
-  ) {
-    this.dataStore = dataStore;
-    this.renderItem = renderItemFunction;
-    this.renderScheduled = false;
-    this.container = container;
+// class VirtualList {
+//   /**
+//    * @internal
+//    */
+//   dataStore: Signal<any[]>;
+//   /**
+//    * @internal
+//    */
+//   renderItem: (item: any, index: number) => HTMLElement;
+//   /**
+//    * @internal
+//    */
+//   renderScheduled: boolean;
+//   /**
+//    * @internal
+//    */
+//   container: HTMLElement;
+//   idxs: number[] = [];
+//   constructor(
+//     container: HTMLElement,
+//     dataStore: Signal<any[]>,
+//     renderItemFunction: (item: any, index: number) => HTMLElement
+//   ) {
+//     this.dataStore = dataStore;
+//     this.renderItem = renderItemFunction;
+//     this.renderScheduled = false;
+//     this.container = container;
 
-    this.scheduleRender();
-    this.idxs.push(dataStore.subscribers["dataChanged"]?.length || 0);
-    this.dataStore.notify("dataChanged", () => {
-      this.scheduleRender();
-    });
-    this.idxs.push(dataStore.subscribers["itemUpdated"]?.length || 0);
-    this.dataStore.notify("itemUpdated", () => {
-      this.scheduleRender();
-    });
-  }
+//     this.scheduleRender();
+//     this.idxs.push(dataStore.subscribers["dataChanged"]?.length || 0);
+//     this.dataStore.notify("dataChanged", () => {
+//       this.scheduleRender();
+//     });
+//     this.idxs.push(dataStore.subscribers["itemUpdated"]?.length || 0);
+//     this.dataStore.notify("itemUpdated", () => {
+//       this.scheduleRender();
+//     });
+//   }
 
-  /**
-   * @internal
-   */
-  scheduleRender() {
-    if (this.renderScheduled) return;
-    this.renderScheduled = true;
-    requestAnimationFrame(this.render.bind(this));
-  }
-  /**
-   * @internal
-   */
-  render() {
-    const loop = Math.max(
-      this.dataStore.store.length,
-      this.container.children.length
-    );
-    const needsFullRender = this.dataStore.store._isDirty();
-    for (let i = 0; i < loop; i++) {
-      if (needsFullRender || this.dataStore.store._isDirty(i)) {
-        const dataItem = this.dataStore.store.get(i);
-        const newDOM = this.renderItem(dataItem, i);
-        const oldDOM = this.container.children[i];
-        if (newDOM instanceof HTMLElement) {
-          if (oldDOM) {
-            if (dataItem === undefined) {
-              oldDOM.remove();
-              continue;
-            }
-            this.container.replaceChild(newDOM, oldDOM);
-          } else {
-            this.container.appendChild(newDOM);
-          }
-        } else {
-          if (oldDOM) {
-            oldDOM.remove();
-          }
-        }
-      }
-    }
+//   /**
+//    * @internal
+//    */
+//   scheduleRender() {
+//     if (this.renderScheduled) return;
+//     this.renderScheduled = true;
+//     requestAnimationFrame(this.render.bind(this));
+//   }
+//   /**
+//    * @internal
+//    */
+//   render() {
+//     const loop = Math.max(
+//       this.dataStore.store.length,
+//       this.container.children.length
+//     );
+//     const needsFullRender = this.dataStore.store._isDirty();
+//     for (let i = 0; i < loop; i++) {
+//       if (needsFullRender || this.dataStore.store._isDirty(i)) {
+//         const dataItem = this.dataStore.store.get(i);
+//         const newDOM = this.renderItem(dataItem, i);
+//         const oldDOM = this.container.children[i];
+//         if (newDOM instanceof HTMLElement) {
+//           if (oldDOM) {
+//             if (dataItem === undefined) {
+//               oldDOM.remove();
+//               continue;
+//             }
+//             this.container.replaceChild(newDOM, oldDOM);
+//           } else {
+//             this.container.appendChild(newDOM);
+//           }
+//         } else {
+//           if (oldDOM) {
+//             oldDOM.remove();
+//           }
+//         }
+//       }
+//     }
 
-    if (needsFullRender) {
-      this.dataStore.store._clearAllDirty();
-    }
-    this.renderScheduled = false;
-  }
-  /**
-   * @internal
-   */
-  destroy() {
-    this.renderItem = null as any;
-    this.container.innerHTML = "";
-    this.container = null as any;
-    this.renderScheduled = false;
-    this.dataStore.subscribers["dataChanged"].splice(this.idxs[0], 1);
-    this.dataStore.subscribers["itemUpdated"].splice(this.idxs[1], 1);
-    this.idxs.length = 0;
-    this.dataStore = null as any;
-  }
-}
+//     if (needsFullRender) {
+//       this.dataStore.store._clearAllDirty();
+//     }
+//     this.renderScheduled = false;
+//   }
+//   /**
+//    * @internal
+//    */
+//   destroy() {
+//     this.renderItem = null as any;
+//     this.container.innerHTML = "";
+//     this.container = null as any;
+//     this.renderScheduled = false;
+//     this.dataStore.subscribers["dataChanged"].splice(this.idxs[0], 1);
+//     this.dataStore.subscribers["itemUpdated"].splice(this.idxs[1], 1);
+//     this.idxs.length = 0;
+//     this.dataStore = null as any;
+//   }
+// }

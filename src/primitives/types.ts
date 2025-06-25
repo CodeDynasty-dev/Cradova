@@ -11,7 +11,8 @@ interface Attributes<E extends HTMLElement> {
 }
 
 type StandardEvents<E extends HTMLElement> = {
-  [key in keyof E]: E[key] extends (this: E, event: Event) => void ? key
+  [key in keyof E]: E[key] extends (this: E, event: Event) => void
+    ? key
     : never;
 }[keyof E];
 
@@ -33,10 +34,8 @@ export type VJS_params_TYPE<E extends HTMLElement> = // children types
     // | VJS_params_TYPE<E>
     // | VJS_params_TYPE<E>[]
     // attributes types
-    | (
-      & Attributes<E>
-      & Omit<Partial<E>, keyof Attributes<E> | StandardEvents<E>>
-    )
+    | (Attributes<E> &
+        Omit<Partial<E>, keyof Attributes<E> | StandardEvents<E>>)
   )[];
 /**
  * @internal
@@ -87,7 +86,7 @@ export type CradovaPageType = {
    * @returns void
    * .
    */
-  template: (this: any) => HTMLElement;
+  template: () => HTMLElement | ((ctx: Comp) => HTMLElement) | Comp;
   /**
    * Cradova page
    * ---
@@ -97,7 +96,7 @@ export type CradovaPageType = {
    * the origin server should respond with the snapshot for future request to the page url
    * the origin server should implement suitable mechanisms to invalidate it's caches
    */
-  snapshotIsolation?: boolean;
+  // snapshotIsolation?: boolean;
 };
 
 export type browserPageType<importType = Page> =
@@ -160,16 +159,16 @@ export interface Comp extends Function {
   useReducer: <S, A>(
     reducer: (state: S, action: A) => S,
     initialArg: S,
-    initializer?: (arg: S) => S,
+    initializer?: (arg: S) => S
   ) => [S, (action: A) => void];
   useState: <S>(
-    initialValue: S,
+    initialValue: S
   ) => [S, (newState: S | ((prevState: S) => S)) => void];
   useEffect: (effect: () => (() => void) | void, deps?: unknown[]) => void;
   useMemo: <T>(factory: () => T, deps?: unknown[]) => T;
   useCallback: <T extends (...args: any[]) => any>(
     callback: T,
-    deps?: unknown[],
+    deps?: unknown[]
   ) => T;
   useRef: <T extends HTMLElement | Node | DocumentFragment>() => RefInstance<T>;
 }

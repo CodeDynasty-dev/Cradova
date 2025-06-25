@@ -273,3 +273,8 @@ we went along with it.
 # v3.12.1
 
 - added and fixed silentStore property for cradova signals.
+
+# v3.12.2
+
+- Bug fixes in cradova pages
+- snapshot isolation is removed due to security issues.

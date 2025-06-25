@@ -462,11 +462,10 @@ export class Signal<Type = any> {
     }
     const listener = () => {
       if (!document.body.contains(listener.element)) {
-        // console.log(
-        //   "----------------->",
-        //   this.subscribers[eventName as keyof Type],
-        // );
-        this.subscribers[eventName as keyof Type].splice(listener.idx, 1);
+        listener.element?.remove();
+        this.subscribers[eventName as keyof Type] = this.subscribers[
+          eventName as keyof Type
+        ].filter((f: any) => listener.idx !== f.idx);
         return;
       }
       let newEl;

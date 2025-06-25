@@ -86,7 +86,7 @@ export type CradovaPageType = {
    * @returns void
    * .
    */
-  template: () => HTMLElement | ((ctx: Comp) => HTMLElement) | Comp;
+  template: ((ctx: Comp) => HTMLElement) | (() => HTMLElement);
   /**
    * Cradova page
    * ---

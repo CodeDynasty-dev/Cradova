@@ -1,39 +1,47 @@
 // Simple todo list
-import { $case, $switch, a, button, div, h1, input, main, p, Page, Router, Signal, } from "../dist/index.js";
+import { $case, $switch, a, button, div, h1, input, List, main, p, Page, Router, } from "../dist/index.js";
 // creating a store
-const todoStore = new Signal(["take bath", "code coded", "take a break"]);
-todoStore.notify(TodoList);
+const todoStore = new List(["take bath", "code coded", "take a break"], (item) => p(item, {
+    title: "click to remove",
+    onclick() {
+        todoStore.splice(todoStore.indexOf(item));
+    },
+    style: {
+        border: "1px solid green",
+    },
+}), {
+    itemHeight: 50,
+    className: "todo-list",
+    id: "todo-list",
+});
+// todoStore.notify(TodoList);
+console.log(todoStore);
 function TodoList(ctx) {
     // can be used to hold multiple references
     const ref = ctx.useRef();
     // markup
-    console.log(todoStore.store);
-    return main(h1(`Todo List`), div(todoStore.computed(function () {
-        const placeholderText = todoStore.store.length
-            ? "type in todo"
-            : "no todos yet, type in todo";
-        return input({
-            placeholder: placeholderText,
-            ref: ref.bind("todoInput"),
-        });
-    }), button("Add todo", {
-        onclick() {
-            const todo = ref.current["todoInput"]?.value;
-            if (todo) {
-                todoStore.store.push(todo);
-                ref.current["todoInput"].value = "";
+    return main(h1(`Todo List`), div(input({
+        onkeydown(event) {
+            if (event.key === "Enter") {
+                const todo = ref.current("todoInput")?.value;
+                if (todo) {
+                    todoStore.push(todo);
+                    ref.current("todoInput").value = "";
+                }
             }
         },
-    })), todoStore.store.map((item) => p(item, {
-        title: "click to remove",
+        placeholder: "type in todo",
+        ref: ref.bind("todoInput"),
+    }), button("Add todo", {
         onclick() {
-            todoStore.store.remove(todoStore.store.indexOf(item));
+            const todo = ref.current("todoInput")?.value;
+            if (todo) {
+                todoStore.push(todo);
+                ref.current("todoInput").value = "";
+            }
         },
-        style: {
-            border: "1px solid green",
-        },
-    })), todoStore.computed(function () {
-        return div(p("Total todos: " + todoStore.store.length, {
+    })), todoStore.Element, todoStore.computed(function () {
+        return div(p("Total todos: " + todoStore.length, {
             style: {
                 fontWeight: "bold",
                 color: "blue",
@@ -84,7 +92,7 @@ function typingExample(ctx) {
     return div(input({
         ref: ref.bind("input"),
         oninput() {
-            ref.current["text"].innerText = ref.current["input"].value;
+            ref.current("text").innerText = ref.current("input").value;
         },
         placeholder: "typing simulation",
     }), p(" no thing typed yet!", { ref: ref.bind("text") }), a({ href: "/p" }, "log lol in the console"));
@@ -99,8 +107,7 @@ Router.BrowserRoutes({
         },
     }),
     "/": new Page({
-        name: "boohoo 1",
-        snapshotIsolation: true,
+        title: "boohoo 1",
         /**
          * @returns A page with a button that navigates to another page that renders a Function as its template.
          * The page also renders a list of todo items and the App component.
@@ -116,8 +123,7 @@ Router.BrowserRoutes({
         },
     }),
     "/test": new Page({
-        snapshotIsolation: true,
-        name: "boohoo 2",
+        title: "boohoo 2",
         template() {
             return div(button("go to Function as page", {
                 onclick() {

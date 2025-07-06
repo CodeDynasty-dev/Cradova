@@ -33,15 +33,9 @@ class cradovaEvent {
    */
 
   async dispatchEvent(
-    eventName: "after_comp_is_mounted" | "after_page_is_killed"
+    eventName: "after_comp_is_mounted" | "after_page_is_killed",
   ) {
     const eventListeners = this[eventName];
-    // if (eventName.includes("Active")) {
-    //   for (let i = 0; i < eventListeners.length; i++) {
-    //     eventListeners[i]();
-    //   }
-    //   return;
-    // }
     while (eventListeners.length !== 0) {
       const en_cb = await eventListeners.shift()!();
       if (typeof en_cb === "function") {
@@ -64,7 +58,7 @@ class Store<Type extends Record<string, any>> {
   $_internal_data: Type;
   constructor(
     data: Type,
-    notifier: (key: keyof Type, value: Type[keyof Type]) => void
+    notifier: (key: keyof Type, value: Type[keyof Type]) => void,
   ) {
     this.$_internal_data = data;
     for (const key in this.$_internal_data) {
@@ -115,112 +109,6 @@ class SilentStore<Type extends Record<string, any>> {
   }
 }
 
-class List<Type extends any[]> {
-  /**
-   * @internal
-   */
-  private _data: Type;
-  /**
-   * @internal
-   */
-  private _dirtyIndices: Set<any>;
-  notifier: (
-    eventType: "dataChanged" | "itemUpdated",
-    newItemData: Type[number]
-  ) => void;
-  constructor(
-    initialData: Type,
-    notifier: (
-      eventType: "dataChanged" | "itemUpdated",
-      newItemData: Type[number]
-    ) => void
-  ) {
-    this._data = initialData || [];
-    this._dirtyIndices = new Set();
-    this.notifier = notifier;
-    this._dirtyIndices.add("all");
-  }
-
-  get items(): IterableIterator<Type[number]> {
-    //? the returned value should be an iterator
-    return {
-      [Symbol.iterator]: () => {
-        return this._data[Symbol.iterator]();
-      },
-      next: () => {
-        return this._data[Symbol.iterator]().next();
-      },
-    };
-  }
-  get length() {
-    return this._data.length;
-  }
-  get(index: number) {
-    return this._data[index];
-  }
-  indexOf(item: Type[number]) {
-    return this._data.indexOf(item);
-  }
-
-  update(index: number, newItemData: Type[number]) {
-    if (
-      index >= 0 &&
-      index < this._data.length &&
-      this._data[index] !== newItemData
-    ) {
-      this._data[index] = newItemData;
-      this._dirtyIndices.add(index);
-      this.notifier("itemUpdated", { index: index, newItemData: newItemData });
-    }
-  }
-
-  push(itemData: Type[number], index?: number) {
-    if (index === undefined || index > this._data.length || index < 0) {
-      index = this._data.length;
-    }
-    this._data.splice(index, 0, itemData);
-    this._dirtyIndices.add("all");
-    this.notifier("dataChanged", { type: "add", index: index });
-  }
-
-  map<T>(callback: (item: Type[number], index: number) => T) {
-    return this._data.map(callback);
-  }
-
-  remove(index: number, count: number = 1) {
-    if (index >= 0 && index < this._data.length && count > 0) {
-      this._data.splice(index, count);
-      this._dirtyIndices.add("all");
-      this.notifier("dataChanged", { type: "remove", index: index });
-    }
-  }
-  /**
-   * @internal
-   */
-  _set(newData: Type) {
-    this._data = newData || [];
-    this._dirtyIndices.clear();
-    this._dirtyIndices.add("all");
-    return ["dataChanged"];
-  }
-  /**
-   * @internal
-   */
-  _isDirty(index: number | "all" = "all") {
-    if (this._dirtyIndices.has(index)) {
-      this._dirtyIndices.delete(index);
-      return true;
-    }
-    return false;
-  }
-  /**
-   * @internal
-   */
-  _clearAllDirty() {
-    this._dirtyIndices.clear();
-  }
-}
-
 /**
  *  Cradova Signal
  * ----
@@ -232,7 +120,7 @@ class List<Type extends any[]> {
  * @constructor initial: Record<string, any>, props: {persist}
  */
 
-export class Signal<Type = any> {
+export class Signal<Type extends Record<string, any> = any> {
   /**
    * @internal
    */
@@ -240,36 +128,22 @@ export class Signal<Type = any> {
   /**
    * @internal
    */
-  private isList: boolean = false;
-  /**
-   * @internal
-   */
   subscribers: Record<
     keyof Type | "dataChanged" | "itemUpdated" | "__ALL__",
-    ((() => void) | Comp)[]
+    ((() => void) | Comp | ((ctx: Comp) => HTMLElement))[]
   > = {} as any;
-  store: Type extends Array<any>
-    ? List<Type>
-    : Type extends Record<string, any>
-    ? Type
-    : never;
+  store: Type;
   silentStore: Type extends Array<any> ? never : Type = undefined!;
   passers?: Record<keyof Type, [string, Signal<Type>]>;
   constructor(initial: Type, props?: { persistName?: string | undefined }) {
-    if (!initial || typeof initial !== "object") {
-      throw new Error("Initial signal value must be an array or object");
+    if (!initial || typeof initial !== "object" || Array.isArray(initial)) {
+      throw new Error("Initial signal value must be an object");
     }
-    if (!Array.isArray(initial)) {
-      this.store = new Store(initial, (key) => {
-        this.publish(key as keyof Type);
-      }) as any;
-      this.silentStore = new SilentStore<any>(this.store as any) as any;
-    } else {
-      this.isList = true;
-      this.store = new List(initial, (eventType) => {
-        this.publish(eventType);
-      }) as any;
-    }
+
+    this.store = new Store(initial, (key) => {
+      this.publish(key as keyof Type);
+    }) as any;
+    this.silentStore = new SilentStore<any>(this.store as any) as any;
 
     if (props && props.persistName) {
       this.pn = props.persistName;
@@ -277,19 +151,11 @@ export class Signal<Type = any> {
       //
       if (key && key !== "undefined") {
         const restored = JSON.parse(key);
-        if (typeof restored === "object" && !Array.isArray(restored)) {
-          this.store = new Store(Object.assign(initial, restored), (key) => {
-            this.publish(key as keyof Type);
-          }) as any;
-          this.silentStore = new SilentStore<any>(this.store as any) as any;
-        } else if (Array.isArray(restored)) {
-          this.isList = true;
-          this.store = new List(restored, (eventType) => {
-            this.publish(eventType);
-          }) as any;
-        }
+        this.store = new Store(Object.assign(initial, restored), (key) => {
+          this.publish(key as keyof Type);
+        }) as any;
+        this.silentStore = new SilentStore<any>(this.store as any) as any;
       }
-      //
     }
   }
   /**
@@ -300,7 +166,7 @@ export class Signal<Type = any> {
    * @internal
    */
   private publish<T extends keyof Type | "dataChanged" | "itemUpdated">(
-    eventName: T
+    eventName: T,
   ) {
     this.subscribers![eventName]?.forEach((c) => {
       if ((c as Comp).published) {
@@ -317,12 +183,7 @@ export class Signal<Type = any> {
       }
     });
     if (this.pn) {
-      localStorage.setItem(
-        this.pn,
-        JSON.stringify(
-          this.isList ? this.store.items : (this.store as any).$_internal_data
-        )
-      );
+      localStorage.setItem(this.pn, JSON.stringify(this.store));
     }
   }
 
@@ -332,7 +193,8 @@ export class Signal<Type = any> {
    *  fires actions if any available
    */
   set(NEW: Type) {
-    const s = new Set<Comp | (() => void)>();
+    const s = new Set<Comp | (() => void) | ((ctx: Comp) => HTMLElement)>();
+    // @ts-ignore
     const events = this.store._set(NEW);
     for (const event of events) {
       const subs2 = this.subscribers![event as keyof Type];
@@ -356,12 +218,7 @@ export class Signal<Type = any> {
     }
 
     if (this.pn) {
-      localStorage.setItem(
-        this.pn,
-        JSON.stringify(
-          this.isList ? this.store.items : (this.store as any).$_internal_data
-        )
-      );
+      localStorage.setItem(this.pn, JSON.stringify(this.store));
     }
   }
   /**
@@ -378,29 +235,29 @@ export class Signal<Type = any> {
       | (() => HTMLElement | void)
       | Comp
       | ((ctx: Comp) => HTMLElement),
-    listener?: (() => HTMLElement | void) | Comp | ((this: Comp) => HTMLElement)
+    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement),
   ) {
     if (!eventName) {
       console.error(
-        ` ✘  Cradova err:  eventName ${String(eventName)} or listener ${String(
-          listener
-        )} is not a valid event name or function`
+        ` ✘  Cradova err:  eventName ${String(eventName)} or listener ${
+          String(
+            listener,
+          )
+        } is not a valid event name or function`,
       );
       return;
     }
     if (typeof eventName === "function") {
       listener = eventName as () => HTMLElement;
-      if (this.isList) {
-        eventName = ["dataChanged", "itemUpdated"] as any[];
-      } else {
-        eventName = Object.keys(this.store) as any[];
-      }
+      eventName = Object.keys(this.store) as any[];
     }
     if (typeof listener !== "function" || !eventName) {
       console.error(
-        ` ✘  Cradova err: listener or eventName ${String(
-          listener
-        )} is not a valid listener function or string`
+        ` ✘  Cradova err: listener or eventName ${
+          String(
+            listener,
+          )
+        } is not a valid listener function or string`,
       );
       return;
     }
@@ -427,23 +284,21 @@ export class Signal<Type = any> {
       | (() => HTMLElement)
       | Comp
       | ((ctx: Comp) => HTMLElement),
-    element?: (() => HTMLElement) | Comp | ((ctx: Comp) => HTMLElement)
+    element?: (() => HTMLElement) | Comp | ((ctx: Comp) => HTMLElement),
   ): HTMLElement | undefined {
     if (!eventName) {
       console.error(
-        ` ✘  Cradova err:  eventName ${String(eventName)} or element ${String(
-          element
-        )} is not a valid event name or function`
+        ` ✘  Cradova err:  eventName ${String(eventName)} or element ${
+          String(
+            element,
+          )
+        } is not a valid event name or function`,
       );
       return;
     }
     if (typeof eventName === "function") {
       element = eventName as () => HTMLElement;
-      if (this.isList) {
-        eventName = "__ALL__" as any;
-      } else {
-        eventName = "__ALL__" as any;
-      }
+      eventName = "__ALL__" as any;
     }
     const isComp = !isArrowFunc(element as Comp);
     let el;
@@ -454,9 +309,11 @@ export class Signal<Type = any> {
     }
     if (el === undefined || !(el instanceof HTMLElement)) {
       console.error(
-        ` ✘  Cradova err:  ${String(
-          element
-        )} is not a valid element or function`
+        ` ✘  Cradova err:  ${
+          String(
+            element,
+          )
+        } is not a valid element or function`,
       );
       return;
     }
@@ -476,9 +333,11 @@ export class Signal<Type = any> {
       }
       if (newEl === undefined || !(newEl instanceof HTMLElement)) {
         console.error(
-          ` ✘  Cradova err:  ${String(
-            element
-          )} is not a valid element or function`
+          ` ✘  Cradova err:  ${
+            String(
+              element,
+            )
+          } is not a valid element or function`,
         );
         return;
       }
@@ -504,7 +363,9 @@ export class Signal<Type = any> {
       return this.passers;
     }
     //? only compute when needed.
-    const keys = Object.keys(this.store) as (keyof Type)[];
+    const keys = Object.keys(
+      (this.store as unknown as Store<Type>).$_internal_data,
+    ) as (keyof Type)[];
     this.passers = {} as any;
     for (const key of keys) {
       this.passers![key] = [key as string, this];
@@ -544,62 +405,18 @@ export class Page {
    * @internal
    */
   public _template?: HTMLElement;
-  // /**
-  //  * @internal
-  //  */
-  // private _snapshot: boolean;
-  // /**
-  //  * @internal
-  //  */
-  // private _snapshot_html?: string;
-  // /**
-  //  * @internal
-  //  */
   _unload_CB?: (this: Page) => Promise<void> | void;
   _activate_CB?: (this: Page) => Promise<void> | void;
   constructor(pageParams: CradovaPageType) {
-    const { template, name } = pageParams;
+    const { template, title } = pageParams;
     if (typeof template !== "function") {
       throw new Error(
-        ` ✘  Cradova err:  template function for the page is not a function`
+        ` ✘  Cradova err:  template function for the page is not a function`,
       );
     }
     this._html = template as () => HTMLElement;
-    this._name = name || document.title;
-    // this._snapshot = snapshotIsolation || false;
+    this._name = title || document.title;
   }
-  // private async _takeSnapShot() {
-  //   //? Prevent snapshot if already exists
-  //   if (RouterBox.doc!.dataset["snapshot"] === "true") return;
-  //   try {
-  //     const response = await fetch(location.href);
-  //     if (!response.ok) throw new Error("Failed to fetch the page");
-  //     const html = await response.text();
-  //     const parser = new DOMParser();
-  //     const doc = parser.parseFromString(html, "text/html");
-  //     doc.title = this._name;
-  //     const wrapper = doc.querySelector('[data-wrapper="app"]');
-  //     if (wrapper) {
-  //       wrapper.setAttribute("data-snapshot", "true");
-  //       wrapper.innerHTML = this._snapshot_html!;
-  //     } else {
-  //       console.error("Wrapper or template is not found");
-  //       return;
-  //     }
-  //     const snapshot = doc.documentElement.outerHTML;
-  //     await fetch(location.origin, {
-  //       body: snapshot,
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "text/html",
-  //         "cradova-snapshot": location.href.slice(location.origin.length),
-  //       },
-  //     });
-  //   } catch (error) {
-  //     console.error("Snapshot error:", error);
-  //   }
-  //   this._snapshot_html = undefined;
-  // }
 
   set onDeactivate(cb: (this: Page) => Promise<void> | void) {
     this._unload_CB = cb;
@@ -719,7 +536,7 @@ class RouterBoxClass {
         this.lastNavigatedRouteController &&
           (this.lastNavigatedRouteController._template = undefined) &&
           this.lastNavigatedRouteController._unload_CB?.apply(
-            this.lastNavigatedRouteController
+            this.lastNavigatedRouteController,
           );
 
         this.lastNavigatedRoute = url;
@@ -740,7 +557,7 @@ class RouterBoxClass {
   }
 
   checker(
-    url: string
+    url: string,
   ): [Page | (() => Promise<Page | undefined>), Record<string, any>] {
     if (url[0] !== "/") {
       url = url.slice(url.indexOf("/", 8));
@@ -840,8 +657,9 @@ export class Router {
       ) {
         // ? creating the lazy
         RouterBox.routes[path] = async () => {
-          const paged: Page =
-            typeof page === "function" ? await page() : await page;
+          const paged: Page = typeof page === "function"
+            ? await page()
+            : await page;
           return RouterBox.route(path, paged);
         };
       } else {
@@ -883,7 +701,7 @@ export class Router {
       console.error(
         " ✘  Cradova err:  href must be a defined path but got " +
           href +
-          " instead"
+          " instead",
       );
     }
     let route = null,
@@ -919,7 +737,7 @@ export class Router {
       RouterBox.loadingPage = page;
     } else {
       throw new Error(
-        " ✘  Cradova err:  Loading Page should be a cradova page class"
+        " ✘  Cradova err:  Loading Page should be a cradova page class",
       );
     }
   }
@@ -951,7 +769,7 @@ export class Router {
       RouterBox["errorHandler"] = callback;
     } else {
       throw new Error(
-        " ✘  Cradova err:  callback for error event is not a function"
+        " ✘  Cradova err:  callback for error event is not a function",
       );
     }
   }
@@ -965,7 +783,7 @@ export class Router {
       RouterBox.doc = doc;
     } else {
       throw new Error(
-        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `
+        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `,
       );
     }
     window.addEventListener("pageshow", () => RouterBox.router());
@@ -1014,102 +832,394 @@ export class RefInstance<T = unknown> {
   }
 }
 
-// VirtualList component
-// class VirtualList {
-//   /**
-//    * @internal
-//    */
-//   dataStore: Signal<any[]>;
-//   /**
-//    * @internal
-//    */
-//   renderItem: (item: any, index: number) => HTMLElement;
-//   /**
-//    * @internal
-//    */
-//   renderScheduled: boolean;
-//   /**
-//    * @internal
-//    */
-//   container: HTMLElement;
-//   idxs: number[] = [];
-//   constructor(
-//     container: HTMLElement,
-//     dataStore: Signal<any[]>,
-//     renderItemFunction: (item: any, index: number) => HTMLElement
-//   ) {
-//     this.dataStore = dataStore;
-//     this.renderItem = renderItemFunction;
-//     this.renderScheduled = false;
-//     this.container = container;
+/**
+ * Cradova List
+ * ---
+ *  A virtual list store and component for efficient rendering of large lists.
+ */
 
-//     this.scheduleRender();
-//     this.idxs.push(dataStore.subscribers["dataChanged"]?.length || 0);
-//     this.dataStore.notify("dataChanged", () => {
-//       this.scheduleRender();
-//     });
-//     this.idxs.push(dataStore.subscribers["itemUpdated"]?.length || 0);
-//     this.dataStore.notify("itemUpdated", () => {
-//       this.scheduleRender();
-//     });
-//   }
+export class List<T> {
+  /**
+   * @internal
+   */
+  private state: T[];
+  /**
+   * @internal
+   */
+  private item: (item: T) => HTMLElement;
 
-//   /**
-//    * @internal
-//    */
-//   scheduleRender() {
-//     if (this.renderScheduled) return;
-//     this.renderScheduled = true;
-//     requestAnimationFrame(this.render.bind(this));
-//   }
-//   /**
-//    * @internal
-//    */
-//   render() {
-//     const loop = Math.max(
-//       this.dataStore.store.length,
-//       this.container.children.length
-//     );
-//     const needsFullRender = this.dataStore.store._isDirty();
-//     for (let i = 0; i < loop; i++) {
-//       if (needsFullRender || this.dataStore.store._isDirty(i)) {
-//         const dataItem = this.dataStore.store.get(i);
-//         const newDOM = this.renderItem(dataItem, i);
-//         const oldDOM = this.container.children[i];
-//         if (newDOM instanceof HTMLElement) {
-//           if (oldDOM) {
-//             if (dataItem === undefined) {
-//               oldDOM.remove();
-//               continue;
-//             }
-//             this.container.replaceChild(newDOM, oldDOM);
-//           } else {
-//             this.container.appendChild(newDOM);
-//           }
-//         } else {
-//           if (oldDOM) {
-//             oldDOM.remove();
-//           }
-//         }
-//       }
-//     }
+  public length: number;
+  /**
+   * @internal
+   */
+  private options?: {
+    itemHeight: number;
+    className?: string;
+    id?: string;
+  };
+  /**
+   * @internal
+   */
+  private renderingRange: number;
+  /**
+   * @internal
+   */
+  private container: HTMLElement;
+  /**
+   * @internal
+   */
+  private firstItemIndex: number = 0;
+  /**
+   * @internal
+   */
+  private lastItemIndex: number = 0;
+  private rendered: boolean = false;
+  subscribers: Function[] = [];
+  constructor(
+    state: T[],
+    item?: (item: T) => HTMLElement,
+    options?: {
+      itemHeight: number;
+      className?: string;
+      id?: string;
+    },
+  ) {
+    this.state = state;
+    this.item = item || ((item: T) => div(String(item)));
+    this.length = state.length;
+    this.options = options;
+    this.renderingRange = Math.round(
+      Math.min(
+        this.length > 50 ? this.length * 0.5 : this.length,
+        window.innerHeight / (this.options?.itemHeight || 1),
+      ),
+    );
+    this.lastItemIndex = this.renderingRange - 1;
+    this.container = document.createElement("div");
+    if (this.options?.className) {
+      this.container.className = this.options?.className;
+    }
+    if (this.options?.id) {
+      this.container.id = this.options?.id;
+    }
+  }
+  get Element() {
+    if (this.rendered) {
+      return this.container;
+    }
+    for (let i = 0; i < this.renderingRange; i++) {
+      const item = this.item(this.state[i]);
+      item.setAttribute("data-index", i.toString());
+      this.container.appendChild(item);
+    }
+    this.rendered = true;
+    // ? adding observer
+    const domObser = () => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const isBottom = entry.target === this.container.lastElementChild;
+            const isTop = !isBottom;
+            observer.unobserve(entry.target);
+            //? efficient way to get index
+            const index = Number(entry.target.getAttribute("data-index"));
+            // ? bottom intersection
+            if (isBottom) {
+              // ? add to the bottom
+              for (let i = index + 1; i < this.length; i++) {
+                const item = this.item(this.state[i]);
+                item.setAttribute("data-index", i.toString());
+                this.container.appendChild(item);
+              }
+              // ?  remove from the top
+              for (let i = index - this.renderingRange; i > 0; i--) {
+                this.container.removeChild(this.container.children[i]);
+              }
+              this.firstItemIndex = Number(
+                this.container.firstElementChild?.getAttribute("data-index") ||
+                  0,
+              );
+              this.lastItemIndex = Number(
+                this.container.lastElementChild?.getAttribute("data-index") ||
+                  0,
+              );
+              console.log(
+                this.firstItemIndex,
+                this.lastItemIndex,
+                index,
+                "bottom",
+              );
+            }
+            // ? top intersection
+            if (isTop) {
+              // ? add to the top
+              for (let i = index - 1; i > 0; i--) {
+                const item = this.item(this.state[i]);
+                item.setAttribute("data-index", i.toString());
+                this.container.appendChild(item);
+              }
+              // ? remove from the bottom
+              for (let i = index + this.renderingRange; i < this.length; i++) {
+                this.container.removeChild(this.container.children[i]);
+              }
+              this.lastItemIndex = Number(
+                this.container.lastElementChild?.getAttribute("data-index") ||
+                  0,
+              );
+              this.firstItemIndex = Number(
+                this.container.firstElementChild?.getAttribute("data-index") ||
+                  0,
+              );
+              // console.log(
+              //   this.firstItemIndex,
+              //   this.lastItemIndex,
+              //   index,
+              //   "top"
+              // );
+            }
+          }
+          //? observe new items
 
-//     if (needsFullRender) {
-//       this.dataStore.store._clearAllDirty();
-//     }
-//     this.renderScheduled = false;
-//   }
-//   /**
-//    * @internal
-//    */
-//   destroy() {
-//     this.renderItem = null as any;
-//     this.container.innerHTML = "";
-//     this.container = null as any;
-//     this.renderScheduled = false;
-//     this.dataStore.subscribers["dataChanged"].splice(this.idxs[0], 1);
-//     this.dataStore.subscribers["itemUpdated"].splice(this.idxs[1], 1);
-//     this.idxs.length = 0;
-//     this.dataStore = null as any;
-//   }
-// }
+          // observer.observe(this.container.lastElementChild as HTMLElement);
+          // observer.observe(this.container.firstElementChild as HTMLElement);
+        });
+      });
+      //? observe initial items
+      observer.observe(this.container.lastElementChild as HTMLElement);
+      observer.observe(this.container.firstElementChild as HTMLElement);
+    };
+    window.addEventListener("scroll", domObser);
+    // @ts-ignore
+    window.CradovaEvent.after_page_is_killed.push(() => {
+      window.removeEventListener("scroll", domObser);
+    });
+    return this.container;
+  }
+
+  public computed<T extends keyof List<T>>(
+    element?: (() => HTMLElement) | Comp | ((ctx: Comp) => HTMLElement),
+  ): HTMLElement | undefined {
+    if (!element) {
+      console.error(
+        ` ✘  Cradova err:  element ${
+          String(
+            element,
+          )
+        } is not a valid element or function`,
+      );
+      return;
+    }
+    const isComp = !isArrowFunc(element as Comp);
+    let el;
+    if (isComp) {
+      el = toComp(element as Comp);
+    } else {
+      el = (element as () => HTMLElement)?.();
+    }
+    if (el === undefined || !(el instanceof HTMLElement)) {
+      console.error(
+        ` ✘  Cradova err:  ${
+          String(
+            element,
+          )
+        } is not a valid element or function`,
+      );
+      return;
+    }
+    const listener = () => {
+      if (!document.body.contains(listener.element)) {
+        listener.element?.remove();
+        this.subscribers.filter((f: any) => listener.idx !== f.idx);
+        return;
+      }
+      let newEl;
+      if (isComp) {
+        newEl = toComp(element as unknown as Comp);
+      } else {
+        newEl = (element as () => HTMLElement)?.();
+      }
+      if (newEl === undefined || !(newEl instanceof HTMLElement)) {
+        console.error(
+          ` ✘  Cradova err:  ${
+            String(
+              element,
+            )
+          } is not a valid element or function`,
+        );
+        return;
+      }
+      listener.element.insertAdjacentElement("beforebegin", newEl);
+      listener.element.remove();
+      listener.element = newEl;
+    };
+    listener.element = el;
+    listener.idx = this.subscribers.length;
+    this.subscribers.push(listener);
+    return el;
+  }
+
+  private diffDOMBeforeUpdatingState(newState: T[]) {
+    this.length = newState.length;
+    this.renderingRange = Math.round(
+      Math.min(
+        this.length > 100 ? this.length * 0.5 : this.length,
+        window.innerHeight / (this.options?.itemHeight || 1),
+      ),
+    );
+    this.lastItemIndex = this.firstItemIndex + this.renderingRange;
+    for (let i = this.lastItemIndex; i >= this.firstItemIndex; i--) {
+      // console.log(
+      //   // this.container.children[i],
+      //   i,
+      //   this.firstItemIndex,
+      //   this.lastItemIndex,
+      //   this.state,
+      //   newState,
+      //   this.container.children[i].getAttribute("data-index")
+      // );
+      if (
+        (this.state[i] === undefined || newState[i] === undefined) &&
+        this.container.children[i] !== undefined
+      ) {
+        this.container.removeChild(this.container.children[i]);
+        continue;
+      }
+      if (JSON.stringify(this.state[i]) === JSON.stringify(newState[i])) {
+        continue;
+      }
+      const item = this.item(newState[i]);
+      item.setAttribute("data-index", i.toString());
+      if (this.container.children[i]) {
+        this.container.replaceChild(item, this.container.children[i]);
+      } else {
+        this.container.appendChild(item);
+      }
+    }
+    this.lastItemIndex = Number(
+      this.container.lastElementChild?.getAttribute("data-index") || 0,
+    );
+    this.firstItemIndex = Number(
+      this.container.firstElementChild?.getAttribute("data-index") || 0,
+    );
+    this.state = newState;
+    this.subscribers.forEach((sub) => {
+      const isComp = !isArrowFunc(sub as Comp);
+      if (isComp) {
+        compManager.recall(sub as Comp);
+      } else {
+        (sub as () => HTMLElement)?.();
+      }
+    });
+  }
+
+  public get data(): IterableIterator<T> {
+    //? the returned value should be an iterator
+    return {
+      [Symbol.iterator]: () => {
+        return this.state[Symbol.iterator]();
+      },
+      next: () => {
+        return this.state[Symbol.iterator]().next();
+      },
+    };
+  }
+  public get(index: number) {
+    return this.state[index];
+  }
+  public indexOf(item: T) {
+    return this.state.indexOf(item);
+  }
+
+  public update(index: number, newItemData: T) {
+    // copy state
+    const newState = [...this.state];
+    if (
+      index >= 0 &&
+      index < this.state.length &&
+      this.state[index] !== newItemData
+    ) {
+      newState[index] = newItemData;
+    }
+    this.diffDOMBeforeUpdatingState(newState);
+  }
+
+  public push(itemData: T) {
+    // copy state
+    const newState = [...this.state];
+    newState.push(itemData);
+    this.diffDOMBeforeUpdatingState(newState);
+  }
+
+  public map<K>(callback: (item: T, index: number) => K) {
+    // copy state
+    const newState = [...this.state];
+    return newState.map(callback);
+  }
+
+  public splice(index: number, count: number = 1, ...items: T[]) {
+    // copy state
+    const newState = [...this.state];
+    if (index >= 0 && index < this.state.length && count > 0) {
+      newState.splice(index, count, ...items);
+    }
+    this.diffDOMBeforeUpdatingState(newState);
+  }
+  public set(newData: T[] | ((prevItem: T[]) => T[])) {
+    // copy state
+    const newState = [...this.state];
+    this.state = newData instanceof Function
+      ? newData(this.state)
+      : newData || [];
+    this.diffDOMBeforeUpdatingState(newState);
+  }
+
+  public destroy() {
+    this.container.remove();
+    this.container = null as any;
+    this.state.length = 0;
+    this.state = null as any;
+    this.item = null as any;
+    this.length = 0;
+    this.options = null as any;
+    this.renderingRange = 0;
+    this.firstItemIndex = 0;
+    this.lastItemIndex = 0;
+  }
+  /**
+   *  Cradova Signal
+   * ----
+   *  subscribe to an event
+   *
+   * @param name of event.
+   * @param callback function to call.
+   */
+  public notify<T extends keyof List<T>>(
+    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement),
+  ) {
+    if (!listener) {
+      console.error(
+        ` ✘  Cradova err:  listener ${
+          String(
+            listener,
+          )
+        } is not a valid listener function or string`,
+      );
+      return;
+    }
+    if (typeof listener !== "function") {
+      console.error(
+        ` ✘  Cradova err: listener or eventName ${
+          String(
+            listener,
+          )
+        } is not a valid listener function or string`,
+      );
+      return;
+    }
+
+    if (!isArrowFunc(listener)) {
+      listener = toCompNoRender(listener as Comp);
+    }
+    this.subscribers.push(listener);
+  }
+}

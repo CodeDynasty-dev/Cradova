@@ -7,14 +7,26 @@ interface Attributes<E extends HTMLElement> {
   style?: Partial<CSS.Properties>;
   [key: `data-${string}`]: string | undefined;
   [key: `aria-${string}`]: string | undefined;
-  [key: `on${string}`]: ((this: E, event: Event) => void) | undefined;
+  [key: `on${string}`]: ((this: E, event: StandardEvents) => void) | undefined;
 }
 
-type StandardEvents<E extends HTMLElement> = {
-  [key in keyof E]: E[key] extends (this: E, event: Event) => void
-    ? key
-    : never;
-}[keyof E];
+type StandardEvents =
+  | KeyboardEvent
+  | MouseEvent
+  | TouchEvent
+  | WheelEvent
+  | DragEvent
+  | ClipboardEvent
+  | CompositionEvent
+  | FocusEvent
+  | InputEvent
+  | AnimationEvent
+  | TransitionEvent
+  | Event;
+
+type OmitFunctions<E> = {
+  [K in keyof E as E[K] extends Function ? never : K]: E[K];
+};
 
 export type VJS_params_TYPE<E extends HTMLElement> = // children types
   (
@@ -31,11 +43,8 @@ export type VJS_params_TYPE<E extends HTMLElement> = // children types
     | ((ctx: Comp) => HTMLElement)
     | ((ctx: Comp) => HTMLElement)[]
     | [string, Signal<any>]
-    // | VJS_params_TYPE<E>
-    // | VJS_params_TYPE<E>[]
-    // attributes types
-    | (Attributes<E> &
-        Omit<Partial<E>, keyof Attributes<E> | StandardEvents<E>>)
+    | Attributes<E>
+    | OmitFunctions<E>
   )[];
 /**
  * @internal
@@ -51,7 +60,7 @@ export interface RouterRouteObject {
   _package: (params: unknown) => void;
   _errorHandler: ((err: unknown) => void) | null;
   _derive(): {
-    _name: string;
+    _title: string;
     _callBack:
       | ((cradovaPageSet: HTMLElement) => void | Promise<void>)
       | undefined;
@@ -77,7 +86,7 @@ export type CradovaPageType = {
    * title of the page
    * .
    */
-  name?: string;
+  title?: string;
   /**
    * Cradova page
    * ---
@@ -159,16 +168,16 @@ export interface Comp extends Function {
   useReducer: <S, A>(
     reducer: (state: S, action: A) => S,
     initialArg: S,
-    initializer?: (arg: S) => S
+    initializer?: (arg: S) => S,
   ) => [S, (action: A) => void];
   useState: <S>(
-    initialValue: S
+    initialValue: S,
   ) => [S, (newState: S | ((prevState: S) => S)) => void];
   useEffect: (effect: () => (() => void) | void, deps?: unknown[]) => void;
   useMemo: <T>(factory: () => T, deps?: unknown[]) => T;
   useCallback: <T extends (...args: any[]) => any>(
     callback: T,
-    deps?: unknown[]
+    deps?: unknown[],
   ) => T;
   useRef: <T extends HTMLElement | Node | DocumentFragment>() => RefInstance<T>;
 }

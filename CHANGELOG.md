@@ -279,6 +279,6 @@ we went along with it.
 - Bug fixes in cradova pages
 - snapshot isolation is removed due to security issues.
 
-# v3.13.0
+# v3.14.0
 
 - Implemented List for managing lists of items and virtualizing them.

@@ -35,17 +35,17 @@ export const makeElement = <E extends HTMLElement>(
       if (Array.isArray(child)) {
         if (child[1] instanceof Signal) {
           // ? push effect to the notifying queue of the signal
-          child[1].notify([child[0] as string], () => {
+          child[1].computed(child[0] as string, () => {
             element.innerHTML = "";
             element.appendChild(
               unroll_child_list([
-                (child[1] as Signal).store[child[0] as string] as HTMLElement,
+                (child[1] as Signal).data[child[0] as string] as HTMLElement,
               ]),
             );
           });
           element.appendChild(
             // @ts-ignore
-            unroll_child_list([child[1].store[child[0]] as HTMLElement]),
+            unroll_child_list([child[1].data[child[0]] as HTMLElement]),
           );
           continue;
         }
@@ -116,15 +116,15 @@ export const makeElement = <E extends HTMLElement>(
           const eventName = value[0] as string;
           const signalInstance = value[1] as Signal<Record<string, any>>;
           // Ensure listen can handle a single event name if it expects an array
-          signalInstance.notify([eventName] as any, () => {
+          signalInstance.computed([eventName] as any, () => {
             element.setAttribute(
               prop,
-              signalInstance.store[eventName] as string,
+              signalInstance.data[eventName] as string,
             );
           });
           element.setAttribute(
             prop,
-            (signalInstance.store as Record<string, any>)[eventName],
+            (signalInstance.data as Record<string, any>)[eventName],
           );
           continue;
         }

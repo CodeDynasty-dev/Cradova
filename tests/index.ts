@@ -33,9 +33,8 @@ const todoStore = new List(
     itemHeight: 50,
     className: "todo-list",
     id: "todo-list",
-  },
+  }
 );
-// todoStore.notify(TodoList);
 console.log(todoStore);
 function TodoList(ctx: Comp) {
   // can be used to hold multiple references
@@ -65,7 +64,7 @@ function TodoList(ctx: Comp) {
             ref.current("todoInput")!.value = "";
           }
         },
-      }),
+      })
     ),
     todoStore.Element,
     todoStore.computed(function () {
@@ -75,9 +74,9 @@ function TodoList(ctx: Comp) {
             fontWeight: "bold",
             color: "blue",
           },
-        }),
+        })
       );
-    }),
+    })
   );
 }
 
@@ -109,9 +108,9 @@ const count = function (ctx: Comp) {
       $case(7, () => h1("count is 7")),
       $case(8, () => h1("count is 8")),
       $case(9, () => h1("count is 9")),
-      $case(10, () => h1("count is 10")),
+      $case(10, () => h1("count is 10"))
     ),
-    h1(" count: " + count),
+    h1(" count: " + count)
   );
 };
 
@@ -153,7 +152,7 @@ function typingExample(ctx: Comp) {
       placeholder: "typing simulation",
     }),
     p(" no thing typed yet!", { ref: ref.bind("text") }),
-    a({ href: "/p" }, "log lol in the console"),
+    a({ href: "/p" }, "log lol in the console")
   );
 }
 
@@ -183,7 +182,7 @@ Router.BrowserRoutes({
           type: "button",
         }),
         TodoList,
-        App,
+        App
       );
     },
   }),
@@ -197,7 +196,7 @@ Router.BrowserRoutes({
           },
         }),
         TodoList,
-        App,
+        App
       );
     },
   }),

@@ -189,6 +189,9 @@ export class Signal<Type extends Record<string, any> = any> {
       listener = eventName as () => HTMLElement;
       eventName = "__ALL__" as any;
     }
+    if (!this.subscribers[eventName as keyof Type]) {
+      this.subscribers[eventName as keyof Type] = [];
+    }
     const isComp = !isArrowFunc(listener as Comp);
     if (isComp) {
       const el = toComp(listener as Comp)!;
@@ -200,38 +203,8 @@ export class Signal<Type extends Record<string, any> = any> {
         );
         return;
       }
-      const listenerRaw = () => {
-        if (!document.body.contains(listenerRaw.element)) {
-          listenerRaw.element?.remove();
-          this.subscribers[eventName as keyof Type] = this.subscribers[
-            eventName as keyof Type
-          ].filter((f: any) => listenerRaw.idx !== f.idx);
-          return;
-        }
-        const newEl = toComp(listener as unknown as Comp);
-
-        if (newEl === undefined || !(newEl instanceof HTMLElement)) {
-          console.error(
-            ` ✘  Cradova err:  ${String(
-              listener
-            )} is not a valid listener or function`
-          );
-          return;
-        }
-        listenerRaw.element.insertAdjacentElement("beforebegin", newEl);
-        listenerRaw.element.remove();
-        listenerRaw.element = newEl;
-      };
-      listenerRaw.element = el;
-      if (!this.subscribers[eventName as keyof Type]) {
-        this.subscribers[eventName as keyof Type] = [];
-      }
-      listenerRaw.idx = this.subscribers[eventName as keyof Type].length;
-      this.subscribers[eventName as keyof Type].push(listenerRaw);
+      this.subscribers[eventName as keyof Type].push(listener!);
       return el;
-    }
-    if (!this.subscribers[eventName as keyof Type]) {
-      this.subscribers[eventName as keyof Type] = [];
     }
     this.subscribers[eventName as keyof Type].push(listener!);
     return undefined;
@@ -423,9 +396,12 @@ export class List<T> {
       console.error(
         ` ✘  Cradova err:  listener ${String(
           listener
-        )} is not a valid component or function`
+        )} is not a valid event name or function`
       );
       return;
+    }
+    if (!this.subscribers) {
+      this.subscribers = [];
     }
     const isComp = !isArrowFunc(listener as Comp);
     if (isComp) {
@@ -434,38 +410,13 @@ export class List<T> {
         console.error(
           ` ✘  Cradova err:  ${String(
             listener
-          )} is not a valid component or function`
+          )} is not a valid element or function`
         );
         return;
       }
-      const listenerRaw = () => {
-        if (!document.body.contains(listenerRaw.element)) {
-          listenerRaw.element?.remove();
-          this.subscribers = this.subscribers.filter(
-            (f: any) => listenerRaw.idx !== f.idx
-          );
-          return;
-        }
-        const newEl = toComp(listener as unknown as Comp);
-
-        if (newEl === undefined || !(newEl instanceof HTMLElement)) {
-          console.error(
-            ` ✘  Cradova err:  ${String(
-              listener
-            )} is not a valid component or function`
-          );
-          return;
-        }
-        listenerRaw.element.insertAdjacentElement("beforebegin", newEl);
-        listenerRaw.element.remove();
-        listenerRaw.element = newEl;
-      };
-      listenerRaw.element = el;
-      listenerRaw.idx = this.subscribers.length;
-      this.subscribers.push(listenerRaw);
+      this.subscribers.push(listener!);
       return el;
     }
-
     this.subscribers.push(listener!);
     return undefined;
   }

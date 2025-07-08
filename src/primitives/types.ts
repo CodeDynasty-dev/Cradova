@@ -3,11 +3,10 @@ import { Page, RefInstance, Signal } from "./classes.js";
 
 interface Attributes<E extends HTMLElement> {
   ref?: [RefInstance<any>, string];
-  value?: any;
   style?: Partial<CSS.Properties>;
-  [key: `data-${string}`]: string | undefined;
-  [key: `aria-${string}`]: string | undefined;
-  [key: `on${string}`]: ((this: E, event: StandardEvents) => void) | undefined;
+  [key: `data-${string}`]: string;
+  [key: `aria-${string}`]: string;
+  [key: `on${string}`]: (this: E, event: StandardEvents) => void;
 }
 
 type StandardEvents =

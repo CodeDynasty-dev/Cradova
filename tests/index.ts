@@ -8,6 +8,7 @@ import {
   type Comp,
   div,
   h1,
+  img,
   input,
   List,
   main,
@@ -33,7 +34,7 @@ const todoStore = new List(
     itemHeight: 50,
     className: "todo-list",
     id: "todo-list",
-  }
+  },
 );
 console.log(todoStore);
 function TodoList(ctx: Comp) {
@@ -64,7 +65,7 @@ function TodoList(ctx: Comp) {
             ref.current("todoInput")!.value = "";
           }
         },
-      })
+      }),
     ),
     todoStore.Element,
     todoStore.computed(function () {
@@ -74,9 +75,17 @@ function TodoList(ctx: Comp) {
             fontWeight: "bold",
             color: "blue",
           },
-        })
+        }),
       );
-    })
+    }),
+    img({
+      fetchPriority: "high",
+      src: "https://via.placeholder.com/150",
+      oncancel() {
+        console.log("cancel");
+        console.log(this);
+      },
+    }),
   );
 }
 
@@ -108,9 +117,9 @@ const count = function (ctx: Comp) {
       $case(7, () => h1("count is 7")),
       $case(8, () => h1("count is 8")),
       $case(9, () => h1("count is 9")),
-      $case(10, () => h1("count is 10"))
+      $case(10, () => h1("count is 10")),
     ),
-    h1(" count: " + count)
+    h1(" count: " + count),
   );
 };
 
@@ -152,7 +161,7 @@ function typingExample(ctx: Comp) {
       placeholder: "typing simulation",
     }),
     p(" no thing typed yet!", { ref: ref.bind("text") }),
-    a({ href: "/p" }, "log lol in the console")
+    a({ href: "/p" }, "log lol in the console"),
   );
 }
 
@@ -182,7 +191,7 @@ Router.BrowserRoutes({
           type: "button",
         }),
         TodoList,
-        App
+        App,
       );
     },
   }),
@@ -196,7 +205,7 @@ Router.BrowserRoutes({
           },
         }),
         TodoList,
-        App
+        App,
       );
     },
   }),

@@ -73,6 +73,7 @@ export class Signal<Type extends Record<string, any> = any> {
   private picker: Type = {} as any;
   soft: Type = {} as any;
   passers?: Record<keyof Type, [string, Signal<Type>]>;
+  private queue: Set<keyof Type> = new Set();
   constructor(initial: Type, props?: { persistName?: string | undefined }) {
     if (!initial || typeof initial !== "object" || Array.isArray(initial)) {
       throw new Error("Initial signal value must be an object");
@@ -91,22 +92,21 @@ export class Signal<Type extends Record<string, any> = any> {
     }
 
     for (const key in this.picker) {
-      const self = this;
       Object.defineProperty(this.data, key, {
-        set(value) {
-          self.picker[key] = value;
-          self.publish([key]);
+        set: (value) => {
+          this.picker[key] = value;
+          this.queue.add(key);
+          // ? publish only when queue is not empty
+          queueMicrotask(() => this.queue.size && this.publish());
         },
-        get() {
-          return self.picker[key];
-        },
+        get: () => this.picker[key],
         enumerable: true,
         configurable: true,
       });
       // ? soft set on this.picker so no event is called
       Object.defineProperty(this.soft, key, {
-        set(value) {
-          self.picker[key] = value;
+        set: (value) => {
+          this.picker[key] = value;
         },
         enumerable: true,
         configurable: true,
@@ -120,12 +120,12 @@ export class Signal<Type extends Record<string, any> = any> {
    * @param events - string key of the action
    * @internal
    */
-  private publish<T extends keyof Type>(events: T[]) {
+  private publish() {
     const s = new Set<Comp | (() => void) | ((ctx: Comp) => HTMLElement)>();
-    events.push("__ALL__" as any);
-    for (const event of events) {
-      if (this.picker[event]) {
-        const subs2 = this.subscribers![event];
+    this.queue.add("__ALL__");
+    for (const k of this.queue) {
+      if (k in this.picker) {
+        const subs2 = this.subscribers![k];
         if (subs2) {
           for (const fn of subs2) {
             s.add(fn);
@@ -133,11 +133,12 @@ export class Signal<Type extends Record<string, any> = any> {
         }
       } else {
         // remove event if not found
-        if (event !== "__ALL__") {
-          delete this.subscribers[event];
+        if (k !== "__ALL__") {
+          delete this.subscribers[k];
         }
       }
     }
+    this.queue.clear();
     for (const c of s.values()) {
       if ((c as Comp).published) {
         compManager.recall(c as Comp);
@@ -157,8 +158,8 @@ export class Signal<Type extends Record<string, any> = any> {
    */
   set(data: Type) {
     Object.assign(this.picker, data);
-    const events = Object.keys(this.subscribers);
-    this.publish(events);
+    this.queue = new Set(Object.keys(this.subscribers));
+    queueMicrotask(() => this.publish());
   }
   /**
    *  Cradova Signal

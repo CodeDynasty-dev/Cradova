@@ -1,20 +1,24 @@
 // Simple todo list
-import { $case, $switch, a, button, div, h1, input, List, main, p, Page, Router, } from "../dist/index.js";
+import { $case, $switch, a, button, div, h1, img, input, List, main, p, Page, Router, } from "../dist/index.js";
 // creating a store
-const todoStore = new List(["take bath", "code coded", "take a break"], (item) => p(item, {
+const todoStore = new List(
+// ["task", "code coded", "take a break"],
+Array(1_00).fill("task"), (item, i) => p(item + " " + (i + 1), {
     title: "click to remove",
-    onclick() {
-        todoStore.splice(todoStore.indexOf(item));
-    },
     style: {
-        border: "1px solid green",
+        backgroundColor: `#c21010`,
+        color: `white`,
+    },
+    onclick() {
+        todoStore.splice(i);
     },
 }), {
-    itemHeight: 50,
+    itemHeight: 330,
+    columns: 4,
     className: "todo-list",
-    id: "todo-list",
+    windowHeight: window.innerHeight,
+    // scrollingDirection: "horizontal",
 });
-// todoStore.notify(TodoList);
 console.log(todoStore);
 function TodoList(ctx) {
     // can be used to hold multiple references
@@ -47,6 +51,13 @@ function TodoList(ctx) {
                 color: "blue",
             },
         }));
+    }), img({
+        fetchPriority: "high",
+        src: "https://via.placeholder.com/150",
+        oncancel() {
+            console.log("cancel");
+            console.log(this);
+        },
     }));
 }
 const count = function (ctx) {

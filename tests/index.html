@@ -18,6 +18,37 @@
       content="This is an example site's home page."
     />
     <meta name="twitter:image" content="/icon.png" />
+
+    <style>
+      .todo-list {
+        /* display: flex; */
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 10px;
+        /* overflow-x: hidden; */
+      }
+      .todo-list p {
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.8s ease;
+        filter: brightness(1);
+        border: 2px solid green;
+        height: 330px;
+        width: 280px;
+        font-size: 28px;
+        font-weight: bold;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .todo-list #list p:first-child {
+        background-color: green !important;
+      }
+      .todo-list p:hover {
+        filter: brightness(0.5);
+      }
+    </style>
   </head>
   <body>
     <div data-wrapper="app"></div>

@@ -569,8 +569,7 @@ export const compManager = {
       // Schedule the re-render asynchronously
       this.activate(component);
     }
-    // @ts-expect-error
-    window.CradovaEvent.dispatchEvent("after_page_is_killed");
+    // window.CradovaEvent.dispatchEvent("after_page_is_killed");
     // @ts-expect-error
     window.CradovaEvent.dispatchEvent("after_comp_is_mounted");
   },

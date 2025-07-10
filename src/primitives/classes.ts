@@ -28,7 +28,7 @@ class cradovaEvent {
    */
 
   async dispatchEvent(
-    eventName: "after_comp_is_mounted" | "after_page_is_killed",
+    eventName: "after_comp_is_mounted" | "after_page_is_killed"
   ) {
     const eventListeners = this[eventName];
     while (eventListeners.length !== 0) {
@@ -176,15 +176,13 @@ export class Signal<Type extends Record<string, any> = any> {
       | (() => void)
       | Comp
       | ((ctx: Comp) => HTMLElement),
-    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement),
+    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement)
   ): HTMLElement | undefined {
     if (!eventName) {
       console.error(
-        ` ✘  Cradova err:  eventName ${String(eventName)} or listener ${
-          String(
-            listener,
-          )
-        } is not a valid event name or function`,
+        ` ✘  Cradova err:  eventName ${String(eventName)} or listener ${String(
+          listener
+        )} is not a valid event name or function`
       );
       return;
     }
@@ -200,11 +198,9 @@ export class Signal<Type extends Record<string, any> = any> {
       const el = toComp(listener as Comp)!;
       if (el === undefined || !(el instanceof HTMLElement)) {
         console.error(
-          ` ✘  Cradova err:  ${
-            String(
-              listener,
-            )
-          } is not a valid element or function`,
+          ` ✘  Cradova err:  ${String(
+            listener
+          )} is not a valid element or function`
         );
         return;
       }
@@ -258,154 +254,171 @@ export class List<T> {
   /**
    * @internal
    */
-  private item: (item: T) => HTMLElement;
+  private item: (item: T, i: number) => HTMLElement;
 
   public length: number;
   /**
    * @internal
    */
-  private options?: {
-    itemHeight: number;
+  private itemHeight = 35; // Adjustabl variable
+  private windowCoverage = 500; // Adjustable  variable
+  private overscan = 20; // Number of extra items to render before the visible range
+  private scrollingDirection = "vertical"; // Adjustable  variable
+  private opts?: {
+    itemHeight?: number;
     className?: string;
-    id?: string;
+    columns?: number;
+    windowHeight?: number;
+    windowWidth?: number;
+    overscan?: number;
+    scrollingDirection?: "vertical" | "horizontal";
+    onScrollEnd?: () => void;
   };
-  /**
-   * @internal
-   */
-  private renderingRange: number;
+  private columns = 1;
   /**
    * @internal
    */
   private container: HTMLElement;
-  /**
-   * @internal
-   */
-  private firstItemIndex: number = 0;
-  /**
-   * @internal
-   */
-  private lastItemIndex: number = 0;
   private rendered: boolean = false;
   subscribers: Function[] = [];
+  scrollPos: number = 0;
+  list: HTMLElement;
+  startIndex: number = 0;
+  listContainer: HTMLElement;
   constructor(
     state: T[],
-    item?: (item: T) => HTMLElement,
-    options?: {
-      itemHeight: number;
+    item?: (item: T, i: number) => HTMLElement,
+    opts?: {
+      itemHeight?: number;
       className?: string;
-      id?: string;
-    },
+      columns?: number;
+      windowHeight?: number;
+      windowWidth?: number;
+      overscan?: number;
+      scrollingDirection?: "vertical" | "horizontal";
+      onScrollEnd?: () => void;
+    }
   ) {
     this.state = state;
-    this.item = item || ((item: T) => div(String(item)));
+    this.item = item || ((item: T, i: number) => div(String(item) + " " + i));
     this.length = state.length;
-    this.options = options;
-    this.renderingRange = Math.round(
-      Math.min(
-        this.length > 50 ? this.length * 0.5 : this.length,
-        window.innerHeight / (this.options?.itemHeight || 1),
-      ),
-    );
-    this.lastItemIndex = this.renderingRange - 1;
-    this.container = document.createElement("div");
-    if (this.options?.className) {
-      this.container.className = this.options?.className;
-    }
-    if (this.options?.id) {
-      this.container.id = this.options?.id;
-    }
-  }
-  get Element() {
-    if (this.rendered) {
-      return this.container;
-    }
-    for (let i = 0; i < this.renderingRange; i++) {
-      const item = this.item(this.state[i]);
-      item.setAttribute("data-index", i.toString());
-      this.container.appendChild(item);
-    }
-    this.rendered = true;
-    // ? adding observer
-    const domObser = () => {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const isBottom = entry.target === this.container.lastElementChild;
-            const isTop = !isBottom;
-            observer.unobserve(entry.target);
-            //? efficient way to get index
-            const index = Number(entry.target.getAttribute("data-index"));
-            // ? bottom intersection
-            if (isBottom) {
-              // ? add to the bottom
-              for (let i = index + 1; i < this.length; i++) {
-                const item = this.item(this.state[i]);
-                item.setAttribute("data-index", i.toString());
-                this.container.appendChild(item);
-              }
-              // ?  remove from the top
-              for (let i = index - this.renderingRange; i > 0; i--) {
-                this.container.removeChild(this.container.children[i]);
-              }
-              this.firstItemIndex = Number(
-                this.container.firstElementChild?.getAttribute("data-index") ||
-                  0,
-              );
-              this.lastItemIndex = Number(
-                this.container.lastElementChild?.getAttribute("data-index") ||
-                  0,
-              );
-            }
-            // ? top intersection
-            if (isTop) {
-              // ? add to the top
-              for (let i = index - 1; i > 0; i--) {
-                const item = this.item(this.state[i]);
-                item.setAttribute("data-index", i.toString());
-                this.container.appendChild(item);
-              }
-              // ? remove from the bottom
-              for (let i = index + this.renderingRange; i < this.length; i++) {
-                this.container.removeChild(this.container.children[i]);
-              }
-              this.lastItemIndex = Number(
-                this.container.lastElementChild?.getAttribute("data-index") ||
-                  0,
-              );
-              this.firstItemIndex = Number(
-                this.container.firstElementChild?.getAttribute("data-index") ||
-                  0,
-              );
-            }
-          }
-          //? observe new items
+    this.opts = opts;
+    this.itemHeight = opts?.itemHeight || 35;
+    this.columns = opts?.columns || 1;
+    this.windowCoverage = opts?.windowHeight || opts?.windowWidth || 500;
+    this.overscan = opts?.overscan || 20;
+    this.scrollingDirection = opts?.scrollingDirection || "vertical";
 
-          // observer.observe(this.container.lastElementChild as HTMLElement);
-          // observer.observe(this.container.firstElementChild as HTMLElement);
-        });
+    this.container = div(
+      {
+        className: this.opts?.className,
+        onscroll: (e: Event) => {
+          this.scrollPos = Math.floor(
+            this.scrollingDirection === "vertical"
+              ? (e.target as HTMLElement).scrollTop
+              : (e.target as HTMLElement).scrollLeft
+          );
+          requestAnimationFrame(() => this.render());
+        },
+        style: {
+          overflowY:
+            this.scrollingDirection === "vertical" ? "scroll" : "hidden",
+          overflowX:
+            this.scrollingDirection === "horizontal" ? "scroll" : "hidden",
+          height: this.opts?.windowHeight
+            ? `${this.opts?.windowHeight}px`
+            : "500px",
+          width: this.opts?.windowWidth
+            ? `${this.opts?.windowWidth}px`
+            : "100%",
+        },
+      },
+      div(
+        {
+          id: "listContainer",
+          style: {
+            height: `${Math.round(
+              (this.length * this.itemHeight) / this.columns
+            )}px`,
+          },
+        },
+        div({
+          id: "list",
+          className: this.opts?.className,
+          style: {
+            transform:
+              this.scrollingDirection === "vertical"
+                ? `translateY(${this.scrollPos}px)`
+                : `translateX(${this.scrollPos}px)`,
+          },
+        })
+      )
+    );
+    this.listContainer = this.container.querySelector("#listContainer")!;
+    this.list = this.container.querySelector("#list")!;
+  }
+
+  get Element() {
+    if (!this.rendered) {
+      this.render();
+      this.rendered = true;
+      // ? TODO: make this WORK BY USING HOW MUCH THE DOCUMENT SCROLLED THEN WE USE THAT TO PROGRAMATICALLY SCROLL THE LIST
+      const relativeScrolling = () => {
+        // we need to check if all of this.container is in the viewport haha
+        const rect = this.container.getBoundingClientRect();
+        if (rect.top < 0 && rect.bottom > window.innerHeight) {
+          this.scrollPos = Math.abs(rect.top);
+          requestAnimationFrame(() => this.render());
+        }
+      };
+      window.addEventListener("scroll", relativeScrolling);
+      // @ts-ignore
+      window.CradovaEvent.after_page_is_killed.push(() => {
+        window.removeEventListener("scroll", relativeScrolling);
       });
-      //? observe initial items
-      observer.observe(this.container.lastElementChild as HTMLElement);
-      observer.observe(this.container.firstElementChild as HTMLElement);
-    };
-    window.addEventListener("scroll", domObser);
-    // @ts-ignore
-    window.CradovaEvent.after_page_is_killed.push(() => {
-      window.removeEventListener("scroll", domObser);
-    });
+    }
     return this.container;
   }
 
+  private render() {
+    const startIndex =
+      Math.floor(this.scrollPos / this.itemHeight) * this.columns;
+
+    this.list.style.transform =
+      this.scrollingDirection === "vertical"
+        ? `translateY(${
+            Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
+          }px)`
+        : `translateX(${
+            Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
+          }px)`;
+
+    let renderedNodesCount =
+      (Math.ceil(this.windowCoverage / this.itemHeight) + this.overscan) *
+      this.columns;
+    renderedNodesCount = Math.min(this.length - startIndex, renderedNodesCount);
+
+    for (; this.list.firstElementChild; ) this.list.firstElementChild.remove();
+    let index = 0;
+    for (let i = 0; i < renderedNodesCount; i++) {
+      index = i + startIndex;
+      if (this.state[index]) {
+        this.list.appendChild(this.item(this.state[index], index));
+      }
+    }
+    if (index + 1 === this.length) {
+      this.opts?.onScrollEnd?.();
+    }
+    this.startIndex = startIndex;
+  }
   public computed(
-    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement),
+    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement)
   ): HTMLElement | undefined {
     if (!listener) {
       console.error(
-        ` ✘  Cradova err:  listener ${
-          String(
-            listener,
-          )
-        } is not a valid event name or function`,
+        ` ✘  Cradova err:  listener ${String(
+          listener
+        )} is not a valid event name or function`
       );
       return;
     }
@@ -417,11 +430,9 @@ export class List<T> {
       const el = toComp(listener as Comp)!;
       if (el === undefined || !(el instanceof HTMLElement)) {
         console.error(
-          ` ✘  Cradova err:  ${
-            String(
-              listener,
-            )
-          } is not a valid element or function`,
+          ` ✘  Cradova err:  ${String(
+            listener
+          )} is not a valid element or function`
         );
         return;
       }
@@ -434,46 +445,54 @@ export class List<T> {
 
   private diffDOMBeforeUpdatingState(newState: T[]) {
     this.length = newState.length;
-    this.renderingRange = Math.round(
-      Math.min(
-        this.length > 100 ? this.length * 0.5 : this.length,
-        window.innerHeight / (this.options?.itemHeight || 1),
-      ),
-    );
-    this.lastItemIndex = this.firstItemIndex + this.renderingRange;
-    for (let i = this.lastItemIndex; i >= this.firstItemIndex; i--) {
-      if (
-        (this.state[i] === undefined || newState[i] === undefined) &&
-        this.container.children[i] !== undefined
-      ) {
-        this.container.removeChild(this.container.children[i]);
-        continue;
+    let startIndex =
+      Math.floor(this.scrollPos / this.itemHeight) * this.columns;
+    startIndex = Math.floor(startIndex / this.columns) * this.columns;
+    let renderedNodesCount = this.list.childElementCount;
+
+    if (renderedNodesCount < this.overscan) {
+      this.state = newState;
+      this.render();
+    } else {
+      for (let i = 0; i < renderedNodesCount; i++) {
+        const index = i + startIndex;
+        //
+        if (newState[index] === undefined) {
+          this.list.children[index]?.remove();
+          continue;
+        }
+        const item = this.item(newState[index], index);
+        if (this.list.children[index]) {
+          this.list.replaceChild(item, this.list.children[index]);
+        } else {
+          this.list.appendChild(item);
+        }
       }
-      if (JSON.stringify(this.state[i]) === JSON.stringify(newState[i])) {
-        continue;
-      }
-      const item = this.item(newState[i]);
-      item.setAttribute("data-index", i.toString());
-      if (this.container.children[i]) {
-        this.container.replaceChild(item, this.container.children[i]);
-      } else {
-        this.container.appendChild(item);
-      }
+      this.list.style.transform =
+        this.scrollingDirection === "vertical"
+          ? `translateY(${
+              Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
+            }px)`
+          : `translateX(${
+              Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
+            }px)`;
+      this.state = newState;
     }
-    this.lastItemIndex = Number(
-      this.container.lastElementChild?.getAttribute("data-index") || 0,
-    );
-    this.firstItemIndex = Number(
-      this.container.firstElementChild?.getAttribute("data-index") || 0,
-    );
-    this.state = newState;
-    this.subscribers.forEach((sub) => {
-      const isComp = !isArrowFunc(sub as Comp);
-      if (isComp) {
-        compManager.recall(sub as Comp);
-      } else {
-        (sub as () => HTMLElement)?.();
-      }
+    if (this.length !== newState.length) {
+      this.listContainer.style.height = `${Math.round(
+        (this.length * this.itemHeight) / this.columns
+      )}px`;
+    }
+
+    queueMicrotask(() => {
+      this.subscribers.forEach((sub) => {
+        const isComp = !isArrowFunc(sub as Comp);
+        if (isComp) {
+          compManager.recall(sub as Comp);
+        } else {
+          (sub as () => HTMLElement)?.();
+        }
+      });
     });
   }
 
@@ -532,9 +551,8 @@ export class List<T> {
   public set(newData: T[] | ((prevItem: T[]) => T[])) {
     // copy state
     const newState = [...this.state];
-    this.state = newData instanceof Function
-      ? newData(this.state)
-      : newData || [];
+    this.state =
+      newData instanceof Function ? newData(this.state) : newData || [];
     this.diffDOMBeforeUpdatingState(newState);
   }
 
@@ -545,7 +563,7 @@ export class List<T> {
   //   this.state = null as any;
   //   this.item = null as any;
   //   this.length = 0;
-  //   this.options = null as any;
+  //   this.opts = null as any;
   //   this.renderingRange = 0;
   //   this.firstItemIndex = 0;
   //   this.lastItemIndex = 0;
@@ -578,7 +596,7 @@ export class Page {
     const { template, title } = pageParams;
     if (typeof template !== "function") {
       throw new Error(
-        ` ✘  Cradova err:  template function for the page is not a function`,
+        ` ✘  Cradova err:  template function for the page is not a function`
       );
     }
     this._html = template as () => HTMLElement;
@@ -703,7 +721,7 @@ class RouterBoxClass {
         this.lastNavigatedRouteController &&
           (this.lastNavigatedRouteController._template = undefined) &&
           this.lastNavigatedRouteController._unload_CB?.apply(
-            this.lastNavigatedRouteController,
+            this.lastNavigatedRouteController
           );
 
         this.lastNavigatedRoute = url;
@@ -724,7 +742,7 @@ class RouterBoxClass {
   }
 
   checker(
-    url: string,
+    url: string
   ): [Page | (() => Promise<Page | undefined>), Record<string, any>] {
     if (url[0] !== "/") {
       url = url.slice(url.indexOf("/", 8));
@@ -824,9 +842,8 @@ export class Router {
       ) {
         // ? creating the lazy
         RouterBox.routes[path] = async () => {
-          const paged: Page = typeof page === "function"
-            ? await page()
-            : await page;
+          const paged: Page =
+            typeof page === "function" ? await page() : await page;
           return RouterBox.route(path, paged);
         };
       } else {
@@ -868,7 +885,7 @@ export class Router {
       console.error(
         " ✘  Cradova err:  href must be a defined path but got " +
           href +
-          " instead",
+          " instead"
       );
     }
     let route = null,
@@ -904,7 +921,7 @@ export class Router {
       RouterBox.loadingPage = page;
     } else {
       throw new Error(
-        " ✘  Cradova err:  Loading Page should be a cradova page class",
+        " ✘  Cradova err:  Loading Page should be a cradova page class"
       );
     }
   }
@@ -933,7 +950,7 @@ export class Router {
       RouterBox["errorHandler"] = callback;
     } else {
       throw new Error(
-        " ✘  Cradova err:  callback for error event is not a function",
+        " ✘  Cradova err:  callback for error event is not a function"
       );
     }
   }
@@ -947,7 +964,7 @@ export class Router {
       RouterBox.doc = doc;
     } else {
       throw new Error(
-        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `,
+        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `
       );
     }
     window.addEventListener("pageshow", () => RouterBox.router());

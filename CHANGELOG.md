@@ -282,3 +282,7 @@ we went along with it.
 # v3.14.0
 
 - Implemented List for managing lists of items and virtualizing them.
+
+# v3.15.1
+
+- Remplemented List class.

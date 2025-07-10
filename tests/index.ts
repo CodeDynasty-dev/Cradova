@@ -19,22 +19,26 @@ import {
 
 // creating a store
 const todoStore = new List(
-  ["take bath", "code coded", "take a break"],
-  (item) =>
-    p(item, {
+  // ["task", "code coded", "take a break"],
+  Array(1_00).fill("task"),
+  (item: string, i: number) =>
+    p(item + " " + (i + 1), {
       title: "click to remove",
-      onclick() {
-        todoStore.splice(todoStore.indexOf(item));
-      },
       style: {
-        border: "1px solid green",
+        backgroundColor: `#c21010`,
+        color: `white`,
+      },
+      onclick() {
+        todoStore.splice(i);
       },
     }),
   {
-    itemHeight: 50,
+    itemHeight: 330,
+    columns: 4,
     className: "todo-list",
-    id: "todo-list",
-  },
+    windowHeight: window.innerHeight,
+    // scrollingDirection: "horizontal",
+  }
 );
 console.log(todoStore);
 function TodoList(ctx: Comp) {
@@ -65,7 +69,7 @@ function TodoList(ctx: Comp) {
             ref.current("todoInput")!.value = "";
           }
         },
-      }),
+      })
     ),
     todoStore.Element,
     todoStore.computed(function () {
@@ -75,7 +79,7 @@ function TodoList(ctx: Comp) {
             fontWeight: "bold",
             color: "blue",
           },
-        }),
+        })
       );
     }),
     img({
@@ -85,7 +89,7 @@ function TodoList(ctx: Comp) {
         console.log("cancel");
         console.log(this);
       },
-    }),
+    })
   );
 }
 
@@ -117,9 +121,9 @@ const count = function (ctx: Comp) {
       $case(7, () => h1("count is 7")),
       $case(8, () => h1("count is 8")),
       $case(9, () => h1("count is 9")),
-      $case(10, () => h1("count is 10")),
+      $case(10, () => h1("count is 10"))
     ),
-    h1(" count: " + count),
+    h1(" count: " + count)
   );
 };
 
@@ -161,7 +165,7 @@ function typingExample(ctx: Comp) {
       placeholder: "typing simulation",
     }),
     p(" no thing typed yet!", { ref: ref.bind("text") }),
-    a({ href: "/p" }, "log lol in the console"),
+    a({ href: "/p" }, "log lol in the console")
   );
 }
 
@@ -191,7 +195,7 @@ Router.BrowserRoutes({
           type: "button",
         }),
         TodoList,
-        App,
+        App
       );
     },
   }),
@@ -205,7 +209,7 @@ Router.BrowserRoutes({
           },
         }),
         TodoList,
-        App,
+        App
       );
     },
   }),

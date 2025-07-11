@@ -124,7 +124,7 @@ export class Signal<Type extends Record<string, any> = any> {
     const s = new Set<Comp | (() => void) | ((ctx: Comp) => HTMLElement)>();
     this.queue.add("__ALL__");
     for (const k of this.queue) {
-      if (this.picker.hasOwnProperty(k)) {
+      if (this.picker.hasOwnProperty(k) || k === "__ALL__") {
         const subs2 = this.subscribers![k];
         if (subs2) {
           for (const fn of subs2) {

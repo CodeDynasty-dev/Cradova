@@ -550,24 +550,10 @@ export class List<T> {
   }
   public set(newData: T[] | ((prevItem: T[]) => T[])) {
     // copy state
-    const newState = [...this.state];
-    this.state =
-      newData instanceof Function ? newData(this.state) : newData || [];
+    const newState =
+      newData instanceof Function ? newData(this.state) : newData;
     this.diffDOMBeforeUpdatingState(newState);
   }
-
-  // public destroy() {
-  //   this.container.remove();
-  //   this.container = null as any;
-  //   this.state.length = 0;
-  //   this.state = null as any;
-  //   this.item = null as any;
-  //   this.length = 0;
-  //   this.opts = null as any;
-  //   this.renderingRange = 0;
-  //   this.firstItemIndex = 0;
-  //   this.lastItemIndex = 0;
-  // }
 }
 
 /**

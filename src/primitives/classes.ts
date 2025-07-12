@@ -28,7 +28,7 @@ class cradovaEvent {
    */
 
   async dispatchEvent(
-    eventName: "after_comp_is_mounted" | "after_page_is_killed",
+    eventName: "after_comp_is_mounted" | "after_page_is_killed"
   ) {
     const eventListeners = this[eventName];
     while (eventListeners.length !== 0) {
@@ -176,15 +176,13 @@ export class Signal<Type extends Record<string, any> = any> {
       | (() => void)
       | Comp
       | ((ctx: Comp) => HTMLElement),
-    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement),
+    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement)
   ): HTMLElement | undefined {
     if (!eventName) {
       console.error(
-        ` ✘  Cradova err:  eventName ${String(eventName)} or listener ${
-          String(
-            listener,
-          )
-        } is not a valid event name or function`,
+        ` ✘  Cradova err:  eventName ${String(eventName)} or listener ${String(
+          listener
+        )} is not a valid event name or function`
       );
       return;
     }
@@ -200,11 +198,9 @@ export class Signal<Type extends Record<string, any> = any> {
       const el = toComp(listener as Comp)!;
       if (el === undefined || !(el instanceof HTMLElement)) {
         console.error(
-          ` ✘  Cradova err:  ${
-            String(
-              listener,
-            )
-          } is not a valid element or function`,
+          ` ✘  Cradova err:  ${String(
+            listener
+          )} is not a valid element or function`
         );
         return;
       }
@@ -315,7 +311,7 @@ export class List<T> {
       itemsInVisibleRange?: number;
       scrollingDirection?: "vertical" | "horizontal";
       onScrollEnd?: () => void;
-    },
+    }
   ) {
     this.state = state;
     this.item = item || ((item: T, i: number) => div(String(item) + " " + i));
@@ -334,17 +330,15 @@ export class List<T> {
           this.scrollPos = Math.floor(
             this.scrollingDirection === "vertical"
               ? (e.target as HTMLElement).scrollTop
-              : (e.target as HTMLElement).scrollLeft,
+              : (e.target as HTMLElement).scrollLeft
           );
           requestAnimationFrame(() => this.render());
         },
         style: {
-          overflowY: this.scrollingDirection === "vertical"
-            ? "scroll"
-            : "hidden",
-          overflowX: this.scrollingDirection === "horizontal"
-            ? "scroll"
-            : "hidden",
+          overflowY:
+            this.scrollingDirection === "vertical" ? "scroll" : "hidden",
+          overflowX:
+            this.scrollingDirection === "horizontal" ? "scroll" : "hidden",
           // height: this.opts?.windowHeight
           //   ? `${this.opts?.windowHeight}px`
           //   : "500px",
@@ -357,23 +351,22 @@ export class List<T> {
         {
           id: "listContainer",
           style: {
-            height: `${
-              Math.round(
-                (this.length * this.itemHeight) / this.columns,
-              )
-            }px`,
+            height: `${Math.round(
+              (this.length * this.itemHeight) / this.columns
+            )}px`,
           },
         },
         div({
           id: "list",
           className: this.opts?.className,
           style: {
-            transform: this.scrollingDirection === "vertical"
-              ? `translateY(${this.scrollPos}px)`
-              : `translateX(${this.scrollPos}px)`,
+            transform:
+              this.scrollingDirection === "vertical"
+                ? `translateY(${this.scrollPos}px)`
+                : `translateX(${this.scrollPos}px)`,
           },
-        }),
-      ),
+        })
+      )
     );
     this.listContainer = this.container.querySelector("#listContainer")!;
     this.list = this.container.querySelector("#list")!;
@@ -402,16 +395,17 @@ export class List<T> {
   }
 
   private render() {
-    const startIndex = Math.floor(this.scrollPos / this.itemHeight) *
-      this.columns;
+    const startIndex =
+      Math.floor(this.scrollPos / this.itemHeight) * this.columns;
 
-    this.list.style.transform = this.scrollingDirection === "vertical"
-      ? `translateY(${
-        Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
-      }px)`
-      : `translateX(${
-        Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
-      }px)`;
+    this.list.style.transform =
+      this.scrollingDirection === "vertical"
+        ? `translateY(${
+            Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
+          }px)`
+        : `translateX(${
+            Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
+          }px)`;
 
     const renderedNodesCount =
       (Math.ceil(this.windowCoverage / this.itemHeight) +
@@ -419,11 +413,11 @@ export class List<T> {
       this.columns;
     const endIndex = Math.min(
       this.length - 1,
-      startIndex + renderedNodesCount - 1,
+      startIndex + renderedNodesCount - 1
     );
-
+    const len = this.list.children.length;
     // Remove nodes that are no longer visible
-    for (let i = this.length - 1; i >= 0; i--) {
+    for (let i = len - 1; i >= 0; i--) {
       const child = this.list.children[i] as HTMLElement;
       const childIndex = parseInt(child.dataset["index"] || "-1", 10);
       if (childIndex < startIndex || childIndex > endIndex) {
@@ -441,7 +435,7 @@ export class List<T> {
         for (const child of this.list.children) {
           const childIndex = parseInt(
             (child as HTMLElement).dataset["index"] || "-1",
-            10,
+            10
           );
           if (i < childIndex) {
             this.list.insertBefore(itemElement, child);
@@ -460,15 +454,13 @@ export class List<T> {
     }
   }
   public computed(
-    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement),
+    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement)
   ): HTMLElement | undefined {
     if (!listener) {
       console.error(
-        ` ✘  Cradova err:  listener ${
-          String(
-            listener,
-          )
-        } is not a valid event name or function`,
+        ` ✘  Cradova err:  listener ${String(
+          listener
+        )} is not a valid event name or function`
       );
       return;
     }
@@ -480,11 +472,9 @@ export class List<T> {
       const el = toComp(listener as Comp)!;
       if (el === undefined || !(el instanceof HTMLElement)) {
         console.error(
-          ` ✘  Cradova err:  ${
-            String(
-              listener,
-            )
-          } is not a valid element or function`,
+          ` ✘  Cradova err:  ${String(
+            listener
+          )} is not a valid element or function`
         );
         return;
       }
@@ -497,11 +487,9 @@ export class List<T> {
 
   private diffDOMBeforeUpdatingState(newState: T[]) {
     if (this.length !== newState.length) {
-      this.listContainer.style.height = `${
-        Math.round(
-          (newState.length * this.itemHeight) / this.columns,
-        )
-      }px`;
+      this.listContainer.style.height = `${Math.round(
+        (newState.length * this.itemHeight) / this.columns
+      )}px`;
       this.length = newState.length;
     }
 
@@ -574,9 +562,8 @@ export class List<T> {
   }
   public set(newData: T[] | ((prevItem: T[]) => T[])) {
     // copy state
-    const newState = newData instanceof Function
-      ? newData(this.state)
-      : newData;
+    const newState =
+      newData instanceof Function ? newData(this.state) : newData;
     this.diffDOMBeforeUpdatingState(newState);
   }
 }
@@ -607,7 +594,7 @@ export class Page {
     const { template, title } = pageParams;
     if (typeof template !== "function") {
       throw new Error(
-        ` ✘  Cradova err:  template function for the page is not a function`,
+        ` ✘  Cradova err:  template function for the page is not a function`
       );
     }
     this._html = template as () => HTMLElement;
@@ -732,7 +719,7 @@ class RouterBoxClass {
         this.lastNavigatedRouteController &&
           (this.lastNavigatedRouteController._template = undefined) &&
           this.lastNavigatedRouteController._unload_CB?.apply(
-            this.lastNavigatedRouteController,
+            this.lastNavigatedRouteController
           );
 
         this.lastNavigatedRoute = url;
@@ -753,7 +740,7 @@ class RouterBoxClass {
   }
 
   checker(
-    url: string,
+    url: string
   ): [Page | (() => Promise<Page | undefined>), Record<string, any>] {
     if (url[0] !== "/") {
       url = url.slice(url.indexOf("/", 8));
@@ -853,9 +840,8 @@ export class Router {
       ) {
         // ? creating the lazy
         RouterBox.routes[path] = async () => {
-          const paged: Page = typeof page === "function"
-            ? await page()
-            : await page;
+          const paged: Page =
+            typeof page === "function" ? await page() : await page;
           return RouterBox.route(path, paged);
         };
       } else {
@@ -897,7 +883,7 @@ export class Router {
       console.error(
         " ✘  Cradova err:  href must be a defined path but got " +
           href +
-          " instead",
+          " instead"
       );
     }
     let route = null,
@@ -933,7 +919,7 @@ export class Router {
       RouterBox.loadingPage = page;
     } else {
       throw new Error(
-        " ✘  Cradova err:  Loading Page should be a cradova page class",
+        " ✘  Cradova err:  Loading Page should be a cradova page class"
       );
     }
   }
@@ -962,7 +948,7 @@ export class Router {
       RouterBox["errorHandler"] = callback;
     } else {
       throw new Error(
-        " ✘  Cradova err:  callback for error event is not a function",
+        " ✘  Cradova err:  callback for error event is not a function"
       );
     }
   }
@@ -976,7 +962,7 @@ export class Router {
       RouterBox.doc = doc;
     } else {
       throw new Error(
-        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `,
+        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `
       );
     }
     window.addEventListener("pageshow", () => RouterBox.router());

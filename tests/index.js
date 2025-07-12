@@ -6,7 +6,9 @@ const todoStore = new List(
 Array(1_00).fill("task"), (item, i) => p(item + " " + (i + 1), {
     title: "click to remove",
     style: {
-        backgroundColor: `#c21010`,
+        cursor: "pointer",
+        background: `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`,
+        // backgroundColor: `#c21010`,
         color: `white`,
     },
     onclick() {

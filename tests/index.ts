@@ -25,7 +25,11 @@ const todoStore = new List(
     p(item + " " + (i + 1), {
       title: "click to remove",
       style: {
-        backgroundColor: `#c21010`,
+        cursor: "pointer",
+        background: `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${
+          Math.random() * 255
+        })`,
+        // backgroundColor: `#c21010`,
         color: `white`,
       },
       onclick() {

@@ -28,7 +28,7 @@ class cradovaEvent {
    */
 
   async dispatchEvent(
-    eventName: "after_comp_is_mounted" | "after_page_is_killed"
+    eventName: "after_comp_is_mounted" | "after_page_is_killed",
   ) {
     const eventListeners = this[eventName];
     while (eventListeners.length !== 0) {
@@ -176,13 +176,15 @@ export class Signal<Type extends Record<string, any> = any> {
       | (() => void)
       | Comp
       | ((ctx: Comp) => HTMLElement),
-    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement)
+    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement),
   ): HTMLElement | undefined {
     if (!eventName) {
       console.error(
-        ` ✘  Cradova err:  eventName ${String(eventName)} or listener ${String(
-          listener
-        )} is not a valid event name or function`
+        ` ✘  Cradova err:  eventName ${String(eventName)} or listener ${
+          String(
+            listener,
+          )
+        } is not a valid event name or function`,
       );
       return;
     }
@@ -198,9 +200,11 @@ export class Signal<Type extends Record<string, any> = any> {
       const el = toComp(listener as Comp)!;
       if (el === undefined || !(el instanceof HTMLElement)) {
         console.error(
-          ` ✘  Cradova err:  ${String(
-            listener
-          )} is not a valid element or function`
+          ` ✘  Cradova err:  ${
+            String(
+              listener,
+            )
+          } is not a valid element or function`,
         );
         return;
       }
@@ -260,17 +264,17 @@ export class List<T> {
   /**
    * @internal
    */
-  private itemHeight = 35; // Adjustabl variable
-  private windowCoverage = 500; // Adjustable  variable
-  private overscan = 20; // Number of extra items to render before the visible range
-  private scrollingDirection = "vertical"; // Adjustable  variable
+  private itemHeight = 35;
+  private windowCoverage = 500;
+  private itemsInVisibleRange = 20;
+  private scrollingDirection = "vertical";
   private opts?: {
     itemHeight?: number;
     className?: string;
     columns?: number;
     windowHeight?: number;
     windowWidth?: number;
-    overscan?: number;
+    itemsInVisibleRange?: number;
     scrollingDirection?: "vertical" | "horizontal";
     onScrollEnd?: () => void;
   };
@@ -279,12 +283,26 @@ export class List<T> {
    * @internal
    */
   private container: HTMLElement;
+  /**
+   * @internal
+   */
   private rendered: boolean = false;
-  subscribers: Function[] = [];
-  scrollPos: number = 0;
-  list: HTMLElement;
-  startIndex: number = 0;
-  listContainer: HTMLElement;
+  /**
+   * @internal
+   */
+  private scrollPos: number = 0;
+  /**
+   * @internal
+   */
+  private subscribers: Function[] = [];
+  /**
+   * @internal
+   */
+  private list: HTMLElement;
+  /**
+   * @internal
+   */
+  private listContainer: HTMLElement;
   constructor(
     state: T[],
     item?: (item: T, i: number) => HTMLElement,
@@ -294,10 +312,10 @@ export class List<T> {
       columns?: number;
       windowHeight?: number;
       windowWidth?: number;
-      overscan?: number;
+      itemsInVisibleRange?: number;
       scrollingDirection?: "vertical" | "horizontal";
       onScrollEnd?: () => void;
-    }
+    },
   ) {
     this.state = state;
     this.item = item || ((item: T, i: number) => div(String(item) + " " + i));
@@ -306,7 +324,7 @@ export class List<T> {
     this.itemHeight = opts?.itemHeight || 35;
     this.columns = opts?.columns || 1;
     this.windowCoverage = opts?.windowHeight || opts?.windowWidth || 500;
-    this.overscan = opts?.overscan || 20;
+    this.itemsInVisibleRange = opts?.itemsInVisibleRange || 20;
     this.scrollingDirection = opts?.scrollingDirection || "vertical";
 
     this.container = div(
@@ -316,43 +334,46 @@ export class List<T> {
           this.scrollPos = Math.floor(
             this.scrollingDirection === "vertical"
               ? (e.target as HTMLElement).scrollTop
-              : (e.target as HTMLElement).scrollLeft
+              : (e.target as HTMLElement).scrollLeft,
           );
           requestAnimationFrame(() => this.render());
         },
         style: {
-          overflowY:
-            this.scrollingDirection === "vertical" ? "scroll" : "hidden",
-          overflowX:
-            this.scrollingDirection === "horizontal" ? "scroll" : "hidden",
-          height: this.opts?.windowHeight
-            ? `${this.opts?.windowHeight}px`
-            : "500px",
-          width: this.opts?.windowWidth
-            ? `${this.opts?.windowWidth}px`
-            : "100%",
+          overflowY: this.scrollingDirection === "vertical"
+            ? "scroll"
+            : "hidden",
+          overflowX: this.scrollingDirection === "horizontal"
+            ? "scroll"
+            : "hidden",
+          // height: this.opts?.windowHeight
+          //   ? `${this.opts?.windowHeight}px`
+          //   : "500px",
+          // width: this.opts?.windowWidth
+          //   ? `${this.opts?.windowWidth}px`
+          //   : "100%",
         },
       },
       div(
         {
           id: "listContainer",
           style: {
-            height: `${Math.round(
-              (this.length * this.itemHeight) / this.columns
-            )}px`,
+            height: `${
+              Math.round(
+                (this.length * this.itemHeight) / this.columns,
+              )
+            }px`,
           },
         },
         div({
           id: "list",
           className: this.opts?.className,
           style: {
-            transform:
-              this.scrollingDirection === "vertical"
-                ? `translateY(${this.scrollPos}px)`
-                : `translateX(${this.scrollPos}px)`,
+            transform: this.scrollingDirection === "vertical"
+              ? `translateY(${this.scrollPos}px)`
+              : `translateX(${this.scrollPos}px)`,
           },
-        })
-      )
+        }),
+      ),
     );
     this.listContainer = this.container.querySelector("#listContainer")!;
     this.list = this.container.querySelector("#list")!;
@@ -381,44 +402,73 @@ export class List<T> {
   }
 
   private render() {
-    const startIndex =
-      Math.floor(this.scrollPos / this.itemHeight) * this.columns;
-
-    this.list.style.transform =
-      this.scrollingDirection === "vertical"
-        ? `translateY(${
-            Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
-          }px)`
-        : `translateX(${
-            Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
-          }px)`;
-
-    let renderedNodesCount =
-      (Math.ceil(this.windowCoverage / this.itemHeight) + this.overscan) *
+    const startIndex = Math.floor(this.scrollPos / this.itemHeight) *
       this.columns;
-    renderedNodesCount = Math.min(this.length - startIndex, renderedNodesCount);
 
-    for (; this.list.firstElementChild; ) this.list.firstElementChild.remove();
-    let index = 0;
-    for (let i = 0; i < renderedNodesCount; i++) {
-      index = i + startIndex;
-      if (this.state[index]) {
-        this.list.appendChild(this.item(this.state[index], index));
+    this.list.style.transform = this.scrollingDirection === "vertical"
+      ? `translateY(${
+        Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
+      }px)`
+      : `translateX(${
+        Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
+      }px)`;
+
+    const renderedNodesCount =
+      (Math.ceil(this.windowCoverage / this.itemHeight) +
+        this.itemsInVisibleRange) *
+      this.columns;
+    const endIndex = Math.min(
+      this.length - 1,
+      startIndex + renderedNodesCount - 1,
+    );
+
+    // Remove nodes that are no longer visible
+    for (let i = this.length - 1; i >= 0; i--) {
+      const child = this.list.children[i] as HTMLElement;
+      const childIndex = parseInt(child.dataset["index"] || "-1", 10);
+      if (childIndex < startIndex || childIndex > endIndex) {
+        this.list.removeChild(child);
       }
     }
-    if (index + 1 === this.length) {
+
+    // Add new nodes
+    for (let i = startIndex; i <= endIndex; i++) {
+      if (!this.list.querySelector(`[data-index="${i}"]`)) {
+        const itemElement = this.item(this.state[i], i);
+        itemElement.dataset["index"] = String(i);
+        // to preserve order, we need to find the correct place to insert the new element
+        let inserted = false;
+        for (const child of this.list.children) {
+          const childIndex = parseInt(
+            (child as HTMLElement).dataset["index"] || "-1",
+            10,
+          );
+          if (i < childIndex) {
+            this.list.insertBefore(itemElement, child);
+            inserted = true;
+            break;
+          }
+        }
+        if (!inserted) {
+          this.list.appendChild(itemElement);
+        }
+      }
+    }
+
+    if (endIndex + 1 >= this.length) {
       this.opts?.onScrollEnd?.();
     }
-    this.startIndex = startIndex;
   }
   public computed(
-    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement)
+    listener?: (() => void) | Comp | ((ctx: Comp) => HTMLElement),
   ): HTMLElement | undefined {
     if (!listener) {
       console.error(
-        ` ✘  Cradova err:  listener ${String(
-          listener
-        )} is not a valid event name or function`
+        ` ✘  Cradova err:  listener ${
+          String(
+            listener,
+          )
+        } is not a valid event name or function`,
       );
       return;
     }
@@ -430,9 +480,11 @@ export class List<T> {
       const el = toComp(listener as Comp)!;
       if (el === undefined || !(el instanceof HTMLElement)) {
         console.error(
-          ` ✘  Cradova err:  ${String(
-            listener
-          )} is not a valid element or function`
+          ` ✘  Cradova err:  ${
+            String(
+              listener,
+            )
+          } is not a valid element or function`,
         );
         return;
       }
@@ -444,55 +496,27 @@ export class List<T> {
   }
 
   private diffDOMBeforeUpdatingState(newState: T[]) {
-    this.length = newState.length;
-    let startIndex =
-      Math.floor(this.scrollPos / this.itemHeight) * this.columns;
-    startIndex = Math.floor(startIndex / this.columns) * this.columns;
-    let renderedNodesCount = this.list.childElementCount;
-
-    if (renderedNodesCount < this.overscan) {
-      this.state = newState;
-      this.render();
-    } else {
-      for (let i = 0; i < renderedNodesCount; i++) {
-        const index = i + startIndex;
-        //
-        if (newState[index] === undefined) {
-          this.list.children[index]?.remove();
-          continue;
-        }
-        const item = this.item(newState[index], index);
-        if (this.list.children[index]) {
-          this.list.replaceChild(item, this.list.children[index]);
-        } else {
-          this.list.appendChild(item);
-        }
-      }
-      this.list.style.transform =
-        this.scrollingDirection === "vertical"
-          ? `translateY(${
-              Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
-            }px)`
-          : `translateX(${
-              Math.floor(this.scrollPos / this.itemHeight) * this.itemHeight
-            }px)`;
-      this.state = newState;
-    }
     if (this.length !== newState.length) {
-      this.listContainer.style.height = `${Math.round(
-        (this.length * this.itemHeight) / this.columns
-      )}px`;
+      this.listContainer.style.height = `${
+        Math.round(
+          (newState.length * this.itemHeight) / this.columns,
+        )
+      }px`;
+      this.length = newState.length;
     }
+
+    this.state = newState;
+    // Delegate all DOM updates to the render method
+    this.render();
 
     queueMicrotask(() => {
-      this.subscribers.forEach((sub) => {
-        const isComp = !isArrowFunc(sub as Comp);
-        if (isComp) {
-          compManager.recall(sub as Comp);
+      for (const listener of this.subscribers) {
+        if ((listener as Comp).published) {
+          compManager.recall(listener as Comp);
         } else {
-          (sub as () => HTMLElement)?.();
+          (listener as () => void)();
         }
-      });
+      }
     });
   }
 
@@ -550,8 +574,9 @@ export class List<T> {
   }
   public set(newData: T[] | ((prevItem: T[]) => T[])) {
     // copy state
-    const newState =
-      newData instanceof Function ? newData(this.state) : newData;
+    const newState = newData instanceof Function
+      ? newData(this.state)
+      : newData;
     this.diffDOMBeforeUpdatingState(newState);
   }
 }
@@ -582,7 +607,7 @@ export class Page {
     const { template, title } = pageParams;
     if (typeof template !== "function") {
       throw new Error(
-        ` ✘  Cradova err:  template function for the page is not a function`
+        ` ✘  Cradova err:  template function for the page is not a function`,
       );
     }
     this._html = template as () => HTMLElement;
@@ -707,7 +732,7 @@ class RouterBoxClass {
         this.lastNavigatedRouteController &&
           (this.lastNavigatedRouteController._template = undefined) &&
           this.lastNavigatedRouteController._unload_CB?.apply(
-            this.lastNavigatedRouteController
+            this.lastNavigatedRouteController,
           );
 
         this.lastNavigatedRoute = url;
@@ -728,7 +753,7 @@ class RouterBoxClass {
   }
 
   checker(
-    url: string
+    url: string,
   ): [Page | (() => Promise<Page | undefined>), Record<string, any>] {
     if (url[0] !== "/") {
       url = url.slice(url.indexOf("/", 8));
@@ -828,8 +853,9 @@ export class Router {
       ) {
         // ? creating the lazy
         RouterBox.routes[path] = async () => {
-          const paged: Page =
-            typeof page === "function" ? await page() : await page;
+          const paged: Page = typeof page === "function"
+            ? await page()
+            : await page;
           return RouterBox.route(path, paged);
         };
       } else {
@@ -871,7 +897,7 @@ export class Router {
       console.error(
         " ✘  Cradova err:  href must be a defined path but got " +
           href +
-          " instead"
+          " instead",
       );
     }
     let route = null,
@@ -907,7 +933,7 @@ export class Router {
       RouterBox.loadingPage = page;
     } else {
       throw new Error(
-        " ✘  Cradova err:  Loading Page should be a cradova page class"
+        " ✘  Cradova err:  Loading Page should be a cradova page class",
       );
     }
   }
@@ -936,7 +962,7 @@ export class Router {
       RouterBox["errorHandler"] = callback;
     } else {
       throw new Error(
-        " ✘  Cradova err:  callback for error event is not a function"
+        " ✘  Cradova err:  callback for error event is not a function",
       );
     }
   }
@@ -950,7 +976,7 @@ export class Router {
       RouterBox.doc = doc;
     } else {
       throw new Error(
-        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `
+        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `,
       );
     }
     window.addEventListener("pageshow", () => RouterBox.router());

@@ -19,22 +19,27 @@
         font-family: "Inter", sans-serif;
         overflow-x: hidden;
       }
+
       .fade-in-up {
         opacity: 0;
         transform: translateY(20px);
         transition: opacity 0.6s ease-out, transform 0.6s ease-out;
       }
+
       .fade-in-up.is-visible {
         opacity: 1;
         transform: translateY(0);
       }
+
       /* Simple hover scale effect for buttons */
       .hover-scale {
         transition: transform 0.3s ease-in-out;
       }
+
       .hover-scale:hover {
         transform: scale(1.05);
       }
+
       /* Background gradient inspired by Google colors */
       .google-gradient {
         background: linear-gradient(135deg, #4285f4, #34a853, #fbbc05, #ea4335);
@@ -46,18 +51,22 @@
         0% {
           background-position: 0% 50%;
         }
+
         50% {
           background-position: 100% 50%;
         }
+
         100% {
           background-position: 0% 50%;
         }
       }
+
       .red {
         border: 1px solid red;
       }
     </style>
   </head>
+
   <body class="bg-gray-50 text-gray-800">
     <header class="absolute top-0 left-0 right-0 z-10 p-4 md:px-8">
       <nav class="container mx-auto flex items-center justify-between">
@@ -74,12 +83,12 @@
             >Docs</a
           >
           <a
-            href="https://discord.gg/faqydQASTy"
+            href="https://discord.codedynasty.dev/"
             class="text-white lg:text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md"
             >Discord</a
           >
           <a
-            href="#"
+            href="https://github.com/CodeDynasty-dev/Cradova"
             class="bg-blue-600 text-white px-4 py-2 rounded-full ml-4 hover:bg-blue-700 hover-scale hidden lg:block"
             >Get Started</a
           >
@@ -108,23 +117,28 @@
       <div class="container mx-auto text-center z-10 p-4">
         <img src="/icon.png" alt="" class="w-24 h-24 mb-4 mx-auto mb-8" />
         <h1 class="text-4xl md:text-6xl font-bold mb-4 fade-in-up">
-          Build Web Apps Easily.
+          A UI framework for web applications.
         </h1>
         <p class="text-xl md:text-2xl mb-8 fade-in-up animation-delay-300">
-          Cradova fixes web development. Lightning fast, simple, and incredibly
-          powerful.
+          Cradova fixes web development. Lightning fast and incredibly simple.
         </p>
-        <div class="space-x-4 fade-in-up animation-delay-600">
-          <a
-            href="/guides/getting-started.html"
-            class="bg-white text-blue-600 px-8 py-3 rounded-full lg:text-lg font-semibold hover:bg-gray-200 hover-scale inline-block"
-            >Get Started</a
-          >
-          <a
-            href="#create"
-            class="border border-blue-600 text-white px-8 py-3 rounded-full lg:text-lg font-semibold hover:bg-blue-600 hover:text-white hover-scale inline-block"
-            >Create an App</a
-          >
+        <div
+          class="space-x-4 fade-in-up animation-delay-600 flex flex-col sm:flex-row sm:gap-12 lg:gap-0 w-fit mx-auto"
+        >
+          <div class="sm:mb-4 lg:mb-0">
+            <a
+              href="/guides/getting-started.html"
+              class="bg-white text-blue-600 px-8 py-3 sm:w-full lg:w-auto rounded-full lg:text-lg font-semibold hover:bg-gray-200 hover-scale inline-block mx-auto block sm:inline-block mb-4 sm:mb-0"
+              >Get Started</a
+            >
+          </div>
+          <div class="sm:mt-4 lg:mt-0">
+            <a
+              href="#create"
+              class="border border-blue-600 text-white px-8 py-3 sm:w-full lg:w-auto rounded-full lg:text-lg font-semibold hover:bg-blue-600 hover:text-white hover-scale inline-block mx-auto block sm:inline-block"
+              >Create Your App</a
+            >
+          </div>
         </div>
       </div>
     </section>
@@ -173,8 +187,8 @@
         <div class="space-x-4 fade-in-up animation-delay-600">
           <a
             href="#"
-            class="bg-black text-[gold] px-8 py-3 rounded-full lg:text-lg font-semibold hover:bg-gray-200 hover-scale inline-block"
-            >Give us a star</a
+            class="bg-black text-[gold] px-8 py-3 w-full sm:w-auto rounded-full lg:text-lg font-semibold hover:bg-gray-200 hover-scale inline-block"
+            >Give Cradova a star</a
           >
         </div>
       </div>
@@ -183,10 +197,10 @@
     <section class="py-16 md:py-24 google-gradient text-white" id="create">
       <div class="container mx-auto px-4 text-center">
         <h2 class="text-3xl md:text-4xl font-bold mb-12 fade-in-up">
-          Get Started in Minutes
+          Build in a weekend
         </h2>
-        <div class="grid md:grid-cols-2 gap-12 items-center">
-          <div class="text-left fade-in-up">
+        <div class="md:grid md:grid-cols-2 gap-12 items-center justify-center">
+          <div class="md:text-left fade-in-up mx-auto">
             <h3 class="text-2xl font-semibold mb-4">Simple Setup</h3>
             <p class="text-lg mb-4">
               Follow our clear documentation to get your first project running
@@ -196,77 +210,21 @@
             <p class="text-lg mb-4">
               Focus on your application's logic, not boilerplate.
             </p>
+            <a
+              href="/guides/getting-started.html"
+              class="my-6 bg-white text-blue-600 px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-200 hover-scale inline-block"
+              >Read the Docs</a
+            >
             <h3 class="text-2xl font-semibold mb-4">Join the Discord</h3>
             <p class="text-lg mb-4">
               Get support and share your creations with a growing community.
             </p>
             <a
-              href="/guides/getting-started.html"
-              class="mt-6 bg-white text-blue-600 px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-200 hover-scale inline-block"
-              >Read the Docs</a
+              href="https://discord.codedynasty.dev/"
+              class="my-6 bg-white text-blue-600 px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-200 hover-scale inline-block"
+              >Join the Discord</a
             >
           </div>
-          <div class="fade-in-up animation-delay-300">
-            <div
-              class="bg-gray-800 text-gray-200 p-6 rounded-lg shadow-xl overflow-x-auto"
-            >
-              <pre><code>
-# Example code snippet
-import framework
-
-@framework.route('/')
-def index():
-    return "Hello, World!"
-
-if __name__ == '__main__':
-    framework.run()
-                        </code></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="py-16 md:py-24 bg-white">
-      <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold mb-12 fade-in-up">
-          Loved by Developers
-        </h2>
-        <div class="grid md:grid-cols-3 gap-8">
-          <div
-            class="p-6 rounded-lg shadow-lg bg-gray-100 text-left fade-in-up"
-          >
-            <p class="italic mb-4">
-              "This framework completely changed my workflow. Development is so
-              much faster now!"
-            </p>
-            <p class="font-semibold">- Jane Doe, Senior Developer</p>
-          </div>
-          <div
-            class="p-6 rounded-lg shadow-lg bg-gray-100 text-left fade-in-up animation-delay-200"
-          >
-            <p class="italic mb-4">
-              "The documentation is superb, and the community is incredibly
-              helpful."
-            </p>
-            <p class="font-semibold">- John Smith, Open Source Enthusiast</p>
-          </div>
-          <div
-            class="p-6 rounded-lg shadow-lg bg-gray-100 text-left fade-in-up animation-delay-400"
-          >
-            <p class="italic mb-4">
-              "Finally, a framework that makes building complex apps feel
-              simple."
-            </p>
-            <p class="font-semibold">- Alice Johnson, CTO</p>
-          </div>
-        </div>
-        <div class="mt-12 fade-in-up">
-          <a
-            href="https://discord.gg/faqydQASTy"
-            class="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 hover-scale inline-block"
-            >Join the Discord</a
-          >
         </div>
       </div>
     </section>
@@ -275,7 +233,7 @@ if __name__ == '__main__':
       <div class="container mx-auto px-4 text-center">
         <p>&copy; 2021-2025 Cradova. All rights reserved.</p>
         <div class="mt-4 space-x-4">
-          <a href="https://discord.gg/faqydQASTy" class="hover:text-white"
+          <a href="https://discord.codedynasty.dev/" class="hover:text-white"
             >Discord</a
           >
           <a href="#" class="hover:text-white text-2xl">੶</a>

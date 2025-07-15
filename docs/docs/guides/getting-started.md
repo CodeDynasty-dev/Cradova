@@ -1,161 +1,266 @@
 <docmach type="wrapper" replacement="content" file="docs/assets/docs.html">
 
-# #Getting Started
+# Getting Started
 
-We're working on new docs. You can check out our new beginner tutorial here, and join our efforts on Discord!
+Cradova is a lightweight, reactive UI framework designed for building modern web applications with simplicity and performance. Inspired by SolidJS, Cradova provides a declarative API, fine-grained reactivity, and efficient DOM updates.
 
-# #See Solid
+## Installation
 
-For quick video overviews of Solid's core concepts, check out:
-
-Solid in 100 seconds
-
-# #Try Solid
-
-By far the easiest way to get started with Solid is to try it online. Our REPL at https://playground.solidjs.com is the perfect way to try out ideas. As is https://codesandbox.io/ where you can modify any of our Examples.
-
-Alternatively, you can use our Vite templates by running these commands in your terminal:
-
-> npx degit solidjs/templates/js my-app
-> cd my-app
-> npm i # or yarn or pnpm
-> npm run dev # or yarn or pnpm
-> Or for TypeScript:
-
-> npx degit solidjs/templates/ts my-app
-> cd my-app
-> npm i # or yarn or pnpm
-> npm run dev # or yarn or pnpm
-> Or you can install the dependencies in your own project. To use Solid with JSX (recommended), you need to install the solid-js NPM library and the Solid JSX compiler Babel plugin:
-
-> npm install solid-js babel-preset-solid
-> Then add babel-preset-solid to your .babelrc, or to your Babel config in webpack or rollup:
-
-"presets": ["solid"]
-For TypeScript, set your tsconfig.json to handle Solid's JSX as follows (see the TypeScript guide for more details):
-
-```
-"compilerOptions": {
-"jsx": "preserve",
-"jsxImportSource": "solid-js",
-}
+```bash
+npm install cradova
 ```
 
-# #Learn Solid
+## Basic Concepts
 
-Solid is all about small composable pieces that serve as building blocks for applications. These pieces are mostly functions which make up many shallow top-level APIs. Fortunately, you won't need to know about most of them to get started.
-
-The two main types of building blocks you have at your disposal are Components and Reactive Primitives.
-
-Components are functions that accept a props object and return JSX elements including native DOM elements and other components. They can be expressed as JSX Elements in PascalCase:
+### Creating Components
 
 ```ts
-function MyComponent(props) {
-  return <div>Hello {props.name}</div>;
-}
+const HelloWorld = () =>
+  div(
+    h1("Hello World!"),
+    p("Welcome to Cradova"),
+    button("Click me", {
+      onclick() {
+        alert("Button clicked!");
+      },
+    })
+  );
 ```
 
-<MyComponent name="Solid" />;
-Components are lightweight in that they are not stateful themselves and have no instances. Instead, they serve as factory functions for DOM elements and reactive primitives.
-
-Solid's fine-grained reactivity is built on three core primitives: Signals, Memos, and Effects. Together, they form an auto-tracking synchronization engine that ensures your view stays up to date. Reactive computations take the form of function-wrapped expressions that execute synchronously.
+### State Management
 
 ```ts
-const [first, setFirst] = createSignal("JSON");
-const [last, setLast] = createSignal("Bourne");
-createEffect(() => console.log(`${first()} ${last()}`));
+const Counter = function (ctx: Comp) {
+  const [count, setCount] = ctx.useState(0);
+
+  return div(
+    p("Count:" + count),
+    button("Increment", {
+      onclick() {
+        setCount(count + 1);
+      },
+    })
+  );
+};
 ```
 
-You can learn more about Solid's Reactivity and Solid's Rendering.
+## API Reference
 
-# #Think Solid
+### Primitive Elements
 
-Solid's design carries several opinions on what principles and values help us best build websites and applications. It is easier to learn and use Solid when you are aware of the philosophy behind it.
+#### `div`, `p`, `button`, `h1`-`h6`, etc.
 
-# #1. Declarative Data
+Create DOM elements with children and properties.
 
-Declarative data is the practice of tying the description of data’s behavior to its declaration. This allows for easy composition by packaging all aspects of data’s behavior in a single place.
-
-# #2. Vanishing Components
-
-It's hard enough to structure your components without taking updates into consideration. Solid updates are completely independent of the components. Component functions are called once and then cease to exist. Components exist to organize your code and not much else.
-
-# #3. Read/Write segregation
-
-Precise control and predictability make for better systems. We don't need true immutability to enforce unidirectional flow, just the ability to make the conscious decision which consumers may write and which may not.
-
-# #4. Simple is better than easy
-
-A lesson that comes hard for fine-grained reactivity. Explicit and consistent conventions even if they require more effort are worth it. The aim is to provide minimal tools to serve as the basis to build upon.
-
-# #Web Components
-
-Solid was born with the desire to have Web Components as first class citizens. Over time its design has evolved and goals have changed. However, Solid is still a great way to author Web Components. Solid Element allows you to write and wrap Solid's function components to produce small and performant Web Components. Inside Solid apps Solid Element is able to still leverage Solid's Context API, and Solid's Portals support Shadow DOM isolated styling.
-
-# #Server Rendering
-
-Solid has a dynamic server side rendering solution that enables a truly isomorphic development experience. Through the use of our Resource primitive, async data requests are easily made and, more importantly, automatically serialized and synchronized between client and browser.
-
-Since Solid supports asynchronous and stream rendering on the server, you get to write your code one way and have it execute on the server. This means that features like render-as-you-fetch and code splitting just work in Solid.
-
-For more information, read the Server guide.
-
-# #Buildless options
-
-If you need or prefer to use Solid in non-compiled environments such as plain HTML files, https://codepen.io, etc, you can use html`` Tagged Template Literals or HyperScript h() functions in plain JavaScript instead of Solid's compile-time-optimized JSX syntax.
-
-You can run them straight from the browser using Skypack, for example:
-
-```html
-<html>
-  <body>
-    <script type="module">
-      import { onCleanup, createSignal } from "https://esm.sh/solid-js@1.8.1";
-      import { render } from "https://esm.sh/solid-js@1.8.1/web";
-      import html from "https://esm.sh/solid-js@1.8.1/html";
-
-      const App = () => {
-        const [count, setCount] = createSignal(0),
-          timer = setInterval(() => setCount(count() + 1), 1000);
-        onCleanup(() => clearInterval(timer));
-        return html`<div>${count}</div>`;
-        // or
-        return h("div", {}, count);
-      };
-      render(App, document.body);
-    </script>
-  </body>
-</html>
+```ts
+div(
+  h1("Title"),
+  p("Description", { className: "text" }),
+  button("Submit", { disabled: true })
+);
 ```
 
-The advantages of going buildless come with tradeoffs:
+#### `fragment(...children)`
 
-Expressions need to always be a wrapped in a getter function or they won't be reactive. The following will not update when the first or last values change because the values are not being accessed inside an effect that the template creates internally, therefore dependencies will not be tracked:
+Creates a document fragment for grouping elements.
 
-```html
-html`
-<h1>Hello ${first() + " " + last()}</h1>
-`;
+```ts
+frag([div("Child 1"), div("Child 2")]);
 ```
 
-// or
+#### `raw(html)`
 
-```html
-h("h1", {}, "Hello ", first() + " " + last());
+Inject raw HTML content.
+
+```ts
+raw("<div>Dangerous content</div>");
 ```
 
-The following will update as expected when first or last change because the template will read from the getter within an effect and dependencies will be tracked:
+### Control Flow
 
-```html
-html`
-<h1>Hello ${() => first() + " " + last()}</h1>
-`; // or h("h1", {}, "Hello ", () => first() + " " + last());
+#### `$switch(value, ...cases)`
+
+Conditional rendering based on value matching.
+
+```ts
+$switch(
+  count,
+  $case(1, () => h1("One")),
+  $case(2, () => h1("Two")),
+  $case(3, () => h1("Three"))
+);
 ```
 
-will be reactive.
+#### `loop(data, component)`
 
-Build-time optimizations won't be in place like they are with Solid JSX, meaning app startup speed will be slightly slower because each template gets compiled at runtime the first time it is executed, but for many use cases this perf hit is imperceivable. Ongoing speed after startup will remain the same with the html`` template tag as with JSX. h() calls will always have slower ongoing speed due to their inability to statically analyze whole templates before being executed.
+Render lists of data.
 
-You need the corresponding DOM Expressions library for these to work with TypeScript. You can use Tagged Template Literals with Lit DOM Expressions or HyperScript with Hyper DOM Expressions.
+```ts
+loop(["Apple", "Banana", "Cherry"], (fruit, index) =>
+  p("" + index + 1 + ". " + fruit)
+);
+```
+
+### State Management
+
+#### `Signal(initial, options)`
+
+Reactive state container with automatic dependency tracking.
+
+```ts
+const counter = new Signal({ value: 0 });
+
+// Subscribe to changes
+counter.computed("value", () => {
+  console.log("Count:" + counter.data.value);
+});
+
+// Update value
+counter.data.value = 1;
+```
+
+#### `List(data, itemComponent, options)`
+
+Reactive array with efficient rendering.
+
+```ts
+const todoList = new List(
+  ["Task 1", "Task 2"],
+  (task, index) =>
+    p(task, {
+      onclick: () => todoList.splice(index, 1),
+    }),
+  { itemHeight: 40 }
+);
+
+// Add new item
+todoList.push("New Task");
+```
+
+### Hooks
+
+#### `useState(initialValue)`
+
+Component-local state management.
+
+```ts
+const [count, setCount] = ctx.useState(0);
+```
+
+#### `useEffect(effect, dependencies)`
+
+Side effects management.
+
+```ts
+ctx.useEffect(() => {
+  const timer = setInterval(() => {
+    setCount((c) => c + 1);
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []);
+```
+
+#### `useRef()`
+
+Reference to DOM elements.
+
+```ts
+const ref = ctx.useRef<HTMLInputElement>();
+
+return input({
+  ref: ref.bind("input"),
+  oninput: () => {
+    console.log(ref.current("input")?.value);
+  },
+});
+```
+
+### Routing
+
+#### `Page(options)`
+
+Define application pages.
+
+```ts
+const HomePage = new Page({
+  title: "Home",
+  template: () =>
+    div(
+      h1("Home Page"),
+      button("Go to About", {
+        onclick: () => Router.navigate("/about"),
+      })
+    ),
+});
+```
+
+#### `Router`
+
+Application navigation manager.
+
+```ts
+Router.BrowserRoutes({
+  "/": HomePage,
+  "/about": new Page({
+    template: () => h1("About Page"),
+  }),
+});
+```
+
+### Utilities
+
+#### `invoke(component, ...args)`
+
+Render a component with arguments.
+
+```ts
+const UserCard = (ctx, user) => div(user.name);
+invoke(UserCard, { name: "Alice" });
+```
+
+## Examples
+
+### Todo List Application
+
+```ts
+const todoStore = new List([], (task, index) =>
+  p(task, {
+    onclick: () => todoStore.splice(index, 1),
+  })
+);
+
+const TodoApp = (ctx: Comp) => {
+  const ref = ctx.useRef<HTMLInputElement>();
+
+  return div(
+    h1("Todo List"),
+    input({
+      ref: ref.bind("input"),
+      onkeydown: (e) => {
+        if (e.key === "Enter") addTodo();
+      },
+    }),
+    button("Add", {
+      onclick: addTodo,
+    }),
+    todoStore.Element
+  );
+
+  function addTodo() {
+    const input = ref.current("input");
+    if (input?.value) {
+      todoStore.push(input.value);
+      input.value = "";
+    }
+  }
+};
+```
+
+## Conclusion
+
+Cradova provides a simple yet powerful API for building reactive web applications. With its fine-grained reactivity model, efficient DOM updates, and familiar component-based architecture, Cradova enables developers to create performant applications with minimal overhead.
+
+For more examples and advanced usage patterns, explore the sample application included in the documentation.
 
 </docmach>

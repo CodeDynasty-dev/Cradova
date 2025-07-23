@@ -241,7 +241,7 @@
           </div>
           <div class="sm:mt-4 lg:mt-0">
             <a
-              href="#create"
+              href="javascript:void(0)"
               class="border border-blue-600 text-white px-8 py-3 sm:w-full lg:w-auto min-w-48 rounded-full lg:text-lg font-semibold hover:bg-blue-600 hover:text-white hover-scale inline-block mx-auto block sm:inline-block"
               onclick="createApp()"
               >Create Your App</a
@@ -502,11 +502,10 @@
           }
         `;
         document.head.appendChild(styleSheet);
-
-        const createApp = () => {
-          alert("Not available yet!, Please wait for the next update");
-        };
       });
+      const createApp = () => {
+        alert("Not available yet!, Please wait for the next update");
+      };
     </script>
   </body>
 </html>

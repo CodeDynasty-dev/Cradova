@@ -169,18 +169,18 @@
             <a
               href="https://github.com/CodeDynasty-dev/Cradova"
               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full font-medium hover-scale"
-              >Get Started</a
+              >Github 🌟</a
             >
           </div>
         </div>
 
         <!-- Mobile menu -->
         <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4">
-          <a
+          <!-- <a
             href="#"
             class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >Features</a
-          >
+          > -->
           <a
             href="/guides/getting-started.html"
             class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -194,17 +194,17 @@
           <a
             href="https://github.com/CodeDynasty-dev/Cradova"
             class="mt-2 block w-full text-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
-            >Get Started</a
+            >Github 🌟</a
           >
         </div>
       </nav>
     </header>
 
     <!-- Add padding-top to account for fixed header -->
-    <div class="h-16 md:h-20"></div>
+    <div class="h-14 md:h-18"></div>
 
     <section
-      class="relative h-auto min-h-[calc(100vh-4rem)] grid items-center justify-center google-gradient text-white overflow-hidden"
+      class="relative h-auto min-h-[calc(100vh-2rem)] grid items-center justify-center google-gradient text-white overflow-hidden"
     >
       <div class="absolute inset-0 z-0 opacity-20">
         <div
@@ -235,14 +235,15 @@
           <div class="sm:mb-4 lg:mb-0">
             <a
               href="/guides/getting-started.html"
-              class="bg-white text-blue-600 px-8 py-3 sm:w-full lg:w-auto rounded-full lg:text-lg font-semibold hover:bg-gray-200 hover-scale inline-block mx-auto block sm:inline-block mb-4 sm:mb-0"
+              class="bg-white text-blue-600 px-8 py-3 sm:w-full lg:w-auto min-w-48 rounded-full lg:text-lg font-semibold hover:bg-gray-200 hover-scale inline-block mx-auto block sm:inline-block mb-4 sm:mb-0"
               >Get Started</a
             >
           </div>
           <div class="sm:mt-4 lg:mt-0">
             <a
               href="#create"
-              class="border border-blue-600 text-white px-8 py-3 sm:w-full lg:w-auto rounded-full lg:text-lg font-semibold hover:bg-blue-600 hover:text-white hover-scale inline-block mx-auto block sm:inline-block"
+              class="border border-blue-600 text-white px-8 py-3 sm:w-full lg:w-auto min-w-48 rounded-full lg:text-lg font-semibold hover:bg-blue-600 hover:text-white hover-scale inline-block mx-auto block sm:inline-block"
+              onclick="createApp()"
               >Create Your App</a
             >
           </div>
@@ -318,9 +319,9 @@
               Focus on your application's logic, not boilerplate.
             </p>
             <a
-              href="/guides/getting-started.html"
+              href="https://github.com/CodeDynasty-dev/Cradova"
               class="my-6 bg-white text-blue-600 px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-200 hover-scale inline-block"
-              >Read the Docs</a
+              >Contribute</a
             >
             <h3 class="text-2xl font-semibold mb-4">Join the Discord</h3>
             <p class="text-lg mb-4">
@@ -343,11 +344,11 @@
           <a href="https://discord.codedynasty.dev/" class="hover:text-white"
             >Discord</a
           >
-          <a href="#" class="hover:text-white text-2xl">੶</a>
+          <a href="#" class="hover:text-white text-2xl">·</a>
           <a href="/guides/getting-started.html" class="hover:text-white"
             >Docs</a
           >
-          <a href="#" class="hover:text-white text-2xl">੶</a>
+          <a href="#" class="hover:text-white text-2xl">·</a>
           <a
             href="https://github.com/CodeDynasty-dev/Cradova"
             class="hover:text-white"
@@ -501,6 +502,10 @@
           }
         `;
         document.head.appendChild(styleSheet);
+
+        const createApp = () => {
+          alert("Not available yet!, Please wait for the next update");
+        };
       });
     </script>
   </body>

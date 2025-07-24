@@ -110,11 +110,11 @@
             <button
               id="theme-toggle"
               type="button"
-              class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2"
+              class="theme-toggle text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2"
             >
               <svg
                 id="theme-toggle-dark-icon"
-                class="hidden w-5 h-5"
+                class="theme-toggle-dark-icon hidden w-5 h-5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -125,7 +125,7 @@
               </svg>
               <svg
                 id="theme-toggle-light-icon"
-                class="hidden w-5 h-5"
+                class="theme-toggle-light-icon hidden w-5 h-5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -163,11 +163,11 @@
             <button
               id="theme-toggle"
               type="button"
-              class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+              class="theme-toggle p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
             >
               <svg
                 id="theme-toggle-dark-icon"
-                class="w-5 h-5 hidden"
+                class="theme-toggle-dark-icon w-5 h-5 hidden"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -178,7 +178,7 @@
               </svg>
               <svg
                 id="theme-toggle-light-icon"
-                class="w-5 h-5 hidden"
+                class="theme-toggle-light-icon w-5 h-5 hidden"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -408,170 +408,7 @@
       </div>
     </footer>
 
-    <script>
-      // On page load or when changing themes, best to add inline in `head` to avoid FOUC
-      if (
-        localStorage.theme === "dark" ||
-        (!("theme" in localStorage) &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches)
-      ) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        // Theme toggle functionality
-        const themeToggleBtn = document.getElementById("theme-toggle");
-        const themeDarkIcon = document.getElementById("theme-toggle-dark-icon");
-        const themeLightIcon = document.getElementById(
-          "theme-toggle-light-icon"
-        );
-
-        // Change the icons inside the button based on previous settings
-        if (themeDarkIcon && themeLightIcon) {
-          if (
-            localStorage.theme === "dark" ||
-            (!("theme" in localStorage) &&
-              window.matchMedia("(prefers-color-scheme: dark)").matches)
-          ) {
-            themeLightIcon.classList.remove("hidden");
-          } else {
-            themeDarkIcon.classList.remove("hidden");
-          }
-        }
-
-        // Theme toggle handler
-        if (themeToggleBtn && themeDarkIcon && themeLightIcon) {
-          themeToggleBtn.addEventListener("click", function () {
-            // Toggle icons
-            themeDarkIcon.classList.toggle("hidden");
-            themeLightIcon.classList.toggle("hidden");
-
-            // Toggle dark class on html element
-            document.documentElement.classList.toggle("dark");
-
-            // Save preference to localStorage
-            const isDark = document.documentElement.classList.contains("dark");
-            localStorage.setItem("theme", isDark ? "dark" : "light");
-          });
-        }
-
-        // Initialize mobile menu
-        const mobileMenuButton = document.getElementById("mobile-menu-button");
-        const mobileMenu = document.getElementById("mobile-menu");
-
-        if (mobileMenuButton && mobileMenu) {
-          // Toggle mobile menu
-          const toggleMobileMenu = (e) => {
-            if (e) e.stopPropagation();
-            const isExpanded =
-              mobileMenuButton.getAttribute("aria-expanded") === "true" ||
-              false;
-            mobileMenuButton.setAttribute("aria-expanded", !isExpanded);
-            mobileMenu.classList.toggle("hidden");
-
-            // Toggle between menu and close icon
-            const menuIcon = mobileMenuButton.querySelector("svg");
-            if (menuIcon) {
-              menuIcon.innerHTML = isExpanded
-                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />'
-                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
-            }
-          };
-
-          // Close menu when clicking outside
-          const closeMenuOnOutsideClick = (e) => {
-            if (
-              !mobileMenuButton.contains(e.target) &&
-              !mobileMenu.contains(e.target)
-            ) {
-              mobileMenu.classList.add("hidden");
-              mobileMenuButton.setAttribute("aria-expanded", "false");
-              const menuIcon = mobileMenuButton.querySelector("svg");
-              if (menuIcon) {
-                menuIcon.innerHTML =
-                  '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />';
-              }
-            }
-          };
-
-          // Add event listeners
-          mobileMenuButton.addEventListener("click", toggleMobileMenu);
-          document.addEventListener("click", closeMenuOnOutsideClick);
-        }
-
-        // Add fade-in animations
-        const fadeElements = document.querySelectorAll(".fade-in, .fade-in-up");
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                entry.target.classList.add("is-visible");
-                entry.target.classList.add("opacity-100", "translate-y-0");
-                observer.unobserve(entry.target);
-              }
-            });
-          },
-          {
-            threshold: 0.1,
-            rootMargin: "0px 0px -50px 0px",
-          }
-        );
-
-        fadeElements.forEach((element) => {
-          observer.observe(element);
-        });
-
-        // Add dynamic styles
-        const styleSheet = document.createElement("style");
-        styleSheet.type = "text/css";
-        styleSheet.textContent = `
-          @keyframes blob {
-            0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0, 0) scale(1); }
-          }
-          .animate-blob { animation: blob 7s infinite; }
-          .animation-delay-2000 { animation-delay: 2s; }
-          .animation-delay-4000 { animation-delay: 4s; }
-          .animation-delay-6000 { 
-            animation-delay: 6s;
-            animation-duration: 8s;
-          }
-          /* Dark mode specific styles */
-          .dark .prose {
-            color: var(--text);
-          }
-          .dark .prose h1,
-          .dark .prose h2,
-          .dark .prose h3,
-          .dark .prose h4,
-          .dark .prose strong {
-            color: var(--text);
-          }
-          .dark .prose a {
-            color: var(--primary);
-          }
-          .dark .prose code {
-            background-color: #1f2937;
-            color: #e5e7eb;
-          }
-          .dark .prose pre {
-            background-color: #1f2937;
-            color: #e5e7eb;
-          }
-          .dark .prose thead {
-            border-bottom-color: #374151;
-          }
-          .dark .prose tbody tr {
-            border-bottom-color: #374151;
-          }
-        `;
-        document.head.appendChild(styleSheet);
-      });
-    </script>
+    <script src="/script.js"></script>
     <script src="/prism.js"></script>
   </body>
 </html>

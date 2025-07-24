@@ -2,7 +2,7 @@
 
 # Getting Started
 
-Cradova is a lightweight, reactive UI framework designed for building modern web applications with simplicity and performance. Inspired by SolidJS, Cradova provides a declarative API, fine-grained reactivity, and efficient DOM updates.
+Cradova is a lightweight, reactive UI framework designed for building modern web applications with simplicity and performance. Inspired from principles of SolidJS and designs of React and Mithril.js, Cradova provides a declarative API, fine-grained reactivity, and efficient DOM updates.
 
 ## Installation
 
@@ -65,7 +65,7 @@ div(
 Creates a document fragment for grouping elements.
 
 ```ts
-frag([div("Child 1"), div("Child 2")]);
+frag(div("Child 1"), div("Child 2"));
 ```
 
 #### `raw(html)`

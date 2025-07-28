@@ -196,7 +196,11 @@ export class Signal<Type extends Record<string, any> = any> {
     const isComp = !isArrowFunc(listener as Comp);
     if (isComp) {
       const el = toComp(listener as Comp)!;
-      if (el === undefined || !(el instanceof HTMLElement)) {
+      if (
+        el === undefined ||
+        !(el instanceof HTMLElement) ||
+        !(el instanceof DocumentFragment)
+      ) {
         console.error(
           ` ✘  Cradova err:  ${String(
             listener
@@ -470,7 +474,11 @@ export class List<T> {
     const isComp = !isArrowFunc(listener as Comp);
     if (isComp) {
       const el = toComp(listener as Comp)!;
-      if (el === undefined || !(el instanceof HTMLElement)) {
+      if (
+        el === undefined ||
+        !(el instanceof HTMLElement) ||
+        !(el instanceof DocumentFragment)
+      ) {
         console.error(
           ` ✘  Cradova err:  ${String(
             listener

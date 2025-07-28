@@ -546,7 +546,10 @@ export const compManager = {
   render(component: Comp): HTMLElement | undefined {
     const html = component(component, ...(component._args || []));
 
-    if (html instanceof HTMLElement) {
+    if (
+      html instanceof HTMLElement ||
+      (html as any) instanceof DocumentFragment
+    ) {
       component.reference = html;
       component.rendered = true;
       component.published = true;
@@ -589,7 +592,10 @@ export const compManager = {
       resetComponent(component);
       const newHtml = component(component, ...(component._args || []));
 
-      if (newHtml instanceof HTMLElement) {
+      if (
+        newHtml instanceof HTMLElement ||
+        (newHtml as any) instanceof DocumentFragment
+      ) {
         // node.replaceWith(newHtml);
         // ? replace the Function element with the Function element
         node!.insertAdjacentElement("beforebegin", newHtml as Element);

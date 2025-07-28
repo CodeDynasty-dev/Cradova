@@ -1,7 +1,7 @@
 import * as CSS from "csstype";
 import { Page, RefInstance, Signal } from "./classes.js";
 
-interface Attributes<E extends HTMLElement> {
+interface Attributes<E extends HTMLElement | DocumentFragment> {
   ref?: [RefInstance<any>, string];
   style?: Partial<CSS.Properties>;
   [key: `data-${string}`]: string;
@@ -27,7 +27,7 @@ type OmitFunctions<E> = {
   [K in keyof E as E[K] extends Function ? never : K]: E[K];
 };
 
-export type VJS_params_TYPE<E extends HTMLElement> = // children types
+export type VJS_params_TYPE<E extends HTMLElement | DocumentFragment> = // children types
   (
     | undefined
     | undefined[]
@@ -167,16 +167,16 @@ export interface Comp extends Function {
   useReducer: <S, A>(
     reducer: (state: S, action: A) => S,
     initialArg: S,
-    initializer?: (arg: S) => S,
+    initializer?: (arg: S) => S
   ) => [S, (action: A) => void];
   useState: <S>(
-    initialValue: S,
+    initialValue: S
   ) => [S, (newState: S | ((prevState: S) => S)) => void];
   useEffect: (effect: () => (() => void) | void, deps?: unknown[]) => void;
   useMemo: <T>(factory: () => T, deps?: unknown[]) => T;
   useCallback: <T extends (...args: any[]) => any>(
     callback: T,
-    deps?: unknown[],
+    deps?: unknown[]
   ) => T;
   useRef: <T extends HTMLElement | Node | DocumentFragment>() => RefInstance<T>;
 }

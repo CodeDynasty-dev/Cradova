@@ -14,7 +14,7 @@
     "url": "git+https://github.com/CodeDynasty-dev/Cradova.git"
   },
   "scripts": {
-    "compile": "bun bundle.ts && run clean",
+    "compile": "bun bundle.ts && npm run clean",
     "lint": "eslint . --fix",
     "tsc": "tsc --target esnext  tests/index.ts --watch --moduleResolution NodeNext --module NodeNext",
     "clean": "rm -rf tests/dist && cp -r dist tests/dist"

@@ -1,6 +1,6 @@
 {
   "name": "cradova",
-  "version": "3.15.7",
+  "version": "3.15.8",
   "description": "A UI framework for web applications.",
   "main": "dist/index.js",
   "type": "module",

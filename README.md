@@ -7,7 +7,7 @@
 <h1 align="center">Cradova</h1>
 
 <p align="center">
-Build Powerful ⚡ Web Apps with Ease
+Build web apps that are fast, small, and simple.
     <br/>
     <br/>
     <a href="https://github.com/codedynasty-dev/cradova#examples"><strong>Explore the 🎙️ docs »</strong></a>
@@ -502,4 +502,6 @@ Support via cryptos -
 - LTC: `ltc1quvc04rpmsurvss6ll54fvdgyh95p5kf74wppa6`
 - TRX: `THag6WuG4EoiB911ce9ELgN3p7DibtS6vP`
 
-Build Powerful ⚡ Web Apps with Ease.
+---
+
+Build Powerful Web Apps. Ship Faster. Ship Smaller.

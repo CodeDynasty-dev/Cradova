@@ -11,3 +11,5 @@ coverage
 **/.github/README.md
 package-lock.json
 docs/build
+example
+build-example.ts

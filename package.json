@@ -17,7 +17,8 @@
     "compile": "bun bundle.ts && npm run clean",
     "lint": "eslint . --fix",
     "tsc": "tsc --target esnext  tests/index.ts --watch --moduleResolution NodeNext --module NodeNext",
-    "clean": "rm -rf tests/dist && cp -r dist tests/dist"
+    "clean": "rm -rf tests/dist && cp -r dist tests/dist",
+    "build:example": "bun build example/src/index.ts --outfile example/dist/index.js --target node && cp -r example/src/styles example/dist/"
   },
   "keywords": [
     "frontend library",
@@ -55,8 +56,7 @@
   },
   "homepage": "https://github.com/CodeDynasty-dev/cradova",
   "dependencies": {
-    "csstype": "^3.1.3",
-    "virtualized-list": "^2.2.0"
+    "csstype": "^3.1.3"
   },
   "docmach": {
     "docs-directory": "docs/docs",
@@ -64,6 +64,7 @@
     "assets-folder": "docs/assets"
   },
   "devDependencies": {
-    "docmach": "^1.0.18"
+    "docmach": "^1.0.18",
+    "esbuild": "^0.28.0"
   }
 }

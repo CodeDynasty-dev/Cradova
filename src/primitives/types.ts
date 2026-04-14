@@ -1,14 +1,6 @@
 import * as CSS from "csstype";
 import { Page, RefInstance, Signal } from "./classes.js";
 
-interface Attributes<E extends HTMLElement | DocumentFragment> {
-  ref?: [RefInstance<any>, string];
-  style?: Partial<CSS.Properties>;
-  [key: `data-${string}`]: string;
-  [key: `aria-${string}`]: string;
-  [key: `on${string}`]: (this: E, event: StandardEvents) => void;
-}
-
 type StandardEvents =
   | KeyboardEvent
   | MouseEvent
@@ -22,6 +14,15 @@ type StandardEvents =
   | AnimationEvent
   | TransitionEvent
   | Event;
+
+interface Attributes<E extends HTMLElement | DocumentFragment> {
+  ref?: [RefInstance<any>, string];
+  style?: Partial<CSS.Properties>;
+  [key: `data-${string}`]: string;
+  [key: `aria-${string}`]: string;
+  [key: `on${string}`]: ((this: E, event: StandardEvents) => void) | undefined;
+}
+
 
 type OmitFunctions<E> = {
   [K in keyof E as E[K] extends Function ? never : K]: E[K];
@@ -45,9 +46,13 @@ export type VJS_params_TYPE<E extends HTMLElement | DocumentFragment> = // child
     | Attributes<E>
     | OmitFunctions<E>
   )[];
-/**
+
+
+  /**
  * @internal
  */
+
+
 export interface RouterRouteObject {
   _html:
     | ((this: Page, data?: unknown) => HTMLElement | DocumentFragment)

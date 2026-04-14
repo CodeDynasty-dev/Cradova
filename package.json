@@ -64,7 +64,7 @@
     "assets-folder": "docs/assets"
   },
   "devDependencies": {
-    "docmach": "^1.0.18",
+    "docmach": "^1.1.3",
     "esbuild": "^0.28.0"
   }
 }

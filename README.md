@@ -31,164 +31,37 @@ Build web apps that are fast, small, and simple.
 ![Forks](https://img.shields.io/github/forks/codedynasty-dev/cradova?style=social)
 ![Stargazers](https://img.shields.io/github/stars/codedynasty-dev/cradova?style=social)
 
-# Cradova is 3
-
-## 2025 - What's New? Function as reactive components
-
-this can't be better anywhere XD
+ 
+  ## Component in Cradova
 
 ```js
-// functional components - USE REGULAR FUNCTIONS, NOT ARROW FUNCTIONS
-// Arrow functions do NOT receive ctx - they are not reactive components
-// Regular functions receive ctx which gives access to hooks (useState, useEffect, useMemo, useRef)
-// This convention exists because functions get a state tree, but arrow functions do not
-// This allows you to control how many state objects are in the DOM
+import { div, h1 } from "cradova";
 
-const Cradova = function (ctx) {
-  // ctx gives you access to hooks
-  const [year, setYear] = ctx.useState(3);
-  const [count] = ctx.useMemo(() => year * 2, [year]);
+function Hello(ctx) {
 
-  ctx.useEffect(() => {
-    console.log("Component mounted");
-    return () => console.log("Cleanup");
-  }, []);
+const [name, setName] = ctx.useState("");
 
-  return h1("Cradova is " + year + " years old", {
-    onclick() {
-      setYear((lastYear) => lastYear + 1);
+  return div(
+
+    h1("Hello " + name, {
+    className: "title",
+    style: {
+      color: "grey",
     },
-  });
-};
+  }),
 
-// WRONG - arrow function does not receive ctx
-const BrokenComponent = (ctx) => {
-  // ctx is undefined here!
-  const [count, setCount] = ctx.useState(0); // Will fail
-  return div(count);
-};
+  input({
+    oninput(e){
+      setName(e.target.value);
+    }
+  }),
 
-// CORRECT - regular function receives ctx
-const WorkingComponent = function (ctx) {
-  const [count, setCount] = ctx.useState(0); // Works!
-  return div(count, { onclick: () => setCount(count + 1) });
-};
-```
-
-### Page Templates - Must Use Regular Functions
-
-```js
-// template function gets ctx with hooks if you using function to declare them.
-const HomePage = new Page({
-  title: "Home",
-  template: function (ctx) {
-    const [view, setView] = ctx.useState("home");
-    return div(
-      h1("Welcome"),
-      button("Switch View", { onclick: () => setView("other") })
-    );
-  }
-});
-
-// WRONG - arrow function template does not get ctx
-const BrokenPage = new Page({
-  title: "Home",
-  template: (ctx) => {  // ctx is undefined!
-    const [view, setView] = ctx.useState("home"); // Will fail
-    return div(view);
-  }
-});
-```
-
-// add reactivity to a signal element.
-const counterSignal = new Signal({ count: 0 });
-function count2() {
-  useEffect(() => {
-    let count = 0;
-    setInterval(() => {
-      count++;
-      counterSignal.publish("count", count);
-    }, 1000);
-  }, this);
-
-  return h1(" count: 0", {
-    subscription: counterSignal.subscriber("count", function ({ count }) {
-      this.innerText = " count: " + count;
-    }),
-  });
+  )
 }
 
-// converts to html and append to the Dom
-document.body.appendChild(div(Cradova));
+
+document.body.append(div(hello)); // 
 ```
-
-## 2024 - What's New? Signals pub/sub
-
-```js
-import { Signal, getSignal, $if, $ifelse, div, h1 } from "cradova";
-
-const signal = new Signal({ name: "john" });
-
-function Hello() {
-  const name = getSignal("name", this).name;
-  return div(
-    $if(name === "john", h1("Hello john")),
-    $if(name === "paul", h1("Goodbye paul")),
-    $ifelse(name === "john", h1("Hello john"), h1("Hello Paul"))
-  );
-}
-
-signal.bind("name", this);
-const html = div(Hello);
-document.body.append(html);
-
-setInterval(() => {
-  signal.publish("name", "paul");
-}, 5000);
-```
-
-## 2023 - What's New? Conditionals
-
-```js
-import { $case, $if, $ifelse, $switch, div, h1 } from "cradova";
-
-function Hello({ name }) {
-  return div(
-    $if(name === "john", h1("Hello john")),
-    $if(name === "paul", h1("Goodbye paul")),
-    $ifelse(name === "john", h1("Hello john"), h1("Hello Paul"))
-  );
-}
-
-const html = div(Hello("john"), Hello("paul"));
-
-function whatsAllowed({ age }) {
-  return div(
-    $switch(
-      age,
-      $case(12, h1("too young")),
-      $case(26, h1("you are welcome")),
-      $case(52, h1("too old"))
-    )
-  );
-}
-
-document.body.append(html, whatsAllowed({ age: 26 }));
-```
-
-## 2023 - What's New? Router
-
-```js
-Router.BrowserRoutes({
-  "/home": home,
-});
-// creates these routes
-Router.navigate("/home", data);
-```
-
-## 2021 - first version
-
-...
 
 # Contents
 
@@ -200,11 +73,11 @@ Router.navigate("/home", data);
 - [Getting Help](#getting-help)
 - [Contributing](#contributing)
 
-## What is Cradova?
+## Why Cradova?
 
-Cradova is a web development framework for building Single Page Applications and
-PWAs.
+Cradova is not react, it's simpler, faster for most components and basically bare javascript syntax, no bundler needed.
 
+And.
 Cradova follows the
 [VJS specification](https://github.com/codedynasty-dev/cradova/blob/main/VJS_spec/specification.md)
 
@@ -213,7 +86,7 @@ Cradova follows the
 Fast and simple with and fewer abstractions and yet easily composable.
 
 Cradova is not built on virtual DOM or diff algorithms. Instead, State
-management is done in a way that is simple, easy and fast.
+management is even based and only affect dom parts is updated, least repaint, done in a way that is simple, easy and fast.
 
 ## Is this a big benefit?
 
@@ -236,30 +109,6 @@ npm i cradova
 <script src="https://unpkg.com/cradova/dist/index.js"></script>
 <!--    js deliver -->
 <script src="https://cdn.jsdelivr.net/npm/cradova/dist/index.js"></script>
-```
-
-## Examples
-
-Some aspects of Cradova are not reflected in the following example. More
-functionality will be entailed in future docs.
-
-## A basic component in Cradova
-
-```js
-import { div, h1 } from "cradova";
-
-function Hello(name) {
-  return h1("Hello " + name, {
-    className: "title",
-    style: {
-      color: "grey",
-    },
-  });
-}
-
-const html = div(Hello("peter"), Hello("joe"));
-
-document.body.append(html);
 ```
 
 ## Basic Samples
@@ -388,118 +237,6 @@ const todoList =  function () {
 document.body.appendChild(TodoList());
 ```
 
-## working with page and Router
-
-Unlike just appending stuff to the DOM, a better to build apps is to use a
-routing system.
-
-Cradova Router is a module that allows you do the following:
-
-Create specified routes in you application help you handle navigation render a
-page on a route listen to Navigation changes create error boundary at page level
-apart from Function level.
-
-let's try an example.
-
-```js
-import { Page, Router, useEffect } from "cradova";
-
-const home = new Page({
-  name: "home page", // page title
-  template: () => div(template),
-});
-
-// in your routes.ts file
-Router.BrowserRoutes({
-  // Ways to use paths and Pages
-  "*": home,
-  "/home": home,
-  "/home?": home,
-  "/home/:name": home,
-  // will be lazy loaded
-  "/lazy-loaded-home": async () => await import("./home"),
-});
-// creates these routes
-
-Router.navigate("/home", data);
-// navigates to that page
-
-Router.onPageEvent((lastRoute, newRoute) => {
-  console.log(lastRoute, newRoute);
-});
-// listen for navigation changes
-```
-
-### More info
-
----
-
-More info on Cradova Router
-
----
-
-Every Cradova app mounts on a div with attribute data-wrapper="app"
-
-if it already exist Cradova will use it instead.
-
-Cradova will create a div with data-wrapper="app" if it doesn't exists already.
-
-so if you want to use your own mount point then create a div with
-data-wrapper="app".
-
----
-
-More info on Cradova pages
-
----
-
-Cradova pages has onActivate() and onDeactivate() methods which is also
-available in the component function on the this variable bound to it.
-
-this allow you manage rendering circle for each page in your app
-
----
-
-More info on Cradova Function
-
----
-
-Cradova Function is a dynamic component class, which ships simple abstractions like:
-
-- Signal
-- useEffect
-- useState
-- useRef
-- preRender
-
-these behaviors allow you manage rendering circle for Functions in your app
-
----
-
-More info on Cradova createSignal
-
----
-
-Cradova Signals allows you to create powerful data stores.
-
-with ability to:
-
-- create store
-- create actions and fire them
-- bind a Function
-- listen to changes
-- persist changes to localStorage
-
-With these simple and easy abstractions, you can write datastores with so much
-convenience.
-
-## Documentation
-
-At the moment, we're in the process of creating a documentation website for
-Cradova, and we have limited resources. If you're interested in lending a hand,
-we invite you to join our community, gain firsthand experience, and contribute
-to the advancement of Cradova.
-
 ## Getting Help
 
 To get further insights and help on Cradova, visit the
@@ -512,8 +249,7 @@ We are currently working to
 [set](https://github.com/codedynasty-dev/cradova/blob/main/contributing.md) up the
 following:
 
-- building Cradova CLI (in progress)
-- Cradova Documentation Website
+- Cradova Docs
 - Sample projects
 - maintenance and promotion
 

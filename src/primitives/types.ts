@@ -1,57 +1,44 @@
 import * as CSS from "csstype";
 import { Page, RefInstance, Signal } from "./classes.js";
+import type {
+  ElementEventHandler,
+  ElementEventMap,
+} from "./dom-objects-event-types.js";
 
-type StandardEvents =
-  | KeyboardEvent
-  | MouseEvent
-  | TouchEvent
-  | WheelEvent
-  | DragEvent
-  | ClipboardEvent
-  | CompositionEvent
-  | FocusEvent
-  | InputEvent
-  | AnimationEvent
-  | TransitionEvent
-  | Event;
+type AnyObject = { [key: string]: any };
 
-interface Attributes<E extends HTMLElement | DocumentFragment> {
+interface Attributes {
   ref?: [RefInstance<any>, string];
   style?: Partial<CSS.Properties>;
   [key: `data-${string}`]: string | undefined;
   [key: `aria-${string}`]: string | undefined;
-  [key: `on${string}`]: ((this: E, event: StandardEvents) => void) | undefined;
 }
 
+type EventAttributes<T extends keyof ElementEventMap> = ElementEventHandler<T>;
 
-type OmitFunctions<E> = {
-  [K in keyof E as E[K] extends Function ? never : K]: E[K];
-};
+export type VJS_params_TYPE<
+  E extends keyof ElementEventMap | HTMLElement | DocumentFragment,
+> = (
+  | undefined
+  | undefined[]
+  | string
+  | string[]
+  | HTMLElement
+  | HTMLElement[]
+  | DocumentFragment
+  | DocumentFragment[]
+  | [string, Signal<any>]
+  | Attributes
+  | (E extends keyof ElementEventMap ? EventAttributes<E> : AnyObject)
+  | (() => HTMLElement)
+  | (() => HTMLElement)[]
+  | ((ctx: Comp) => HTMLElement)
+  | ((ctx: Comp) => HTMLElement)[]
+)[];
 
-export type VJS_params_TYPE<E extends HTMLElement | DocumentFragment> = // children types
-  (
-    | undefined
-    | undefined[]
-    | string
-    | string[]
-    | HTMLElement
-    | HTMLElement[]
-    | DocumentFragment
-    | DocumentFragment[]
-    | (() => HTMLElement)
-    | (() => HTMLElement)[]
-    | ((ctx: Comp) => HTMLElement)
-    | ((ctx: Comp) => HTMLElement)[]
-    | [string, Signal<any>]
-    | Attributes<E>
-    | OmitFunctions<E>
-  )[];
-
-
-  /**
+/**
  * @internal
  */
-
 
 export interface RouterRouteObject {
   _html:
@@ -172,16 +159,16 @@ export interface Comp extends Function {
   useReducer: <S, A>(
     reducer: (state: S, action: A) => S,
     initialArg: S,
-    initializer?: (arg: S) => S
+    initializer?: (arg: S) => S,
   ) => [S, (action: A) => void];
   useState: <S>(
-    initialValue: S
+    initialValue: S,
   ) => [S, (newState: S | ((prevState: S) => S)) => void];
   useEffect: (effect: () => (() => void) | void, deps?: unknown[]) => void;
   useMemo: <T>(factory: () => T, deps?: unknown[]) => T;
   useCallback: <T extends (...args: any[]) => any>(
     callback: T,
-    deps?: unknown[]
+    deps?: unknown[],
   ) => T;
   useRef: <T extends HTMLElement | Node | DocumentFragment>() => RefInstance<T>;
 }

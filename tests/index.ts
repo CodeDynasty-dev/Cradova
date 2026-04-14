@@ -73,7 +73,7 @@ function TodoList(ctx: Comp) {
             ref.current("todoInput")!.value = "";
           }
         },
-      })
+      }),
     ),
     todoStore.Element,
     todoStore.computed(function () {
@@ -83,7 +83,7 @@ function TodoList(ctx: Comp) {
             fontWeight: "bold",
             color: "blue",
           },
-        })
+        }),
       );
     }),
     img({
@@ -93,7 +93,7 @@ function TodoList(ctx: Comp) {
         console.log("cancel");
         console.log(this);
       },
-    })
+    }),
   );
 }
 

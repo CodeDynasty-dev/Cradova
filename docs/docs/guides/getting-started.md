@@ -20,12 +20,12 @@ npm install cradova
 // CORRECT - regular function receives ctx with access to hooks
 const HelloWorld = function (ctx: Comp) {
   const [count, setCount] = ctx.useState(0);
-  
+
   ctx.useEffect(() => {
     console.log("Mounted!");
     return () => console.log("Cleanup!");
   }, []);
-  
+
   return div(
     h1("Hello World!"),
     p("Count: " + count),
@@ -33,7 +33,7 @@ const HelloWorld = function (ctx: Comp) {
       onclick() {
         setCount(count + 1);
       },
-    })
+    }),
   );
 };
 
@@ -55,18 +55,19 @@ const HomePage = new Page({
     const [view, setView] = ctx.useState("home");
     return div(
       h1("Welcome"),
-      button("Switch View", { onclick: () => setView("other") })
+      button("Switch View", { onclick: () => setView("other") }),
     );
-  }
+  },
 });
 
 // WRONG - arrow function template does not get ctx
 const BrokenPage = new Page({
   title: "Home",
-  template: (ctx) => {  // ctx is undefined!
+  template: (ctx) => {
+    // ctx is undefined!
     const [view, setView] = ctx.useState("home"); // Will fail
     return div(view);
-  }
+  },
 });
 ```
 
@@ -82,7 +83,7 @@ const Counter = function (ctx: Comp) {
       onclick() {
         setCount(count + 1);
       },
-    })
+    }),
   );
 };
 ```
@@ -99,7 +100,7 @@ Create DOM elements with children and properties.
 div(
   h1("Title"),
   p("Description", { className: "text" }),
-  button("Submit", { disabled: true })
+  button("Submit", { disabled: true }),
 );
 ```
 
@@ -130,7 +131,7 @@ $switch(
   count,
   $case(1, () => h1("One")),
   $case(2, () => h1("Two")),
-  $case(3, () => h1("Three"))
+  $case(3, () => h1("Three")),
 );
 ```
 
@@ -140,7 +141,7 @@ Render lists of data.
 
 ```ts
 loop(["Apple", "Banana", "Cherry"], (fruit, index) =>
-  p("" + index + 1 + ". " + fruit)
+  p("" + index + 1 + ". " + fruit),
 );
 ```
 
@@ -173,7 +174,7 @@ const todoList = new List(
     p(task, {
       onclick: () => todoList.splice(index, 1),
     }),
-  { itemHeight: 40 }
+  { itemHeight: 40 },
 );
 
 // Add new item
@@ -233,7 +234,7 @@ const HomePage = new Page({
       h1("Home Page"),
       button("Go to About", {
         onclick: () => Router.navigate("/about"),
-      })
+      }),
     ),
 });
 ```
@@ -270,7 +271,7 @@ invoke(UserCard, { name: "Alice" });
 const todoStore = new List([], (task, index) =>
   p(task, {
     onclick: () => todoStore.splice(index, 1),
-  })
+  }),
 );
 
 const TodoApp = (ctx: Comp) => {
@@ -287,7 +288,7 @@ const TodoApp = (ctx: Comp) => {
     button("Add", {
       onclick: addTodo,
     }),
-    todoStore.Element
+    todoStore.Element,
   );
 
   function addTodo() {
@@ -299,6 +300,21 @@ const TodoApp = (ctx: Comp) => {
   }
 };
 ```
+
+## Cradova Agent Skill Documentation
+
+Complete documentation for building with the Cradova framework.
+
+- [SKILL.md - Framework Overview](./SKILL.html) - Core concepts and when to use Cradova
+- [BASICS.md - Getting Started](./BASICS.html) - Quick start guide
+- [CONVENTIONS.md](./CONVENTIONS.html) - Function vs arrow function rules
+- [STATE.md](./STATE.html) - Signal and hooks deep dive
+- [COMPONENTS.md](./COMPONENTS.html) - Creating and using components
+- [ROUTING.md](./ROUTING.html) - Page and Router configuration
+- [CONTROL-FLOW.md](./CONTROL-FLOW.html) - Conditional rendering
+- [PERFORMANCE.md](./PERFORMANCE.html) - List virtualization, optimization
+- [EXAMPLES.md](./EXAMPLES.html) - Complete code examples
+- [PRODUCTION.md](./PRODUCTION.html) - Real-world patterns and deployment
 
 ## Conclusion
 

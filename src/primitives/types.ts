@@ -18,8 +18,8 @@ type StandardEvents =
 interface Attributes<E extends HTMLElement | DocumentFragment> {
   ref?: [RefInstance<any>, string];
   style?: Partial<CSS.Properties>;
-  [key: `data-${string}`]: string;
-  [key: `aria-${string}`]: string;
+  [key: `data-${string}`]: string | undefined;
+  [key: `aria-${string}`]: string | undefined;
   [key: `on${string}`]: ((this: E, event: StandardEvents) => void) | undefined;
 }
 

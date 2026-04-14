@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+  <head>
+    <!-- 
+    Developed with Docmach -  Markdown Reimagined.
+    find more at https://docmach.codedynasty.dev
+    -->
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Cradova - Beautifully Simple</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/bundle.css" />
+    <link href="/prism.css" rel="stylesheet" />
+    <link rel="icon" href="/icon.png" type="image/png" />
+    <style>
+      :root {
+        --primary: #3b82f6;
+        --primary-hover: #2563eb;
+        --text: #1f2937;
+        --text-muted: #6b7280;
+        --bg: #f9fafb;
+        --card-bg: #ffffff;
+        --border: #e5e7eb;
+      }
+
+      :not(pre) > code[class*="language-"],
+      pre[class*="language-"] {
+        background: #111827;
+      }
+
+      .dark {
+        --primary: #60a5fa;
+        --primary-hover: #3b82f6;
+        --text: #f3f4f6;
+        --text-muted: #9ca3af;
+        --bg: #111827;
+        --card-bg: #1f2937;
+        --border: #374151;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        overflow-x: hidden;
+        background-color: var(--bg);
+        color: var(--text);
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .fade-in-up {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      }
+      .fade-in-up.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      /* Simple hover scale effect for buttons */
+      .hover-scale {
+        transition: transform 0.3s ease-in-out;
+      }
+      .hover-scale:hover {
+        transform: scale(1.05);
+      }
+      /* Background gradient inspired by Google colors */
+      .google-gradient {
+        background: linear-gradient(135deg, #4285f4, #34a853, #fbbc05, #ea4335);
+        background-size: 400% 400%;
+        animation: gradientAnimation 15s ease infinite;
+      }
+
+      .dark .google-gradient {
+        opacity: 0.9;
+      }
+
+      @keyframes gradientAnimation {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+      .red {
+        border: 1px solid red;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-800 grid w-full">
+    <header
+      class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900/95 shadow-sm md:bg-white/80 md:dark:bg-gray-900/80 md:backdrop-blur-sm md:shadow-sm"
+    >
+      <nav class="container mx-auto px-4 py-3 md:py-4 md:px-8">
+        <div class="flex items-center justify-between">
+          <a href="/" class="flex items-center">
+            <span class="text-2xl font-bold text-blue-500">Cradova</span>
+          </a>
+
+          <!-- Mobile menu button -->
+          <div class="md:hidden">
+            <!-- Theme toggle -->
+            <button
+              id="theme-toggle"
+              type="button"
+              class="theme-toggle text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2"
+            >
+              <svg
+                id="theme-toggle-dark-icon"
+                class="theme-toggle-dark-icon hidden w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
+                ></path>
+              </svg>
+              <svg
+                id="theme-toggle-light-icon"
+                class="theme-toggle-light-icon hidden w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+            </button>
+            <button
+              type="button"
+              id="mobile-menu-button"
+              class="text-gray-700 hover:text-gray-900 focus:outline-none"
+            >
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16m-7 6h7"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Desktop Menu -->
+          <div class="hidden md:flex items-center space-x-1 lg:space-x-4">
+            <button
+              id="theme-toggle"
+              type="button"
+              class="theme-toggle p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+            >
+              <svg
+                id="theme-toggle-dark-icon"
+                class="theme-toggle-dark-icon w-5 h-5 hidden"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
+                ></path>
+              </svg>
+              <svg
+                id="theme-toggle-light-icon"
+                class="theme-toggle-light-icon w-5 h-5 hidden"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+            </button>
+            <a
+              href="/guides/getting-started.html"
+              class="text-blue-600 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Docs
+            </a>
+            <a
+              href="https://discord.codedynasty.dev/"
+              class="text-blue-600 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Discord
+            </a>
+            <!-- <a
+              href="https://github.com/CodeDynasty-dev/Cradova"
+              class="ml-4 bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 hover-scale"
+            >
+              Get Started
+            </a> -->
+          </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div
+          id="mobile-menu"
+          class="hidden md:hidden mt-2 pb-3 border-t border-gray-200"
+        >
+          <div class="px-2 pt-2 space-y-1">
+            <!-- <a
+              href="#"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+            >
+              Features
+            </a> -->
+            <a
+              href="/guides/getting-started.html"
+              class="block px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:bg-blue-50"
+            >
+              Documentation
+            </a>
+            <a
+              href="https://discord.codedynasty.dev/"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+            >
+              Join Discord
+            </a>
+            <a
+              href="https://github.com/CodeDynasty-dev/Cradova"
+              class="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md text-base font-medium hover:bg-blue-700 mt-2"
+            >
+              Get Started
+            </a>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Add padding to account for fixed header -->
+    <div class="h-14 md:h-17"></div>
+
+    <section
+      class="relative h-auto min-h-[calc(70vh-2rem)] grid items-center justify-center google-gradient text-white"
+    >
+      <!-- Animated Background Blobs -->
+      <div class="absolute inset-0 z-0 opacity-20">
+        <div
+          class="absolute top-1/4 left-1/4 w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"
+        ></div>
+        <div
+          class="absolute top-1/2 right-1/4 w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"
+        ></div>
+        <div
+          class="absolute bottom-1/4 left-1/3 w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"
+        ></div>
+        <div
+          class="absolute bottom-1/3 right-1/3 w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 bg-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-6000"
+        ></div>
+      </div>
+
+      <!-- Hero Content -->
+      <div
+        class="container mx-auto text-center z-10 px-4 py-12 sm:py-16 md:py-20 lg:py-24 pb-15"
+      >
+        <div class="max-w-4xln mx-auto">
+          <h1
+            class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-3 sm:mb-4 md:mb-5 fade-in-up leading-tight"
+          >
+            <span class="block">Cradova</span>
+            <span class="text-blue-100">Documentation</span>
+          </h1>
+          <p
+            class="text-lg sm:text-xl md:text-2xl text-blue-50 max-w-2xl mx-auto mb-6 sm:mb-8 md:mb-10 fade-in-up animation-delay-100 text-shadow-md shadow-black/30"
+          >
+            Learn how to build amazing web applications with Cradova
+          </p>
+          <div
+            class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 fade-in-up animation-delay-200"
+          >
+            <!-- <a
+              href="/guides/getting-started.html"
+              class="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-3.5 bg-white text-blue-700 font-medium rounded-full hover:bg-blue-50 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
+            >
+              Get Started
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 ml-2"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </a> -->
+            <a
+              href="https://github.com/CodeDynasty-dev/Cradova"
+              class="group inline-flex items-center justify-center px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 text-white font-semibold rounded-2xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl backdrop-blur-sm min-w-[180px]"
+            >
+              <svg
+                class="w-5 h-5 mr-2 transition-transform group-hover:scale-110"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.1-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span>View on GitHub</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scroll Indicator -->
+      <div
+        class="absolute bottom-[55px] left-1/2 transform -translate-x-1/2 z-10 hidden md:block"
+      >
+        <div class="animate-bounce flex flex-col items-center">
+          <svg
+            class="w-6 h-6 text-white/60"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            ></path>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <main
+      class="py-6 sm:py-8 md:py-12 lg:py-16 w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 -mt-2 sm:-mt-12 md:-mt-6 lg:-mt-8 rounded-t-3xl relative z-10 shadow-inner overflow-hidden"
+    >
+      <h1>Cradova Performance</h1>
+<p>This guide covers performance optimization in Cradova including the List class and virtualized rendering.</p>
+<h2>Why Performance Matters</h2>
+<p>Cradova uses direct DOM manipulation without virtual DOM diffing. This is generally faster, but large lists can still impact performance. Use these techniques to optimize.</p>
+<h2>List Class</h2>
+<p>For large arrays, use the List class which provides efficient rendering:</p>
+<pre><code class="language-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">List</span>, p, div } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;cradova&quot;</span>;
+
+<span class="hljs-comment">// Create list with render function</span>
+<span class="hljs-keyword">const</span> itemsList = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>(
+  [<span class="hljs-string">&quot;Item 1&quot;</span>, <span class="hljs-string">&quot;Item 2&quot;</span>, <span class="hljs-string">&quot;Item 3&quot;</span>],
+  <span class="hljs-function">(<span class="hljs-params">item, index</span>) =&gt;</span> <span class="hljs-title function_">p</span>(item, { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;item-&quot;</span> + index })
+);
+
+<span class="hljs-comment">// Render in component</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">MyComponent</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"><span class="hljs-attr">ctx</span>: <span class="hljs-title class_">Comp</span></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">div</span>(itemsList.<span class="hljs-property">Element</span>);
+};
+
+<span class="hljs-comment">// Add item</span>
+itemsList.<span class="hljs-title function_">push</span>(<span class="hljs-string">&quot;New Item&quot;</span>);
+
+<span class="hljs-comment">// Remove item</span>
+itemsList.<span class="hljs-title function_">splice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+
+<span class="hljs-comment">// Update item</span>
+itemsList[<span class="hljs-number">0</span>] = <span class="hljs-string">&quot;Updated&quot;</span>;
+</code></pre>
+<h3>List with Object Data</h3>
+<pre><code class="language-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Todo</span> {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">done</span>: <span class="hljs-built_in">boolean</span>;
+}
+
+<span class="hljs-keyword">const</span> todos = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">Todo</span>&gt;(
+  [
+    { <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">text</span>: <span class="hljs-string">&quot;Learn Cradova&quot;</span>, <span class="hljs-attr">done</span>: <span class="hljs-literal">false</span> },
+    { <span class="hljs-attr">id</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">text</span>: <span class="hljs-string">&quot;Build app&quot;</span>, <span class="hljs-attr">done</span>: <span class="hljs-literal">true</span> }
+  ],
+  <span class="hljs-function">(<span class="hljs-params">todo, index</span>) =&gt;</span> <span class="hljs-title function_">div</span>(
+    { <span class="hljs-attr">className</span>: todo.<span class="hljs-property">done</span> ? <span class="hljs-string">&quot;done&quot;</span> : <span class="hljs-string">&quot;&quot;</span> },
+    <span class="hljs-title function_">p</span>(todo.<span class="hljs-property">text</span>),
+    <span class="hljs-title function_">button</span>(todo.<span class="hljs-property">done</span> ? <span class="hljs-string">&quot;Undo&quot;</span> : <span class="hljs-string">&quot;Complete&quot;</span>, {
+      <span class="hljs-attr">onclick</span>: <span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-keyword">const</span> newTodos = [...todos.<span class="hljs-property">data</span>];
+        newTodos[index] = { ...todo, <span class="hljs-attr">done</span>: !todo.<span class="hljs-property">done</span> };
+        todos.<span class="hljs-property">data</span> = newTodos;
+      }
+    })
+  )
+);
+</code></pre>
+<h3>List Options</h3>
+<pre><code class="language-ts"><span class="hljs-keyword">const</span> list = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>(data, renderFn, {
+  <span class="hljs-attr">itemHeight</span>: <span class="hljs-number">50</span>,      <span class="hljs-comment">// Fixed height for virtualization</span>
+  <span class="hljs-attr">containerHeight</span>: <span class="hljs-number">400</span> <span class="hljs-comment">// Container height</span>
+});
+</code></pre>
+<h2>Virtualized List</h2>
+<p>For very large lists (1000+ items), use virtualized-list:</p>
+<pre><code class="language-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">List</span>, virtualizedList } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;cradova&quot;</span>;
+
+<span class="hljs-keyword">const</span> bigList = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>(
+  <span class="hljs-title class_">Array</span>(<span class="hljs-number">10000</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">_, i</span>) =&gt;</span> <span class="hljs-string">`Item <span class="hljs-subst">${i}</span>`</span>),
+  <span class="hljs-function">(<span class="hljs-params">item, index</span>) =&gt;</span> <span class="hljs-title function_">div</span>(<span class="hljs-title function_">p</span>(item)),
+  { 
+    <span class="hljs-attr">itemHeight</span>: <span class="hljs-number">40</span>,
+    <span class="hljs-attr">containerHeight</span>: <span class="hljs-number">600</span>,
+    <span class="hljs-attr">virtualized</span>: <span class="hljs-literal">true</span>
+  }
+);
+</code></pre>
+<h2>useMemo for Expensive Calculations</h2>
+<pre><code class="language-ts"><span class="hljs-keyword">const</span> <span class="hljs-title class_">ExpensiveComponent</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"><span class="hljs-attr">ctx</span>: <span class="hljs-title class_">Comp</span></span>) {
+  <span class="hljs-keyword">const</span> [items, setItems] = ctx.<span class="hljs-title function_">useState</span>([]);
+  
+  <span class="hljs-comment">// Only recalculate when items change</span>
+  <span class="hljs-keyword">const</span> sorted = ctx.<span class="hljs-title function_">useMemo</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">return</span> items
+      .<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">i</span> =&gt;</span> i.<span class="hljs-property">active</span>)
+      .<span class="hljs-title function_">sort</span>(<span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> a.<span class="hljs-property">name</span>.<span class="hljs-title function_">localeCompare</span>(b.<span class="hljs-property">name</span>))
+      .<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">i</span> =&gt;</span> ({ ...i, <span class="hljs-attr">displayName</span>: i.<span class="hljs-property">name</span>.<span class="hljs-title function_">toUpperCase</span>() }));
+  }, [items]);
+  
+  <span class="hljs-comment">// Expensive computation not needed on every render</span>
+  <span class="hljs-keyword">const</span> total = ctx.<span class="hljs-title function_">useMemo</span>(<span class="hljs-function">() =&gt;</span> 
+    items.<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">sum, i</span>) =&gt;</span> sum + i.<span class="hljs-property">price</span>, <span class="hljs-number">0</span>),
+  [items]);
+  
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">div</span>(
+    <span class="hljs-title function_">h1</span>(<span class="hljs-string">&quot;Total: {{ content }}quot;</span> + total),
+    sorted.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> <span class="hljs-title function_">p</span>(item.<span class="hljs-property">displayName</span>))
+  );
+};
+</code></pre>
+<h2>useCallback for Stable References</h2>
+<pre><code class="language-ts"><span class="hljs-keyword">const</span> <span class="hljs-title class_">Parent</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"><span class="hljs-attr">ctx</span>: <span class="hljs-title class_">Comp</span></span>) {
+  <span class="hljs-keyword">const</span> [count, setCount] = ctx.<span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
+  
+  <span class="hljs-comment">// Stable reference - won&#x27;t cause child re-renders</span>
+  <span class="hljs-keyword">const</span> handleClick = ctx.<span class="hljs-title function_">useCallback</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">setCount</span>(<span class="hljs-function"><span class="hljs-params">c</span> =&gt;</span> c + <span class="hljs-number">1</span>);
+  }, []);
+  
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">div</span>(
+    <span class="hljs-title function_">h1</span>(<span class="hljs-string">&quot;Count: &quot;</span> + count),
+    <span class="hljs-comment">// Child only re-renders when count changes, not on every render</span>
+    <span class="hljs-title class_">ChildComponent</span>({ <span class="hljs-attr">onClick</span>: handleClick })
+  );
+};
+</code></pre>
+<h2>Avoiding Unnecessary Re-renders</h2>
+<pre><code class="language-ts"><span class="hljs-comment">// ❌ WRONG - new function every render</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">BadComponent</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"><span class="hljs-attr">ctx</span>: <span class="hljs-title class_">Comp</span></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">button</span>(<span class="hljs-string">&quot;Click&quot;</span>, {
+    <span class="hljs-attr">onclick</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;clicked&quot;</span>) <span class="hljs-comment">// New function each render</span>
+  });
+};
+
+<span class="hljs-comment">// ✅ CORRECT - stable function</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">GoodComponent</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"><span class="hljs-attr">ctx</span>: <span class="hljs-title class_">Comp</span></span>) {
+  <span class="hljs-keyword">const</span> handleClick = ctx.<span class="hljs-title function_">useCallback</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;clicked&quot;</span>);
+  }, []);
+  
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">button</span>(<span class="hljs-string">&quot;Click&quot;</span>, { <span class="hljs-attr">onclick</span>: handleClick });
+};
+</code></pre>
+<h2>Signal vs useState</h2>
+<p>Use Signal for global/shared state, useState for component-local:</p>
+<pre><code class="language-ts"><span class="hljs-comment">// Global state - use Signal</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">AppStore</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Signal</span>({ <span class="hljs-attr">user</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">theme</span>: <span class="hljs-string">&quot;light&quot;</span> });
+
+<span class="hljs-comment">// Component state - use useState</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">MyComponent</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"><span class="hljs-attr">ctx</span>: <span class="hljs-title class_">Comp</span></span>) {
+  <span class="hljs-keyword">const</span> [local, setLocal] = ctx.<span class="hljs-title function_">useState</span>(<span class="hljs-string">&quot;&quot;</span>);
+  
+  <span class="hljs-comment">// Reading global state (triggers when it changes)</span>
+  <span class="hljs-keyword">const</span> theme = <span class="hljs-title class_">AppStore</span>.<span class="hljs-property">data</span>.<span class="hljs-property">theme</span>;
+  
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">div</span>();
+};
+</code></pre>
+<h2>Optimizing Large Lists</h2>
+<h3>1. Pagination</h3>
+<pre><code class="language-ts"><span class="hljs-keyword">const</span> <span class="hljs-title class_">PaginatedList</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"><span class="hljs-attr">ctx</span>: <span class="hljs-title class_">Comp</span></span>) {
+  <span class="hljs-keyword">const</span> [items, setItems] = ctx.<span class="hljs-title function_">useState</span>(allItems);
+  <span class="hljs-keyword">const</span> [page, setPage] = ctx.<span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
+  <span class="hljs-keyword">const</span> pageSize = <span class="hljs-number">20</span>;
+  
+  <span class="hljs-keyword">const</span> currentPage = ctx.<span class="hljs-title function_">useMemo</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> start = page * pageSize;
+    <span class="hljs-keyword">return</span> items.<span class="hljs-title function_">slice</span>(start, start + pageSize);
+  }, [items, page]);
+  
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">div</span>(
+    currentPage.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> <span class="hljs-title function_">p</span>(item.<span class="hljs-property">name</span>)),
+    <span class="hljs-title function_">div</span>(
+      <span class="hljs-title function_">button</span>(<span class="hljs-string">&quot;Prev&quot;</span>, { <span class="hljs-attr">disabled</span>: page === <span class="hljs-number">0</span>, <span class="hljs-attr">onclick</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">setPage</span>(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> p - <span class="hljs-number">1</span>) }),
+      <span class="hljs-title function_">button</span>(<span class="hljs-string">&quot;Next&quot;</span>, { <span class="hljs-attr">disabled</span>: (page + <span class="hljs-number">1</span>) * pageSize &gt;= items.<span class="hljs-property">length</span>, <span class="hljs-attr">onclick</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">setPage</span>(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> p + <span class="hljs-number">1</span>) })
+    )
+  );
+};
+</code></pre>
+<h3>2. Infinite Scroll</h3>
+<pre><code class="language-ts"><span class="hljs-keyword">const</span> <span class="hljs-title class_">InfiniteList</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"><span class="hljs-attr">ctx</span>: <span class="hljs-title class_">Comp</span></span>) {
+  <span class="hljs-keyword">const</span> [items, setItems] = ctx.<span class="hljs-title function_">useState</span>(initialItems);
+  <span class="hljs-keyword">const</span> [loading, setLoading] = ctx.<span class="hljs-title function_">useState</span>(<span class="hljs-literal">false</span>);
+  
+  ctx.<span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleScroll</span> = (<span class="hljs-params"></span>) =&gt; {
+      <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">window</span>.<span class="hljs-property">scrollY</span> + <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerHeight</span> &gt;= <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-property">offsetHeight</span> - <span class="hljs-number">100</span>) {
+        <span class="hljs-title function_">loadMore</span>();
+      }
+    };
+    <span class="hljs-variable language_">window</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&quot;scroll&quot;</span>, handleScroll);
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">window</span>.<span class="hljs-title function_">removeEventListener</span>(<span class="hljs-string">&quot;scroll&quot;</span>, handleScroll);
+  }, []);
+  
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">loadMore</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"></span>) =&gt; {
+    <span class="hljs-keyword">if</span> (loading) <span class="hljs-keyword">return</span>;
+    <span class="hljs-title function_">setLoading</span>(<span class="hljs-literal">true</span>);
+    <span class="hljs-keyword">const</span> more = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchMore</span>();
+    <span class="hljs-title function_">setItems</span>([...items, ...more]);
+    <span class="hljs-title function_">setLoading</span>(<span class="hljs-literal">false</span>);
+  };
+  
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">div</span>(
+    items.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> <span class="hljs-title function_">p</span>(item.<span class="hljs-property">name</span>)),
+    loading ? <span class="hljs-title function_">p</span>(<span class="hljs-string">&quot;Loading...&quot;</span>) : <span class="hljs-literal">null</span>
+  );
+};
+</code></pre>
+<h3>3. Window Virtualization</h3>
+<p>For extremely long lists (10k+ items), only render visible items:</p>
+<pre><code class="language-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Todo</span> {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">done</span>: <span class="hljs-built_in">boolean</span>;
+}
+
+<span class="hljs-keyword">const</span> todos = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">Todo</span>&gt;(
+  [
+    { <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">text</span>: <span class="hljs-string">&quot;Learn Cradova&quot;</span>, <span class="hljs-attr">done</span>: <span class="hljs-literal">false</span> },
+    { <span class="hljs-attr">id</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">text</span>: <span class="hljs-string">&quot;Build app&quot;</span>, <span class="hljs-attr">done</span>: <span class="hljs-literal">true</span> }
+  ],
+  <span class="hljs-function">(<span class="hljs-params">todo, index</span>) =&gt;</span> <span class="hljs-title function_">div</span>(
+    { <span class="hljs-attr">className</span>: todo.<span class="hljs-property">done</span> ? <span class="hljs-string">&quot;done&quot;</span> : <span class="hljs-string">&quot;&quot;</span> },
+    <span class="hljs-title function_">p</span>(todo.<span class="hljs-property">text</span>),
+    <span class="hljs-title function_">button</span>(todo.<span class="hljs-property">done</span> ? <span class="hljs-string">&quot;Undo&quot;</span> : <span class="hljs-string">&quot;Complete&quot;</span>, {
+      <span class="hljs-attr">onclick</span>: <span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-keyword">const</span> newTodos = [...todos.<span class="hljs-property">data</span>];
+        newTodos[index] = { ...todo, <span class="hljs-attr">done</span>: !todo.<span class="hljs-property">done</span> };
+        todos.<span class="hljs-property">data</span> = newTodos;
+      }
+    })
+  )
+);
+<span class="hljs-string">``</span><span class="hljs-string">`0
+
+## Performance Checklist
+
+- [ ] Use `</span>useMemo<span class="hljs-string">` for expensive calculations
+- [ ] Use `</span>useCallback<span class="hljs-string">` for stable function references
+- [ ] Use List class for large arrays (100+ items)
+- [ ] Consider virtualization for very large lists (1000+)
+- [ ] Implement pagination for large datasets
+- [ ] Use lazy loading for routes
+- [ ] Prefer Signal for global state over prop drilling
+- [ ] Keep components small and focused
+
+## Bundle Size
+
+Cradova&#x27;s framework is ~15KB minified. For comparison:
+
+- React + ReactDOM: ~45KB
+- Vue: ~35KB
+- Cradova: ~15KB
+
+This makes Cradova suitable for:
+- Mobile applications
+- Low-bandwidth environments
+- Quick initial load requirements</span></code></pre>
+
+    </main>
+
+    <section
+      class="py-12 sm:py-16 md:py-20 lg:py-24 google-gradient text-white"
+    >
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-12 fade-in-up">
+          Get Started in Minutes
+        </h2>
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+          <div class="text-left fade-in-up mx-auto">
+            <h3 class="text-2xl font-semibold mb-4">Simple Setup</h3>
+            <p class="text-lg mb-4">
+              Follow our clear documentation to get your first project running
+              in no time.
+            </p>
+            <h3 class="text-2xl font-semibold mb-4">Write Less Code</h3>
+            <p class="text-lg mb-4">
+              Focus on your application's logic, not boilerplate.
+            </p>
+            <h3 class="text-2xl font-semibold mb-4">Join the Discord</h3>
+            <p class="text-lg mb-4">
+              Get support and share your creations with a growing community.
+            </p>
+            <a
+              href="https://discord.gg/faqydQASTy"
+              class="mt-6 bg-white text-blue-600 px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-200 hover-scale inline-block"
+              >Join Discord</a
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="bg-gray-800 text-gray-300 py-6 sm:py-8">
+      <div class="container mx-auto px-4 text-center">
+        <p>&copy; 2021-2025 Cradova. All rights reserved.</p>
+        <div class="mt-4 space-x-4">
+          <a href="https://discord.codedynasty.dev/" class="hover:text-white"
+            >Discord</a
+          >
+          <a href="#" class="hover:text-white text-2xl">·</a>
+          <a href="/guides/getting-started.html" class="hover:text-white"
+            >Docs</a
+          >
+          <a href="#" class="hover:text-white text-2xl">·</a>
+          <a
+            href="https://github.com/CodeDynasty-dev/Cradova"
+            class="hover:text-white"
+            >GitHub</a
+          >
+        </div>
+      </div>
+    </footer>
+
+    <script src="/script.js"></script>
+    <script src="/prism.js"></script>
+  </body>
+</html>

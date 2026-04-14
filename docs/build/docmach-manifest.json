@@ -1,0 +1,207 @@
+{
+  "generatedAt": "2026-04-14T15:07:40.829Z",
+  "docsDirectory": "docs/docs",
+  "buildDirectory": "docs/build",
+  "totalPages": 11,
+  "tree": {
+    "name": "/",
+    "type": "directory",
+    "path": "/",
+    "children": [
+      {
+        "name": "guides",
+        "type": "directory",
+        "path": "/guides",
+        "children": [
+          {
+            "name": "BASICS.html",
+            "type": "file",
+            "path": "/guides/BASICS.html",
+            "link": "/guides/BASICS.html",
+            "sourcePath": "docs/docs/guides/BASICS.md",
+            "outputPath": "docs/build/guides/BASICS.html",
+            "docmachTags": []
+          },
+          {
+            "name": "COMPONENTS.html",
+            "type": "file",
+            "path": "/guides/COMPONENTS.html",
+            "link": "/guides/COMPONENTS.html",
+            "sourcePath": "docs/docs/guides/COMPONENTS.md",
+            "outputPath": "docs/build/guides/COMPONENTS.html",
+            "docmachTags": []
+          },
+          {
+            "name": "CONTROL-FLOW.html",
+            "type": "file",
+            "path": "/guides/CONTROL-FLOW.html",
+            "link": "/guides/CONTROL-FLOW.html",
+            "sourcePath": "docs/docs/guides/CONTROL-FLOW.md",
+            "outputPath": "docs/build/guides/CONTROL-FLOW.html",
+            "docmachTags": []
+          },
+          {
+            "name": "CONVENTIONS.html",
+            "type": "file",
+            "path": "/guides/CONVENTIONS.html",
+            "link": "/guides/CONVENTIONS.html",
+            "sourcePath": "docs/docs/guides/CONVENTIONS.md",
+            "outputPath": "docs/build/guides/CONVENTIONS.html",
+            "docmachTags": []
+          },
+          {
+            "name": "EXAMPLES.html",
+            "type": "file",
+            "path": "/guides/EXAMPLES.html",
+            "link": "/guides/EXAMPLES.html",
+            "sourcePath": "docs/docs/guides/EXAMPLES.md",
+            "outputPath": "docs/build/guides/EXAMPLES.html",
+            "docmachTags": []
+          },
+          {
+            "name": "getting-started.html",
+            "type": "file",
+            "path": "/guides/getting-started.html",
+            "link": "/guides/getting-started.html",
+            "sourcePath": "docs/docs/guides/getting-started.md",
+            "outputPath": "docs/build/guides/getting-started.html",
+            "docmachTags": [
+              {
+                "type": "wrapper",
+                "file": "docs/assets/docs.html",
+                "replacement": "content"
+              },
+              {
+                "type": "wrapper",
+                "file": "docs/assets/docs.html"
+              }
+            ]
+          },
+          {
+            "name": "PERFORMANCE.html",
+            "type": "file",
+            "path": "/guides/PERFORMANCE.html",
+            "link": "/guides/PERFORMANCE.html",
+            "sourcePath": "docs/docs/guides/PERFORMANCE.md",
+            "outputPath": "docs/build/guides/PERFORMANCE.html",
+            "docmachTags": []
+          },
+          {
+            "name": "PRODUCTION.html",
+            "type": "file",
+            "path": "/guides/PRODUCTION.html",
+            "link": "/guides/PRODUCTION.html",
+            "sourcePath": "docs/docs/guides/PRODUCTION.md",
+            "outputPath": "docs/build/guides/PRODUCTION.html",
+            "docmachTags": []
+          },
+          {
+            "name": "ROUTING.html",
+            "type": "file",
+            "path": "/guides/ROUTING.html",
+            "link": "/guides/ROUTING.html",
+            "sourcePath": "docs/docs/guides/ROUTING.md",
+            "outputPath": "docs/build/guides/ROUTING.html",
+            "docmachTags": []
+          },
+          {
+            "name": "SKILL.html",
+            "type": "file",
+            "path": "/guides/SKILL.html",
+            "link": "/guides/SKILL.html",
+            "sourcePath": "docs/docs/guides/SKILL.md",
+            "outputPath": "docs/build/guides/SKILL.html",
+            "docmachTags": []
+          },
+          {
+            "name": "STATE.html",
+            "type": "file",
+            "path": "/guides/STATE.html",
+            "link": "/guides/STATE.html",
+            "sourcePath": "docs/docs/guides/STATE.md",
+            "outputPath": "docs/build/guides/STATE.html",
+            "docmachTags": []
+          }
+        ]
+      }
+    ]
+  },
+  "pages": [
+    {
+      "sourcePath": "docs/docs/guides/EXAMPLES.md",
+      "outputPath": "docs/build/guides/EXAMPLES.html",
+      "link": "/guides/EXAMPLES.html",
+      "docmachTags": []
+    },
+    {
+      "sourcePath": "docs/docs/guides/ROUTING.md",
+      "outputPath": "docs/build/guides/ROUTING.html",
+      "link": "/guides/ROUTING.html",
+      "docmachTags": []
+    },
+    {
+      "sourcePath": "docs/docs/guides/BASICS.md",
+      "outputPath": "docs/build/guides/BASICS.html",
+      "link": "/guides/BASICS.html",
+      "docmachTags": []
+    },
+    {
+      "sourcePath": "docs/docs/guides/CONVENTIONS.md",
+      "outputPath": "docs/build/guides/CONVENTIONS.html",
+      "link": "/guides/CONVENTIONS.html",
+      "docmachTags": []
+    },
+    {
+      "sourcePath": "docs/docs/guides/PRODUCTION.md",
+      "outputPath": "docs/build/guides/PRODUCTION.html",
+      "link": "/guides/PRODUCTION.html",
+      "docmachTags": []
+    },
+    {
+      "sourcePath": "docs/docs/guides/STATE.md",
+      "outputPath": "docs/build/guides/STATE.html",
+      "link": "/guides/STATE.html",
+      "docmachTags": []
+    },
+    {
+      "sourcePath": "docs/docs/guides/COMPONENTS.md",
+      "outputPath": "docs/build/guides/COMPONENTS.html",
+      "link": "/guides/COMPONENTS.html",
+      "docmachTags": []
+    },
+    {
+      "sourcePath": "docs/docs/guides/PERFORMANCE.md",
+      "outputPath": "docs/build/guides/PERFORMANCE.html",
+      "link": "/guides/PERFORMANCE.html",
+      "docmachTags": []
+    },
+    {
+      "sourcePath": "docs/docs/guides/getting-started.md",
+      "outputPath": "docs/build/guides/getting-started.html",
+      "link": "/guides/getting-started.html",
+      "docmachTags": [
+        {
+          "type": "wrapper",
+          "file": "docs/assets/docs.html",
+          "replacement": "content"
+        },
+        {
+          "type": "wrapper",
+          "file": "docs/assets/docs.html"
+        }
+      ]
+    },
+    {
+      "sourcePath": "docs/docs/guides/CONTROL-FLOW.md",
+      "outputPath": "docs/build/guides/CONTROL-FLOW.html",
+      "link": "/guides/CONTROL-FLOW.html",
+      "docmachTags": []
+    },
+    {
+      "sourcePath": "docs/docs/guides/SKILL.md",
+      "outputPath": "docs/build/guides/SKILL.html",
+      "link": "/guides/SKILL.html",
+      "docmachTags": []
+    }
+  ]
+}

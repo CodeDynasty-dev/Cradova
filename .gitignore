@@ -9,7 +9,6 @@ dist
 **/.eslintignore
 coverage
 **/.github/README.md
-package-lock.json
-docs/build
+package-lock.json 
 example
 build-example.ts

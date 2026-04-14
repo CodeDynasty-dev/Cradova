@@ -92,6 +92,10 @@
       .red {
         border: 1px solid red;
       }
+      li a {
+        text-decoration: underline;
+        color: #3b82f6;
+      }
     </style>
   </head>
   <body class="bg-gray-50 text-gray-800 grid w-full">
@@ -354,57 +358,29 @@
       class="py-6 sm:py-8 md:py-12 lg:py-16 w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 -mt-2 sm:-mt-12 md:-mt-6 lg:-mt-8 rounded-t-3xl relative z-10 shadow-inner overflow-hidden"
     >
       <h1>Getting Started</h1>
-<p>Cradova is a lightweight, reactive UI framework designed for building modern web applications with simplicity and performance. Inspired from principles of SolidJS and designs of React and Mithril.js, Cradova provides a declarative API, fine-grained reactivity, and efficient DOM updates.</p>
+<p>Cradova is a lightweight, reactive UI framework designed for building modern web applications with simplicity and performance.
+<br></p>
+<p>Inspired from principles of SolidJS and designs of React and Mithril.js, Cradova provides a declarative API, fine-grained reactivity, and efficient DOM updates.</p>
 <h2>Installation</h2>
 <pre><code class="language-bash">npm install cradova
 </code></pre>
-<h2>Examples</h2>
-<h3>Todo List Application</h3>
-<pre><code class="language-ts"><span class="hljs-keyword">const</span> todoStore = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>([], <span class="hljs-function">(<span class="hljs-params">task, index</span>) =&gt;</span>
-  <span class="hljs-title function_">p</span>(task, {
-    <span class="hljs-attr">onclick</span>: <span class="hljs-function">() =&gt;</span> todoStore.<span class="hljs-title function_">splice</span>(index, <span class="hljs-number">1</span>),
-  }),
-);
-
-<span class="hljs-keyword">const</span> <span class="hljs-title function_">TodoApp</span> = (<span class="hljs-params"><span class="hljs-attr">ctx</span>: <span class="hljs-title class_">Comp</span></span>) =&gt; {
-  <span class="hljs-keyword">const</span> ref = ctx.<span class="hljs-property">useRef</span>&lt;<span class="hljs-title class_">HTMLInputElement</span>&gt;();
-
-  <span class="hljs-keyword">return</span> <span class="hljs-title function_">div</span>(
-    <span class="hljs-title function_">h1</span>(<span class="hljs-string">&quot;Todo List&quot;</span>),
-    <span class="hljs-title function_">input</span>({
-      <span class="hljs-attr">ref</span>: ref.<span class="hljs-title function_">bind</span>(<span class="hljs-string">&quot;input&quot;</span>),
-      <span class="hljs-attr">onkeydown</span>: <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
-        <span class="hljs-keyword">if</span> (e.<span class="hljs-property">key</span> === <span class="hljs-string">&quot;Enter&quot;</span>) <span class="hljs-title function_">addTodo</span>();
-      },
-    }),
-    <span class="hljs-title function_">button</span>(<span class="hljs-string">&quot;Add&quot;</span>, {
-      <span class="hljs-attr">onclick</span>: addTodo,
-    }),
-    todoStore.<span class="hljs-property">Element</span>,
-  );
-
-  <span class="hljs-keyword">function</span> <span class="hljs-title function_">addTodo</span>(<span class="hljs-params"></span>) {
-    <span class="hljs-keyword">const</span> input = ref.<span class="hljs-title function_">current</span>(<span class="hljs-string">&quot;input&quot;</span>);
-    <span class="hljs-keyword">if</span> (input?.<span class="hljs-property">value</span>) {
-      todoStore.<span class="hljs-title function_">push</span>(input.<span class="hljs-property">value</span>);
-      input.<span class="hljs-property">value</span> = <span class="hljs-string">&quot;&quot;</span>;
-    }
-  }
-};
-</code></pre>
-<h2>Docs</h2>
-<p>Complete documentation for building with the Cradova framework.</p>
+<h1>Docs</h1>
+<p>Complete documentation for building with the Cradova framework.
+<br>
+<br></p>
 <ul>
-<li><a href="./SKILL.html">SKILL.md - Framework Overview</a> - Core concepts and when to use Cradova</li>
-<li><a href="./BASICS.html">BASICS.md - Getting Started</a> - Quick start guide</li>
-<li><a href="./CONVENTIONS.html">CONVENTIONS.md</a> - Function vs arrow function rules</li>
-<li><a href="./STATE.html">STATE.md</a> - Signal and hooks deep dive</li>
-<li><a href="./COMPONENTS.html">COMPONENTS.md</a> - Creating and using components</li>
-<li><a href="./ROUTING.html">ROUTING.md</a> - Page and Router configuration</li>
-<li><a href="./CONTROL-FLOW.html">CONTROL-FLOW.md</a> - Conditional rendering ($if, $ifelse, $switch, $case, loop)</li>
-<li><a href="./PERFORMANCE.html">PERFORMANCE.md</a> - List virtualization, optimization</li>
-<li><a href="./EXAMPLES.html">EXAMPLES.md</a> - Complete code examples</li>
-<li><a href="./PRODUCTION.html">PRODUCTION.md</a> - Real-world patterns and deployment</li>
+<li><a href="./SKILL.html">Framework Overview</a> - Core concepts and when to use Cradova</li>
+<li><a href="./BASICS.html">Getting Started</a> - Quick start guide</li>
+<li><a href="./CONVENTIONS.html">conventions</a> - Function vs arrow function rules</li>
+<li><a href="./STATE.html">state</a> - Signal and hooks deep dive</li>
+<li><a href="./COMPONENTS.html">component</a> - Creating and using components</li>
+<li><a href="./ROUTING.html">routing</a> - Page and Router configuration</li>
+<li><a href="./CONTROL-FLOW.html">control flow</a> - Conditional rendering ($if, $ifelse, $switch, $case, loop)</li>
+<li><a href="./PERFORMANCE.html">performance</a> - List virtualization, optimization</li>
+<li><a href="./EXAMPLES.html">example</a> - Complete code examples</li>
+<li><a href="./PRODUCTION.html">production</a> - Real-world patterns and deployment
+<br>
+<br></li>
 </ul>
 <h3>invoke and fragment Utilities</h3>
 <h4><code>invoke(component, ...args)</code></h4>

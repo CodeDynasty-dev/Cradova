@@ -1,3 +1,6 @@
+<docmach type="wrapper" replacement="content" file="docs/assets/docs.html">
+
+
 # Cradova Control Flow
 
 This guide covers conditional rendering in Cradova using $if, $ifelse, $switch, and $case.
@@ -257,3 +260,5 @@ const TaskList = function(ctx: Comp) {
 | `$ifelse(condition, trueContent, falseContent)` | If/else conditional |
 | `$switch(value, ...$case(value, fn))` | Match multiple values |
 | `$case(value, fn)` | Single case in switch |
+
+</docmach>

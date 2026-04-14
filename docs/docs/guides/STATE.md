@@ -1,3 +1,5 @@
+<docmach type="wrapper" replacement="content" file="docs/assets/docs.html">
+
 # Cradova State Management
 
 This guide covers all state management options in Cradova: Signal for global state, and hooks for component-local state.
@@ -262,3 +264,5 @@ ctx.useEffect(() => {
     .finally(() => setLoading(false));
 }, []);
 ```
+
+</docmach>

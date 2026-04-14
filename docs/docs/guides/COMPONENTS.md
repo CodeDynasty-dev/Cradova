@@ -1,3 +1,6 @@
+<docmach type="wrapper" replacement="content" file="docs/assets/docs.html">
+
+
 # Cradova Components
 
 This guide covers creating components and using DOM elements in Cradova.
@@ -294,3 +297,6 @@ const Fragment = raw(`
 4. **Extract complex logic** - Use hooks for reusability
 5. **Use semantic HTML** - Use proper elements (nav, header, etc.)
 6. **Handle events properly** - Use proper event types
+
+
+</docmach>

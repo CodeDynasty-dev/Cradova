@@ -1,3 +1,6 @@
+<docmach type="wrapper" replacement="content" file="docs/assets/docs.html">
+
+
 # Cradova Performance
 
 This guide covers performance optimization in Cradova including the List class and virtualized rendering.
@@ -287,3 +290,5 @@ This makes Cradova suitable for:
 - Mobile applications
 - Low-bandwidth environments
 - Quick initial load requirements
+
+</docmach>

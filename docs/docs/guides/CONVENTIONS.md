@@ -1,3 +1,6 @@
+<docmach type="wrapper" replacement="content" file="docs/assets/docs.html">
+
+
 # Cradova Conventions
 
 This document covers the critical conventions that AI agents must follow when working with Cradova.
@@ -132,3 +135,5 @@ $case("value", () => div("content"))
 3. Not returning cleanup from useEffect
 4. Using `.data` without Signal wrapper (must be object, not array/primitive)
 5. Trying to use hooks outside of component function scope
+
+</docmach>

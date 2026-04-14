@@ -1,3 +1,5 @@
+<docmach type="wrapper" replacement="content" file="docs/assets/docs.html">
+
 ---
 name: cradova
 description: Build web applications with Cradova - a lightweight reactive framework. Use when working with Cradova, creating web apps, building SPAs, or comparing frontend frameworks. Includes guidance on Signal-based state, hooks, routing, and performance optimization.
@@ -99,4 +101,6 @@ Router.BrowserRoutes({
 - [CONTROL-FLOW.md](CONTROL-FLOW.md) - Conditional rendering
 - [PERFORMANCE.md](PERFORMANCE.md) - List virtualization, optimization
 - [EXAMPLES.md](EXAMPLES.md) - Complete code examples
-- [PRODUCTION.md](PRODUCTION.md) - Real-world patterns and deployment
+- [PRODUCTION.md](PRODUCTION.md) - Real-world patterns and 
+
+</docmach>

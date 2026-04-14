@@ -1,3 +1,6 @@
+<docmach type="wrapper" replacement="content" file="docs/assets/docs.html">
+
+
 # Cradova Examples
 
 Complete, working code examples for common use cases.
@@ -453,3 +456,5 @@ Example `index.html`:
 </body>
 </html>
 ```
+
+</docmach>

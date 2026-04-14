@@ -1,3 +1,6 @@
+<docmach type="wrapper" replacement="content" file="docs/assets/docs.html">
+
+
 # Cradova Production Patterns
 
 This guide covers real-world patterns used in production Cradova applications, based on actual production code.
@@ -415,3 +418,5 @@ Production Cradova apps typically use:
 - CSS imports for styling
 - Error boundaries for resilience
 - Proper cleanup in useEffect return functions
+
+</docmach>

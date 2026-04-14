@@ -1,3 +1,6 @@
+<docmach type="wrapper" replacement="content" file="docs/assets/docs.html">
+
+
 # Cradova Basics
 
 Quick reference for the fundamentals of Cradova.
@@ -152,3 +155,5 @@ ctx is undefined
 - [COMPONENTS.md](COMPONENTS.md) - Creating components
 - [ROUTING.md](ROUTING.md) - Page and Router
 - [EXAMPLES.md](EXAMPLES.md) - Working code
+
+</docmach>

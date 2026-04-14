@@ -1,3 +1,6 @@
+<docmach type="wrapper" replacement="content" file="docs/assets/docs.html">
+
+
 # Cradova Routing
 
 This guide covers routing in Cradova using Page and Router.
@@ -258,3 +261,5 @@ Router.BrowserRoutes({
 5. **Handle 404s** with wildcard route
 6. **Keep URL structure clean** - use meaningful paths
 7. **Use query params** for filtering/sorting, route params for identifiers
+
+</docmach>

@@ -38,19 +38,67 @@ Build web apps that are fast, small, and simple.
 this can't be better anywhere XD
 
 ```js
-// functional components
+// functional components - USE REGULAR FUNCTIONS, NOT ARROW FUNCTIONS
+// Arrow functions do NOT receive ctx - they are not reactive components
+// Regular functions receive ctx which gives access to hooks (useState, useEffect, useMemo, useRef)
+// This convention exists because functions get a state tree, but arrow functions do not
+// This allows you to control how many state objects are in the DOM
 
-const Cradova = function () {
-  const [year, setYear] = useState(3, this);
+const Cradova = function (ctx) {
+  // ctx gives you access to hooks
+  const [year, setYear] = ctx.useState(3);
+  const [count] = ctx.useMemo(() => year * 2, [year]);
 
-  return h1("Cradova is " + year + " yrs old in ", {
+  ctx.useEffect(() => {
+    console.log("Component mounted");
+    return () => console.log("Cleanup");
+  }, []);
+
+  return h1("Cradova is " + year + " years old", {
     onclick() {
-      setYear((lastYear) => {
-        return lastYear + 1;
-      });
+      setYear((lastYear) => lastYear + 1);
     },
   });
 };
+
+// WRONG - arrow function does not receive ctx
+const BrokenComponent = (ctx) => {
+  // ctx is undefined here!
+  const [count, setCount] = ctx.useState(0); // Will fail
+  return div(count);
+};
+
+// CORRECT - regular function receives ctx
+const WorkingComponent = function (ctx) {
+  const [count, setCount] = ctx.useState(0); // Works!
+  return div(count, { onclick: () => setCount(count + 1) });
+};
+```
+
+### Page Templates - Must Use Regular Functions
+
+```js
+// template function gets ctx with hooks if you using function to declare them.
+const HomePage = new Page({
+  title: "Home",
+  template: function (ctx) {
+    const [view, setView] = ctx.useState("home");
+    return div(
+      h1("Welcome"),
+      button("Switch View", { onclick: () => setView("other") })
+    );
+  }
+});
+
+// WRONG - arrow function template does not get ctx
+const BrokenPage = new Page({
+  title: "Home",
+  template: (ctx) => {  // ctx is undefined!
+    const [view, setView] = ctx.useState("home"); // Will fail
+    return div(view);
+  }
+});
+```
 
 // add reactivity to a signal element.
 const counterSignal = new Signal({ count: 0 });

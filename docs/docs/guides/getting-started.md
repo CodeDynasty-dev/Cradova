@@ -14,17 +14,60 @@ npm install cradova
 
 ### Creating Components
 
+**Important:** Use regular functions, not arrow functions. Arrow functions do NOT receive `ctx` - they are not reactive components. This convention exists because functions get a state tree, but arrow functions do not. This allows you to control how many state objects are in the DOM.
+
 ```ts
-const HelloWorld = () =>
-  div(
+// CORRECT - regular function receives ctx with access to hooks
+const HelloWorld = function (ctx: Comp) {
+  const [count, setCount] = ctx.useState(0);
+  
+  ctx.useEffect(() => {
+    console.log("Mounted!");
+    return () => console.log("Cleanup!");
+  }, []);
+  
+  return div(
     h1("Hello World!"),
-    p("Welcome to Cradova"),
+    p("Count: " + count),
     button("Click me", {
       onclick() {
-        alert("Button clicked!");
+        setCount(count + 1);
       },
     })
   );
+};
+
+// WRONG - arrow function does NOT receive ctx
+const BrokenComponent = () => {
+  // ctx is undefined here!
+  const [count, setCount] = ctx.useState(0); // Will fail
+  return div(count);
+};
+```
+
+### Page Templates - Must Use Regular Functions
+
+```ts
+// CORRECT - regular function gets ctx with hooks
+const HomePage = new Page({
+  title: "Home",
+  template: function (ctx: Comp) {
+    const [view, setView] = ctx.useState("home");
+    return div(
+      h1("Welcome"),
+      button("Switch View", { onclick: () => setView("other") })
+    );
+  }
+});
+
+// WRONG - arrow function template does not get ctx
+const BrokenPage = new Page({
+  title: "Home",
+  template: (ctx) => {  // ctx is undefined!
+    const [view, setView] = ctx.useState("home"); // Will fail
+    return div(view);
+  }
+});
 ```
 
 ### State Management

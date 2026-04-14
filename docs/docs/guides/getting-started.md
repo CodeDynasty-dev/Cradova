@@ -301,7 +301,7 @@ const TodoApp = (ctx: Comp) => {
 };
 ```
 
-## Cradova Agent Skill Documentation
+## Docs
 
 Complete documentation for building with the Cradova framework.
 
@@ -311,10 +311,32 @@ Complete documentation for building with the Cradova framework.
 - [STATE.md](./STATE.html) - Signal and hooks deep dive
 - [COMPONENTS.md](./COMPONENTS.html) - Creating and using components
 - [ROUTING.md](./ROUTING.html) - Page and Router configuration
-- [CONTROL-FLOW.md](./CONTROL-FLOW.html) - Conditional rendering
+- [CONTROL-FLOW.md](./CONTROL-FLOW.html) - Conditional rendering ($if, $ifelse, $switch, $case, loop)
 - [PERFORMANCE.md](./PERFORMANCE.html) - List virtualization, optimization
 - [EXAMPLES.md](./EXAMPLES.html) - Complete code examples
 - [PRODUCTION.md](./PRODUCTION.html) - Real-world patterns and deployment
+
+### invoke and fragment Utilities
+
+#### `invoke(component, ...args)`
+
+Render a component with arguments.
+
+```ts
+import { invoke } from "cradova";
+const UserCard = function (ctx, user) {
+  return div(user.name);
+};
+invoke(UserCard, { name: "Alice" });
+```
+
+#### `fragment(...children)`
+
+Creates a document fragment for grouping elements without adding extra DOM nodes.
+
+```ts
+frag(div("Child 1"), div("Child 2"));
+```
 
 ## Conclusion
 

@@ -251,20 +251,35 @@ const MyComponent = function(ctx: Comp) {
 };
 ```
 
-## Fragment Pattern
+## invoke - Component with Arguments
 
-Use nested divs or raw() for multiple root elements:
+Use `invoke` to render a component with additional arguments:
 
 ```ts
-// Option 1: Wrapper div
-const MyComponent = function() {
+const UserCard = function(ctx: Comp, user: { name: string; email: string }) {
   return div(
+    h3(user.name),
+    p(user.email)
+  );
+};
+
+// Render with arguments
+invoke(UserCard, { name: "Alice", email: "alice@example.com" });
+```
+
+## Fragment - Grouping Elements
+
+Use `fragment` (or `frag`) to group elements without extra DOM nodes:
+
+```ts
+const MyComponent = function(ctx: Comp) {
+  return fragment(
     div("First"),
     div("Second")
   );
 };
 
-// Option 2: Fragment with raw
+// Or raw HTML fragment
 const Fragment = raw(`
   <div>First</div>
   <div>Second</div>

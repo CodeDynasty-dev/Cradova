@@ -115,14 +115,14 @@ export interface ElementEventMap {
     onfocus: (this: HTMLFormElement, event: FocusEvent) => void;
     onblur: (this: HTMLFormElement, event: FocusEvent) => void;
   };
-  h1: typeof ElementEventMap.footer;
-  h2: typeof ElementEventMap.footer;
-  h3: typeof ElementEventMap.footer;
-  h4: typeof ElementEventMap.footer;
-  h5: typeof ElementEventMap.footer;
-  h6: typeof ElementEventMap.footer;
-  header: typeof ElementEventMap.footer;
-  i: typeof ElementEventMap.footer;
+  h1: ElementEventMap["footer"];
+  h2: ElementEventMap["footer"];
+  h3: ElementEventMap["footer"];
+  h4: ElementEventMap["footer"];
+  h5: ElementEventMap["footer"];
+  h6: ElementEventMap["footer"];
+  header: ElementEventMap["footer"];
+  i: ElementEventMap["footer"];
   iframe: {
     onload: (this: HTMLIFrameElement, event: Event) => void;
     onerror: (this: HTMLIFrameElement, event: Event) => void;
@@ -178,18 +178,18 @@ export interface ElementEventMap {
     onfocus: (this: HTMLLabelElement, event: FocusEvent) => void;
     onblur: (this: HTMLLabelElement, event: FocusEvent) => void;
   };
-  li: typeof ElementEventMap.footer;
-  main: typeof ElementEventMap.footer;
-  nav: typeof ElementEventMap.footer;
-  ol: typeof ElementEventMap.footer;
+  li: ElementEventMap["footer"];
+  main: ElementEventMap["footer"];
+  nav: ElementEventMap["footer"];
+  ol: ElementEventMap["footer"];
   option: {
     onclick: (this: HTMLOptionElement, event: MouseEvent) => void;
     ondblclick: (this: HTMLOptionElement, event: MouseEvent) => void;
     onmousedown: (this: HTMLOptionElement, event: MouseEvent) => void;
     onmouseup: (this: HTMLOptionElement, event: MouseEvent) => void;
   };
-  p: typeof ElementEventMap.footer;
-  section: typeof ElementEventMap.footer;
+  p: ElementEventMap["footer"];
+  section: ElementEventMap["footer"];
   select: {
     onchange: (this: HTMLSelectElement, event: Event) => void;
     oninput: (this: HTMLSelectElement, event: Event) => void;
@@ -201,7 +201,7 @@ export interface ElementEventMap {
     onblur: (this: HTMLSelectElement, event: FocusEvent) => void;
     oninvalid: (this: HTMLSelectElement, event: Event) => void;
   };
-  span: typeof ElementEventMap.footer;
+  span: ElementEventMap["footer"];
   textarea: {
     oninput: (this: HTMLTextAreaElement, event: InputEvent) => void;
     onchange: (this: HTMLTextAreaElement, event: Event) => void;
@@ -220,7 +220,7 @@ export interface ElementEventMap {
     oncopy: (this: HTMLTextAreaElement, event: ClipboardEvent) => void;
     onpaste: (this: HTMLTextAreaElement, event: ClipboardEvent) => void;
   };
-  ul: typeof ElementEventMap.footer;
+  ul: ElementEventMap["footer"];
   video: {
     onplay: (this: HTMLVideoElement, event: Event) => void;
     onpause: (this: HTMLVideoElement, event: Event) => void;
@@ -242,10 +242,8 @@ export interface ElementEventMap {
     onmousedown: (this: HTMLVideoElement, event: MouseEvent) => void;
     onmouseup: (this: HTMLVideoElement, event: MouseEvent) => void;
   };
-  tbody: typeof ElementEventMap.footer;
-  table: typeof ElementEventMap.footer;
-  td: typeof ElementEventMap.footer;
-  tr: typeof ElementEventMap.footer;
+  tbody: ElementEventMap["footer"];
+  table: ElementEventMap["footer"];
 }
 
 export type ElementEventHandler<T extends keyof ElementEventMap> = {

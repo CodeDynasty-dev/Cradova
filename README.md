@@ -10,7 +10,7 @@
 Build web apps that are fast, small, and simple.
     <br/>
     <br/>
-    <a href="https://github.com/codedynasty-dev/cradova#examples"><strong>Explore the 🎙️ docs »</strong></a>
+    <a href="https://cradova.codedynasty.dev/"><strong>Explore the 🎙️ docs »</strong></a>
     <br/>
     <br/>
     <a href="https://t.me/codedynasty-devHQ">Join Community</a>

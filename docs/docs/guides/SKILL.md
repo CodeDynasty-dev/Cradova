@@ -94,13 +94,13 @@ Router.BrowserRoutes({
 
 ## See Also
 
-- [CONVENTIONS.md](CONVENTIONS.md) - Detailed function vs arrow function rules
-- [STATE.md](STATE.md) - Signal and hooks deep dive
-- [COMPONENTS.md](COMPONENTS.md) - Creating and using components
-- [ROUTING.md](ROUTING.md) - Page and Router configuration
-- [CONTROL-FLOW.md](CONTROL-FLOW.md) - Conditional rendering
-- [PERFORMANCE.md](PERFORMANCE.md) - List virtualization, optimization
-- [EXAMPLES.md](EXAMPLES.md) - Complete code examples
-- [PRODUCTION.md](PRODUCTION.md) - Real-world patterns and 
+- [CONVENTIONS.md](CONVENTIONS.html) - Detailed function vs arrow function rules
+- [STATE.md](STATE.html) - Signal and hooks deep dive
+- [COMPONENTS.md](COMPONENTS.html) - Creating and using components
+- [ROUTING.md](ROUTING.html) - Page and Router configuration
+- [CONTROL-FLOW.md](CONTROL-FLOW.html) - Conditional rendering
+- [PERFORMANCE.md](PERFORMANCE.html) - List virtualization, optimization
+- [EXAMPLES.md](EXAMPLES.html) - Complete code examples
+- [PRODUCTION.md](PRODUCTION.html) - Real-world patterns and 
 
 </docmach>

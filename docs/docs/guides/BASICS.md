@@ -150,10 +150,10 @@ ctx is undefined
 
 ## Next Steps
 
-- [CONVENTIONS.md](CONVENTIONS.md) - Critical function vs arrow rules
-- [STATE.md](STATE.md) - Signal and hooks
-- [COMPONENTS.md](COMPONENTS.md) - Creating components
-- [ROUTING.md](ROUTING.md) - Page and Router
-- [EXAMPLES.md](EXAMPLES.md) - Working code
+- [CONVENTIONS.md](CONVENTIONS.html) - Critical function vs arrow rules
+- [STATE.md](STATE.html) - Signal and hooks
+- [COMPONENTS.md](COMPONENTS.html) - Creating components
+- [ROUTING.md](ROUTING.html) - Page and Router
+- [EXAMPLES.md](EXAMPLES.html) - Working code
 
 </docmach>

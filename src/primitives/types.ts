@@ -9,7 +9,7 @@ type AnyObject = { [key: string]: any };
 
 interface Attributes {
   ref?: [RefInstance<any>, string];
-  style?: Partial<CSS.Properties>;
+  style?: Partial<CSS.Properties> | string;
   [key: `data-${string}`]: string | undefined;
   [key: `aria-${string}`]: string | undefined;
 }

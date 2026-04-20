@@ -838,7 +838,7 @@ export class Router {
    *
    * accepts an object containing pat and page
    */
-  static BrowserRoutes(obj: Record<string, browserPageType<Page | unknown>>) {
+  static BrowserRoutes(obj: Record<string, browserPageType<Page>>) {
     for (const path in obj) {
       const page = obj[path] as browserPageType;
       if (
@@ -891,7 +891,7 @@ export class Router {
       console.error(
         " ✘  Cradova err:  href must be a defined path but got " +
           href +
-          " instead"
+          " instead",
       );
     }
     let route = null,
@@ -927,7 +927,7 @@ export class Router {
       RouterBox.loadingPage = page;
     } else {
       throw new Error(
-        " ✘  Cradova err:  Loading Page should be a cradova page class"
+        " ✘  Cradova err:  Loading Page should be a cradova page class",
       );
     }
   }
@@ -956,7 +956,7 @@ export class Router {
       RouterBox["errorHandler"] = callback;
     } else {
       throw new Error(
-        " ✘  Cradova err:  callback for error event is not a function"
+        " ✘  Cradova err:  callback for error event is not a function",
       );
     }
   }
@@ -970,7 +970,7 @@ export class Router {
       RouterBox.doc = doc;
     } else {
       throw new Error(
-        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `
+        `✘  Cradova err: please add '<div data-wrapper="app"></div>' to the body of your index.html file `,
       );
     }
     window.addEventListener("pageshow", () => RouterBox.router());

@@ -74,8 +74,12 @@ export const makeElement = <E extends HTMLElement>(
     // adding attributes
     for (const [prop, value] of Object.entries(props)) {
       // adding styles
-      if (prop === "style" && typeof value === "object") {
-        Object.assign(element.style, value);
+      if (prop === "style") {
+        if (typeof value === "object") {
+          Object.assign(element.style, value);
+        } else if (typeof value === "string") {
+          element.style.cssText = value;
+        }
         continue;
       }
 
